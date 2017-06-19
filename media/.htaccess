@@ -1,0 +1,17 @@
+
+# define all the necessary mime types
+AddType text/vtt .vtt
+AddType text/plain .srt
+
+AddType video/mp4 .mp4
+AddType video/webm .webm
+AddType video/ogg .ogv
+
+AddType audio/mp3 .mp3
+AddType audio/ogg .ogg .oga
+AddType audio/x-wav .wav
+
+# some broken mime types for testing
+#AddType text/javascript .vtt
+
+

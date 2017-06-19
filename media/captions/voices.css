@@ -1,0 +1,10 @@
+
+#demo .oz-captions [data-voice="John"] *
+{
+	color:#0ff !important;
+}
+
+#demo .oz-captions [data-voice="Janet"] *
+{
+	color:#0f0 !important;
+}
