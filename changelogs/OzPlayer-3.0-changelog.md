@@ -45,19 +45,19 @@
 
   These changes relate to the fact that iOS10 can now play inline videos (i.e. not in fullscreen mode).
 
-* Keyboard clicks on the control buttons no longer repeat, since repeating is unecessary and may cause problems for people who have a motor impairment.
-
-* Removed mime-type checking when loading VTT and SRT files, so that server configuration is no longer required to define the types for these files.
-
-* Removed the global volume-key handler (up and down arrows) because it meant that these keystrokes couldn't be used in other parts of the interface, but they're more usefully supported on the slider controls and now essential for navigating the new captions language menu.
-
-* Removed the keyboard shortcuts tooltip because it wasn't really needed.
-
 * Fixed an issue in recent versions of Firefox whereby high-DPI images were not being applied because of a change in its supported media query syntax.
 
 ## Other Changes
 
+* Removed mime-type checking when loading VTT and SRT files, so that server configuration is no longer required to define the types for these files.
+
+* Keyboard clicks on the control buttons no longer repeat, since repeating is unecessary and may cause problems for people who have a motor impairment.
+
 * Slightly lightened the color of disabled controls, to comply with minimum contrast requirements for small controls.
+
+* Removed the global volume-key handler (up and down arrows) because it meant that these keystrokes couldn't be used in other parts of the interface, but they're more usefully supported on the slider controls and now essential for navigating the new captions language menu.
+
+* Removed the keyboard shortcuts tooltip because it wasn't really needed.
 
 * Some changes to the language file to support multi-language captions and audio-only, and because of the removal of the keyboard shortcuts tooltip:
 
