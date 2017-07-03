@@ -1,0 +1,2933 @@
+/*******************************************************************************
+ Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
+ ------------------------------------------------------------------------------
+ OzPlayer [3.0] => interface core
+ ------------------------------------------------------------------------------
+*******************************************************************************/
+
+
+
+/* core structural resets */
+.ozplayer,
+.ozplayer .oz-poster,
+.ozplayer video,
+.ozplayer .me-plugin,
+.ozplayer .me-plugin embed,
+.ozplayer .me-plugin object,
+.ozplayer .me-plugin iframe,
+.ozplayer .ozplayer-fallback,
+.oz-message,
+.oz-captions,
+.oz-controls,
+.oz-controls fieldset
+{
+    position:relative !important;
+    z-index:1 !important;
+    float:none !important;
+    margin:0 !important;
+    padding:0 !important;
+    visibility:visible !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+}
+
+
+
+
+
+
+
+/* skip link target anchors */
+.oz-skip-anchor
+{
+    /* nb. apply block display to the anchors so they create a new line
+       but then specify zero height so they have no visible presence */
+    float:none !important;
+    display:block !important;
+    height:0 !important;
+}
+
+
+
+
+
+
+
+/* player container */
+.ozplayer
+{
+    /* put the player container at the top of its local stack
+       so that the audio-only language menu can open beneath
+       the control strip and still be above the transcript */
+    z-index:65535 !important;
+
+    /* nb. overflow hidden creates control focus displacement in webkit
+       so we must use overflow visible instead, which also allows for
+       content to expand outside the player if required (eg. in the
+       audio-only player the language menu and tooltips are outside) */
+    overflow:visible !important;
+
+    /* use inline-block so it shrinks to fit the content
+       nb. inline-table would be better but it's not well enough supported */
+    display:inline-block !important;
+
+    /* enforce layout resets, which are critical for positioning and size calculations */
+    margin:0 !important;
+    padding:0 !important;
+
+    /* main border */
+    border:2px solid #000 !important;
+
+    /* reset internal text-align in case it's used on the parent to center the player */
+    text-align:left !important;
+
+    /* default background for when there's no poster and no frame data exists
+       which means we must set a corresponding default foreground color as well */
+    background:#000 !important;
+    color:#fff !important;
+
+    /* nb. if we don't specify a default cursor
+       then some browsers will show a text cursor */
+    cursor:default !important;
+
+    /* block user selection, callouts and tap highlights in iOS
+       nb. I was slightly reluctant to do this, but then it's not particular
+       useful in this case, and disabling it prevents the flicker of visible
+       highlight when you touch the video, and prevents the callout menu
+       from appearing to select the whole video when you longpress it */
+    -webkit-user-select:none !important;
+    -webkit-touch-callout:none !important;
+    -webkit-tap-highlight-color:rgba(0,0,0,0) !important;
+
+
+    /*** DEV TMP ***//*
+    border:5px solid blue !important; */
+
+    /*** DEV TMP ***//*
+    background-color:#00f !important;
+    border:5px solid darkviolet !important; */
+}
+
+/*** DEV TMP ***//*
+.ozplayer
+{
+    border-color:blue !important;
+}
+.ozplayer.oz-responsive
+{
+    border-color:cyan !important;
+}
+.ozplayer.oz-smallscreen
+{
+    border-style:dashed !important;
+} */
+
+/* hide any border when the container is in fullscreen mode
+   because it serves no design purpose, and it interferes with
+   size calculations in safari (for which box-sizing doesn't help) */
+.ozplayer.oz-fullscreen
+{
+    border:none !important;
+}
+
+
+
+/* hide the player from print
+   n.b. the extra element selectors are to add specificity
+   so that this rule also overrides the IE display hacks
+   n.b. if the player is undisplayed during init then the
+   transcript won't be generated, but it's okay to do that
+   for print since it doesn't get applied until after init */
+@media print
+{
+    html body .ozplayer
+    {
+        display:none !important;
+    }
+}
+
+
+
+
+
+
+
+/* logo bug link */
+.oz-logo-bug,
+.oz-logo-bug:visited
+{
+    position:absolute !important;
+    right:5px !important;
+    top:5px !important;
+
+    /* position the logo above the poster but below the captions and controls
+       nb. originally this was above the captions, but it actually needs to go
+       beneath the captions, just in case they've been resized large enough */
+    z-index:4250 !important;
+
+    float:none !important;
+    display:inline !important;
+    visibility:visible !important;
+    width:120px !important;
+    height:34px !important;
+
+    margin:0 !important;
+    padding:0 !important;
+
+    border:none !important;
+    -moz-border-radius:2px !important;
+    -webkit-border-radius:2px !important;
+    border-radius:2px !important;
+
+    /* fallback text font */
+    font:normal normal bold 12px/1.4 helvetica, arial, sans-serif !important;
+    text-decoration:none !important;
+    text-shadow:none !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    /* default fallback text color */
+    color:#fff !important;
+
+    /* logo image background properties
+       nb. the image itself is applied via scripting as a data URI
+       its native size is 106x24 but there's space for 110x24 */
+    background-image:none;                                /* [STYLE MODIFIED] */
+    background-repeat:no-repeat !important;
+    background-position:5px 5px !important;
+
+    /* rgba background color with legacy fallback */
+    background-color:#000 !important;
+    background-color:rgba(0,0,0,0.55) !important;
+
+    /* nb. enforce pointer cursor jic */
+    cursor:pointer !important;
+
+    -moz-outline-radius:2px !important;
+    outline-radius:2px !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+
+    /* default full opacity
+       nb. using all the older vendor syntaxes as well
+       because this is the only hiding method we're using
+       so we need it to work as widely as possible */
+    -moz-opacity:1 !important;
+    -khtml-opacity:1 !important;
+    opacity:1 !important;
+
+
+    /*** DEV TMP ***//*
+    right:0 !important;
+    top:0 !important;
+    background-color:blue !important; */
+}
+
+/* logo bug link => auto-hiding hidden state */
+.oz-auto-hiding .oz-logo-bug,
+.oz-auto-hiding .oz-logo-bug:visited,
+.oz-auto-hidden .oz-logo-bug,
+.oz-auto-hidden .oz-logo-bug:visited
+{
+    -moz-opacity:0 !important;
+    -khtml-opacity:0 !important;
+    opacity:0 !important;
+    filter:alpha(opacity:0) !important;
+}
+
+/* logo bug link => auto-hiding */
+.oz-auto-hiding .oz-logo-bug,
+.oz-auto-hiding .oz-logo-bug:visited
+{
+    /* define a fade transition to switch to the hidden state
+       (which is only for this state, so that switching to visible is instant) */
+    -moz-transition:opacity 0.5s !important;
+    -ms-transition:opacity 0.5s !important;
+    -webkit-transition:opacity 0.5s !important;
+    transition:opacity 0.5s !important;
+}
+
+/* no-images => logo bug link */
+.oz-no-images .oz-logo-bug,
+.oz-no-images .oz-logo-bug:visited
+{
+    /* set auto dimensions so it can size to the fallback text
+       but constrained with the max-width the same as the image */
+    width:auto !important;
+    height:auto !important;
+    max-width:120px !important;
+
+    /* darker rgba background color with legacy fallback
+       (so that the text is easier to read) */
+    background-color:#000 !important;
+    background-color:rgba(0,0,0,0.75) !important;
+
+
+    /*** DEV TMP ***//*
+    background:blue !important; */
+}
+
+/* logo bug link => fallback text
+   nb. this will only be seen if css or images are unavailable
+   nnb. it's hidden with display to avoid the focus displacement
+   that offleft positioning sometimes causes in webkit, so to compensate
+   screenreaders, the link also has an identical "aria-label" (and "title")
+   as well as explicit aria-hidden=false on this, to counteract its lack of display */
+.oz-logo-bug small
+{
+    display:none !important;
+}
+
+/* no images => logo bug link => fallback text */
+.oz-no-images .oz-logo-bug small
+{
+    /* nb. float prevents it being affected by container text-align */
+    float:right !important;
+    display:inline-block !important;
+    visibility:visible !important;
+
+    /* nb. add padding for highlight space */
+    padding:8px 12px 7px 12px !important;
+    margin:0 !important;
+
+    border:none !important;
+
+    -moz-border-radius:2px !important;
+    -webkit-border-radius:2px !important;
+    border-radius:2px !important;
+
+    font-size:1em !important;
+    line-height:1.4 !important;
+    text-align:center !important;
+    text-shadow:none !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    background:transparent !important;
+
+    /* nb. enforce pointer cursor jic */
+    cursor:pointer !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+
+
+    /*** DEV TMP ***//*
+    background-color:green !important; */
+}
+
+/* nb. hide the logo bug and text in fullscreen mode, since the tab control excludes links
+   and so we don't have to increase the size of the no-images container and text
+   or deal with the jumping out of fullscreen mode when following its link */
+.ozplayer.oz-fullscreen .oz-logo-bug,
+.ozplayer.oz-fullscreen .oz-logo-bug:visited,
+.oz-no-images.oz-fullscreen .oz-logo-bug small
+{
+    display:none !important;
+}
+
+/* smallscreen => logo bug */
+.ozplayer.oz-smallscreen .oz-logo-bug,
+.ozplayer.oz-smallscreen .oz-logo-bug:visited
+{
+    /* hide the logo entirely to stop it overlapping other content */
+    display:none !important;
+}
+
+
+
+
+
+
+
+/* skip links */
+.ozplayer .oz-skip-links,
+.ozplayer .oz-skip-links *
+{
+    float:none !important;
+    visibility:visible !important;
+    margin:0 !important;
+    padding:0 !important;
+    list-style-type:none !important;
+
+    /* base font-size and line-height */
+    font-size:12px !important;
+    line-height:1.4 !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+}
+.ozplayer .oz-skip-links
+{
+    position:absolute !important;
+    left:5px !important;
+    top:5px !important;
+
+    /* position the logo above the poster but below the captions and controls
+       nb. this needs to go beneath the captions just in case they're very large
+       and beneath the controls in case we have a cc menu with lots of items
+       nb. this used to be on top of everything because of the keyboard help
+       tooltip, but that's not necessary anymore now that we don't have it */
+    z-index:4250 !important;
+
+    float:left !important;
+
+    /* nb. display and visibility can't be used for the hidden state
+       because the links have to remain accessible for keyboard triggering re-showing */
+    display:block !important;
+    visibility:visible !important;
+
+    /* nb. limit the width as a proportion of the video width
+       to reduce the possibility of it overlapping the logo-bug
+       nb. this value is based on the smallest standard video size
+       and the resulting size of the logo-bug with default text
+       it also avoids wrapping with the default skip and help link text
+       when used with a standard test video which has a width of 640
+       nb. this won't be enough for the smallscreen layout, however that
+       doesn't matter since the skip links are hidden for smallscreen */
+    max-width:66% !important;
+
+    /* default full opacity
+       nb. using all the older vendor syntaxes as well
+       because this is the only hiding method we're using
+       so we need it to work as widely as possible */
+    -moz-opacity:1 !important;
+    -khtml-opacity:1 !important;
+    opacity:1 !important;
+
+
+    /*** DEV TMP ***//*
+    border:2px dashed darkcyan !important;
+    background:crimson !important; */
+}
+.ozplayer .oz-skip-links li,
+.ozplayer .oz-skip-links li a,
+.ozplayer .oz-skip-links li a:visited
+{
+    display:block !important;
+    float:left !important;
+    margin:0 !important;
+    padding:0 !important;
+
+    border:none !important;
+
+    /* fallback text font */
+    font:normal normal bold 12px/1.4 helvetica, arial, sans-serif !important;
+    text-decoration:none !important;
+    text-align:left !important;
+    text-shadow:none !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    /* fallback text color */
+    color:#fff !important;
+}
+.ozplayer .oz-skip-links li
+{
+    /* nb. use static positioning so that the positioning context
+       for the keyboard help dialog is the list itself */
+    position:static !important;
+
+    /* nb. use padding to create the space around the links
+       so that the list itself is free to have transparency */
+    padding:5px 0 5px 5px !important;
+
+    /* rgba background color with legacy fallback */
+    background-color:#000 !important;
+    background-color:rgba(0,0,0,0.55) !important;
+
+
+    /*** DEV TMP ***//*
+    border:1px solid hotpink !important;
+    background:green !important;
+    background-color:rgba(0,150,0,0.66) !important; */
+}
+.ozplayer .oz-skip-links li:first-child
+{
+    -moz-border-radius:2px 0 0 2px !important;
+    -webkit-border-radius:2px 0 0 2px !important;
+    border-radius:2px 0 0 2px !important;
+}
+.ozplayer .oz-skip-links li:last-child
+{
+    padding-right:5px !important;
+
+    -moz-border-radius:0 2px 2px 0 !important;
+    -webkit-border-radius:0 2px 2px 0 !important;
+    border-radius:0 2px 2px 0 !important;
+}
+.ozplayer .oz-skip-links li:first-child:last-child
+{
+    -moz-border-radius:2px !important;
+    -webkit-border-radius:2px !important;
+    border-radius:2px !important;
+}
+.ozplayer .oz-skip-links li a,
+.ozplayer .oz-skip-links li a:visited
+{
+    /* nb. we apply relative positioning so that the links can have a z-index
+       which is then increased in the hover and focus states so the
+       highlighted link is always at the top, which is ultimately to
+       prevent its focusring from being clipped in mac/webkit browsers */
+    position:relative !important;
+    z-index:0 !important;
+
+    height:22px !important;
+
+    -moz-border-radius:2px !important;
+    -webkit-border-radius:2px !important;
+    border-radius:2px !important;
+
+    /* default icon background */
+    background:transparent none no-repeat !important;
+
+
+    /*** DEV TMP ***//*
+    background-color:blue !important; */
+}
+.ozplayer .oz-skip-links li a:hover,
+.ozplayer .oz-skip-links li a:focus,
+.ozplayer .oz-skip-links li a:active
+{
+    z-index:1000 !important;
+}
+
+/* nb. we need link wrappers with non-inline display
+   so we can use them to test whether css is enabled */
+.ozplayer .oz-skip-links li span
+{
+    display:block !important;
+}
+
+/* auto-hiding hidden state */
+.oz-auto-hiding .oz-skip-links,
+.oz-auto-hidden .oz-skip-links
+{
+    -moz-opacity:0 !important;
+    -khtml-opacity:0 !important;
+    opacity:0 !important;
+    filter:alpha(opacity:0) !important;
+}
+
+/* filter removal hack for IE9 */
+@media only all
+{
+    .oz-auto-hiding .oz-skip-links,
+    .oz-auto-hidden .oz-skip-links
+    {
+        filter:none !important;
+    }
+}
+
+/* skip links auto-hiding */
+.oz-auto-hiding .oz-skip-links
+{
+    /* define a fade transition to switch to the hidden state
+       (which is only for this state, so that switching to visible is instant) */
+    -moz-transition:opacity 0.5s !important;
+    -ms-transition:opacity 0.5s !important;
+    -webkit-transition:opacity 0.5s !important;
+    transition:opacity 0.5s !important;
+}
+
+/* nb. properly hide the skip links in fullscreen mode, since the tab control will exclude them
+   and so we don't have to deal with jumping out of fullscreen mode when following a link */
+.ozplayer.oz-fullscreen .oz-skip-links
+{
+    display:none !important;
+}
+
+/* skip links => icons widths and background-positions */
+.ozplayer .oz-skip-links li.oz-skip-video a,
+.ozplayer .oz-skip-links li.oz-skip-video a:visited
+{
+    width:23px !important;
+
+    background-position:0 0 !important;
+}
+.ozplayer .oz-skip-links li.oz-skip-video a:hover,
+.ozplayer .oz-skip-links li.oz-skip-video a:focus,
+.ozplayer .oz-skip-links li.oz-skip-video a:active
+{
+    background-position:0 -22px !important;
+}
+.ozplayer .oz-skip-links li.oz-skip-transcript a,
+.ozplayer .oz-skip-links li.oz-skip-transcript a:visited
+{
+    width:32px !important;
+
+    background-position:-28px 0 !important;
+}
+.ozplayer .oz-skip-links li.oz-skip-transcript a:hover,
+.ozplayer .oz-skip-links li.oz-skip-transcript a:focus,
+.ozplayer .oz-skip-links li.oz-skip-transcript a:active
+{
+    background-position:-28px -22px !important;
+}
+
+/* background size for retina icons (if the skin defines them) */
+@media
+    only all and (-webkit-min-device-pixel-ratio:1.5),
+    only all and (-moz-min-device-pixel-ratio:1.5),
+    only all and (min--moz-device-pixel-ratio:1.5),
+    only all and (-o-min-device-pixel-ratio:3/2),
+    only all and (min-device-pixel-ratio:1.5)
+{
+    .ozplayer .oz-skip-links li a,
+    .ozplayer .oz-skip-links li a:visited
+    {
+        background-size:100px 44px !important;
+    }
+}
+
+/* no images => skip links */
+.ozplayer.oz-no-images .oz-skip-links li
+{
+    /* darker rgba background color with legacy fallback
+       (so that the text is easier to read) */
+    background-color:#000 !important;
+    background-color:rgba(0,0,0,0.75) !important;
+}
+.ozplayer.oz-no-images .oz-skip-links li a,
+.ozplayer.oz-no-images .oz-skip-links li a:visited
+{
+    /* set auto dimensions so the links expand with their inner text */
+    width:auto !important;
+    height:auto !important;
+
+    /* negate the background image */
+    background-image:none !important;
+
+    /* nb. add padding for highlight space */
+    padding:8px 8px 7px 8px !important;
+}
+
+/* skip links => link fallback text
+   nb. this will only be seen if css or images are unavailable
+   nnb. it's hidden with display to avoid the focus displacement
+   that offleft positioning sometimes causes in webkit, so to compensate
+   screenreaders, the links also have identical "aria-label" (and "title")
+   as well as explicit aria-hidden=false on this, to counteract its lack of display */
+.ozplayer .oz-skip-links li a span
+{
+    display:none !important;
+}
+
+/* no images => skip links => link fallback text */
+.oz-no-images .oz-skip-links li a span
+{
+    display:inline-block !important;
+
+    /* nb. re-inforce the inherited cursor for older IE */
+    cursor:pointer !important;
+}
+
+/* smallscreen => skip links */
+.ozplayer.oz-smallscreen .oz-skip-links
+{
+    /* hide the skip links entirely to stop them overlapping other content
+       nb. this will also hide the keyhelp since it can't be triggered anymore */
+    display:none !important;
+}
+
+
+
+
+
+
+
+/* native video object */
+.ozplayer video
+{
+    /* position the video at the bottom of the control stack */
+    z-index:1000 !important;
+
+    float:none !important;
+    visibility:visible !important;
+
+    /* nb. the flash player will hide this using display:none
+       so it doesn't affect the layout of the plugin replacement container
+       but it doesn't get removed entirely, presumably because so it can
+       universally refer to its data attributes or other properties */
+    display:block;                                        /* [STYLE MODIFIED] */
+
+    /* nb. width and height can only be set by script */
+
+    /* set the absolute min width and height for the smallest-screen layout */
+    min-width:240px !important;
+    min-height:135px !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+    /* default background for when there's no poster and no frame data exists
+       which means we must set a corresponding default foreground color as well */
+    background:#000 !important;
+    color:#fff !important;
+
+    /* default opacity
+       nb. zero is used for temporary hiding so that during initial buffering
+       (and if you pause during that) the video won't show (or go back to)
+       its poster image, it will either have a black background,
+       or it will show the first video frame once available */
+    opacity:1;                                            /* [STYLE MODIFIED] */
+
+
+    /*** DEV TMP ***//*
+    background-color:#b00 !important; */
+}
+
+/* native video object => black screen of death styles
+   nb. this is used for authentication and license failures
+   to hide native controls and prevent subsequent external playback */
+.ozplayer video.oz-bsod::-webkit-media-controls
+{
+    display:none !important;
+}
+
+
+
+/* flash and youeub video containers */
+.ozplayer .me-plugin
+{
+    /* position the video at the bottom of the control stack */
+    z-index:1000 !important;
+
+    float:none !important;
+    visibility:visible !important;
+
+    /* nb. width and height can only be set by script */
+
+    /* nb. override its default block display for better layout in older browsers */
+    display:inline-block !important;
+
+    /* set the same min-width and height */
+    min-width:240px !important;
+    min-height:135px !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+
+    /*** DEV TMP ***//*
+    background-color:#0ff !important; */
+}
+.ozplayer .me-plugin embed,
+.ozplayer .me-plugin object,
+.ozplayer .me-plugin iframe
+{
+    /* nb. this removes the mysterious 5px space that appears
+       underneath the flash embed, object or youtube iframe, but which
+       doesn't appear to be actually caused by any layout properties
+       so this is really just band-aid to compensate the other way
+       nb. this still doesn't fix it for the iframe in some browsers */
+    margin-bottom:-5px !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+}
+
+
+
+/* native audio object for the audio-only player */
+.ozplayer audio
+{
+    /* position the video at the bottom of the control stack */
+    z-index:1000 !important;
+
+    float:none !important;
+    visibility:visible !important;
+
+    /* default width will only apply when viewing without JS
+       nb. do not set a default height because different platforms
+       render different heights depending on their controls style */
+    width:400px;                                   /*[ MAY BE AUTHOR MODIFED ]*/
+
+    /* set the absolute min width for the smallest-screen layout */
+    min-width:240px !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+}
+
+/* native audio object for video AD */
+.ozplayer video ~ audio
+{
+    /* this is hidden just in case the native controls are specified
+       so they don't show up even when scripting is unsupported
+       (since there's no native falback for audio descriptions)
+       nb. we must include zero height for iOS, which otherwise
+       renders a ~10px vertical space for the audio element */
+    display:none !important;
+    visibility:hidden !important;
+    width:0 !important;
+    height:0 !important;
+}
+
+
+
+
+
+
+
+/* fallback content container */
+.ozplayer .ozplayer-fallback
+{
+    float:none !important;
+    /* nb. override default block display for better layout in older browsers */
+    display:inline-block !important;
+    visibility:visible !important;
+
+    /* set a default background to cover the player's black background
+       which means we must also set a corresponding foreground color */
+    background:#fff !important;
+    color:#000 !important;
+}
+
+
+
+
+
+
+
+/* poster overlay */
+.ozplayer .oz-poster,
+.ozplayer .oz-poster *
+{
+    float:none !important;
+    visibility:visible !important;
+    margin:0 !important;
+    padding:0 !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+}
+.ozplayer .oz-poster
+{
+    position:absolute !important;
+    left:0 !important;
+    top:0 !important;
+
+    /* position the poster above the video, but below the captions and controls */
+    z-index:3000 !important;
+
+    display:block !important;
+
+    /* size the poster and its image to match the video */
+    width:100% !important;
+    height:100% !important;
+
+    /* set a corresponding poster min-height in case the video
+       min-height applies, so the poster always covers it completely
+       (even if some or most of that is just a black background)
+       nb. so this is the same as the video min-height */
+    min-height:135px !important;
+
+    /* default background properties */
+    background-color:#000 !important;
+    background-image:none;                                /* [STYLE MODIFIED] */
+    background-repeat:no-repeat !important;
+    background-position:0 0;                              /* [STYLE MODIFIED] */
+
+    /* nb. this should have a pointer cursor to signify its action */
+    cursor:pointer !important;
+
+
+    /*** DEV TMP ***//*
+    border:5px solid brown !important;
+    background-color:#f90 !important; */
+}
+
+/* poster overlay disabled state */
+.ozplayer .oz-poster.oz-disabled
+{
+    cursor:default !important;
+}
+
+
+
+/* poster => inner click-to-play icon */
+.ozplayer .oz-poster span
+{
+    position:absolute !important;
+    left:50% !important;
+    top:50% !important;
+
+    display:block !important;
+
+    /* default size and margin center offset
+       nb. subtract half the controls height from the top offset
+       so the icon is centered in the space above the controls */
+    width:96px !important;
+    height:96px !important;
+    margin:-64px 0 0 -48px !important;
+
+    /* default overlays background */
+    background:none no-repeat !important;
+}
+
+/* hide the inner icon while the poster is disabled */
+.ozplayer .oz-poster.oz-disabled span
+{
+    visibility:hidden !important;
+}
+
+/* remove focus caret in firefox, which sometimes appears from mouse click
+   even though this isn't a focusable element, nor is it inside a focusable container */
+.ozplayer .oz-poster span
+{
+    outline:none !important;
+}
+
+/* poster => overlay icon component elements for css3 browsers
+   which is hidden from earlier browsers because we need border-radius */
+.ozplayer .oz-poster span span
+{
+    display:none !important;
+}
+:root .ozplayer .oz-poster span span
+{
+    /* compensate for the position and margin offset on the parent */
+    left:0 !important;
+    top:0 !important;
+    margin:0 !important;
+
+    /* then re-display the inner elements for supported browsers */
+    display:block !important;
+}
+:root .ozplayer .oz-poster > span
+{
+    /* use the dark circle sprite for this element */
+    background-position:-96px -96px !important;
+}
+:root .ozplayer .oz-poster > span > span
+{
+    /* use border-radius to create a circle */
+    -moz-border-radius:39px !important;
+    -webkit-border-radius:39px !important;
+    border-radius:39px !important;
+
+    /* then offset the element to overlay the outer circle
+       creating the same effect as the default image
+       except that we can now change the highlight color */
+    width:78px !important;
+    height:78px !important;
+    margin:9px 0 0 9px !important;
+
+    /* no background image for this element */
+    background-image:none !important;
+
+    /* inner circle is gray by default, same as the static image */
+    background-color:#696969 !important;
+}
+:root .ozplayer .oz-poster span span span
+{
+    /* compensate for the parent margin offset */
+    margin:-9px 0 0 -9px !important;
+
+    /* use the icon-only sprite for this element */
+    background-position:0 -96px !important;
+}
+:root .ozplayer .oz-poster span:hover span span
+{
+    /* icon-only highlight sprite */
+    background-position:0 -192px !important;
+}
+
+/* large poster */
+.oz-large .oz-poster span
+{
+    /* large size and margin center offset */
+    width:192px !important;
+    height:192px !important;
+    margin:-128px 0 0 -96px !important;
+}
+
+/* large poster => overlay icon component elements for css3 browsers */
+:root .oz-large .oz-poster > span
+{
+    /* large dark circle sprite */
+    background-position:-192px -192px !important;
+}
+:root .oz-large .oz-poster > span > span
+{
+    /* large circle */
+    -moz-border-radius:78px !important;
+    -webkit-border-radius:78px !important;
+    border-radius:78px !important;
+
+    /* large offset */
+    width:156px !important;
+    height:156px !important;
+    margin:18px 0 0 18px !important;
+}
+:root .oz-large .oz-poster span span span
+{
+    /* large offset compensation */
+    margin:-18px 0 0 -18px !important;
+
+    /* large icon-only sprite */
+    background-position:0 -192px !important;
+}
+:root .oz-large .oz-poster span:hover span span
+{
+    /* large icon-only highlight sprite */
+    background-position:0 -384px !important;
+}
+
+
+/* background size for retina overlays (if the skin defines them) */
+@media
+    only all and (-webkit-min-device-pixel-ratio:1.5),
+    only all and (-moz-min-device-pixel-ratio:1.5),
+    only all and (min--moz-device-pixel-ratio:1.5),
+    only all and (-o-min-device-pixel-ratio:3/2),
+    only all and (min-device-pixel-ratio:1.5)
+{
+    .ozplayer .oz-poster span
+    {
+        background-size:288px !important;
+    }
+    .oz-large .oz-poster span
+    {
+        background-size:576px !important;
+    }
+}
+
+/* no-images overlay => inner click-to-play icon */
+.ozplayer.oz-no-images .oz-poster span,
+.oz-large.oz-no-images .oz-poster span
+{
+    /* hide the icon element altogether, beause it looks
+       quite odd as just a coloured circle with no play icon
+       nb. this means there's no icon to indicate the click to play action
+       but the poster still has a pointer cursor to denote its clickability */
+    display:none !important;
+}
+
+
+
+
+
+
+
+/* player authentication messages */
+.oz-message
+{
+    position:absolute !important;
+    bottom:0 !important;
+    left:0 !important;
+
+    /* position the message above everything,
+       even the controls (which should be hidden anyway) */
+    z-index:6000 !important;
+
+    width:100% !important;
+
+    border-top:1px solid #000 !important;
+
+    font-size:14px !important;
+    line-height:1.4 !important;
+    text-align:center !important;
+
+    background:#ffa !important;
+    color:#000 !important;
+
+    background:#000 !important;
+    color:#fff !important;
+}
+.oz-message span
+{
+    display:block !important;
+
+    padding:5px !important;
+}
+
+
+
+
+
+
+
+/* player indicator + inner tranlucency layer
+   nb. we need the inner layer because the dimming effect is important
+   but only quite recent browsers support RGBA background colors */
+.oz-indicator,
+.oz-indicator *
+{
+    float:none !important;
+    visibility:visible !important;
+    margin:0 !important;
+    padding:0 !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+    /* fallback and aria-live text font */
+    font:normal normal bold 18px/1.4 "lucida grande", verdana, sans-serif !important;
+    text-align:center !important;
+    text-shadow:none !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+}
+.oz-indicator,
+.oz-indicator span
+{
+    position:absolute !important;
+    top:0 !important;
+
+    /* hide the indicator with offleft positioning
+       so it can always be displayed for screenreaders */
+    left:-10000px !important;
+
+    /* position the indicator above the poster and captions but below the controls */
+    z-index:4000 !important;
+
+    display:block !important;
+
+    /* size the indicator to match the video */
+    width:100% !important;
+    height:100% !important;
+}
+.oz-indicator span
+{
+    /* nb. position the translucent layer below the spinner */
+    z-index:1000 !important;
+
+    /* nb. use a solid background-color plus opacity to create the translucency
+       because that has much wider browser support than an rgba background-color
+       and in this case it's not acceptable just to have it opaque in older browsers */
+    background:#000 !important;
+
+    -moz-opacity:0.36 !important;
+    -khtml-opacity:0.36 !important;
+    opacity:0.36 !important;
+    filter:alpha(opacity=36) !important;
+}
+
+/* player indicator => black screen of death
+   nb. this is used for authentication and license failures */
+.oz-indicator.oz-bsod span
+{
+    -moz-opacity:0.66 !important;
+    -khtml-opacity:0.66 !important;
+    opacity:0.66 !important;
+    filter:alpha(opacity=66) !important;
+}
+
+/* filter removal hack for IE9
+   nb. IE9 supports standard opacity as well as its legacy filter,
+   but the rendering is really crappy if we let it apply them both */
+@media only all
+{
+    .oz-indicator span
+    {
+        filter:none !important;
+    }
+}
+
+/* player indicator => visible state */
+.oz-indicator.oz-visible,
+.oz-indicator.oz-visible span
+{
+    /* bring the indicator onto the screen to show it */
+    left:0 !important;
+}
+
+/* audio only => player indicator => visible state */
+.oz-audio .oz-indicator.oz-visible,
+.oz-audio .oz-indicator.oz-visible span
+{
+    /* keep the indicator permanently offleft, so that it's
+       never displayed but remains screenreader accessible */
+    left:-10000px !important;
+}
+
+/* large controls => player indicator */
+.oz-large .oz-indicator,
+.oz-large .oz-indicator *
+{
+    font:normal normal bold 36px/1.4 "lucida grande", verdana, sans-serif !important;
+}
+
+
+
+/* player indicator => icon container */
+.oz-indicator strong
+{
+    position:absolute !important;
+    left:50% !important;
+    top:50% !important;
+
+    /* nb. position the icon above the translucent layer */
+    z-index:2000 !important;
+
+    display:block !important;
+
+    /* default size and margin center offset
+       nb. subtract half the controls height from the top offset
+       so the icon is centered in the space above the controls */
+    width:96px !important;
+    height:96px !important;
+    margin:-64px 0 0 -48px !important;
+
+    /* default background properties */
+    background-color:transparent !important;
+    background-image:none !important;
+    background-repeat:no-repeat !important;
+    background-position:0 0;                              /* [STYLE MODIFIED] */
+}
+
+/* player indicator => large icon container */
+.oz-large .oz-indicator strong
+{
+    /* large size and margin center offset */
+    width:192px !important;
+    height:192px !important;
+    margin:-128px 0 0 -96px !important;
+
+    /* large fallback and aria-live font */
+    font-size:40px !important;
+}
+
+
+
+/* player indicator => "timeout" type icon */
+.oz-indicator.oz-timeout strong
+{
+    /* default overlay position
+       nb. we must use !important for the background position, to override
+       the dynamic background position that's used for the "loading" type */
+    background-position:-96px 0 !important;            /* [VERY IMPORTANT] */
+}
+
+/* player indicator => large "timeout" type icon container */
+.oz-large .oz-indicator.oz-timeout strong
+{
+    /* large overlay position
+       nb. we must use !important for the background position, to override
+       the dynamic background position that's used for the "loading" type */
+    background-position:-192px 0 !important;        /* [VERY IMPORTANT] */
+}
+
+/* background size for retina overlays (if the skin defines them) */
+@media
+    only all and (-webkit-min-device-pixel-ratio:1.5),
+    only all and (-moz-min-device-pixel-ratio:1.5),
+    only all and (min--moz-device-pixel-ratio:1.5),
+    only all and (-o-min-device-pixel-ratio:3/2),
+    only all and (min-device-pixel-ratio:1.5)
+{
+    .oz-indicator.oz-timeout strong
+    {
+        background-size:288px !important;
+    }
+    .oz-large .oz-indicator.oz-timeout strong
+    {
+        background-size:576px !important;
+    }
+}
+
+/* no-images player indicator => "timeout" type icon */
+.oz-no-images  .oz-indicator.oz-timeout strong,
+.oz-large.oz-no-images .oz-indicator.oz-timeout strong
+{
+    /* negate the background image */
+    background-image:none !important;
+}
+
+
+
+/* player indicator => "loading" type icon */
+.oz-indicator.oz-loading strong
+{
+    /* spinner size and margin center offset */
+    width:86px !important;
+    height:86px !important;
+    margin:-59px 0 0 -43px !important;
+}
+
+/* loading indicator => large "loading" type icon */
+.oz-large .oz-indicator.oz-loading strong
+{
+    /* large spinner size and margin center offset */
+    width:172px !important;
+    height:172px !important;
+    margin:-118px 0 0 -86px !important;
+}
+
+/* background size for retina sprites (if the skin defines them) */
+@media
+    only all and (-webkit-min-device-pixel-ratio:1.5),
+    only all and (-moz-min-device-pixel-ratio:1.5),
+    only all and (min--moz-device-pixel-ratio:1.5),
+    only all and (-o-min-device-pixel-ratio:3/2),
+    only all and (min-device-pixel-ratio:1.5)
+{
+    .oz-indicator.oz-loading strong
+    {
+        background-size:688px 86px !important;
+    }
+    .oz-large .oz-indicator.oz-loading strong
+    {
+        background-size:1376px 172px !important;
+    }
+}
+
+/* no-images player indicator => "loading" type icon */
+.oz-no-images  .oz-indicator.oz-loading strong,
+.oz-large.oz-no-images .oz-indicator.oz-loading strong
+{
+    /* negate the background image */
+    background-image:none !important;
+}
+
+
+
+/* player indicator => aria live status text */
+.oz-indicator strong em
+{
+    /* nb. use offleft positioning so it remains accessible to screenreaders
+       which won't cause any outline problems because it can't take the focus */
+    position:absolute !important;
+    left:-10000px !important;
+}
+
+/* no-images player indicator => aria live text */
+.oz-no-images .oz-indicator strong em
+{
+    /* show the status text */
+    position:static !important;
+
+    /* re-inforce inherited font */
+    font:normal italic bold 18px/1.4 "lucida grande", verdana, sans-serif !important;
+
+    /* line-box background and corresponding color */
+    background:#000 !important;
+    color:#fff !important;
+}
+
+/* large controls => no-images player indicator */
+.oz-large.oz-no-images .oz-indicator strong em
+{
+    font:normal normal bold 36px/1.4 "lucida grande", verdana, sans-serif !important;
+}
+
+
+
+/*** DEV TMP ***//*
+.oz-indicator
+{
+    background-color:rgba(255,0,0,0.66) !important;
+}
+.oz-indicator span
+{
+    background-color:rgba(0,255,0,0.66) !important;
+}
+.oz-indicator strong
+{
+    background-color:rgba(0,0,255,0.66) !important;
+}
+.oz-no-images .oz-indicator strong em
+{
+    background-color:rgba(0,255,255,0.66) !important;
+}
+* html .oz-indicator
+{
+    background-color:red !important;
+}
+* html .oz-indicator span
+{
+    background-color:green !important;
+}
+* html .oz-indicator strong
+{
+    background-color:blue !important;
+}
+* html .oz-no-images .oz-indicator strong em
+{
+    background-color:cyan !important;
+} */
+
+
+
+
+
+
+
+/* captions */
+.ozplayer .oz-captions
+{
+    position:absolute !important;
+    left:0 !important;
+
+    /* position the captions above the video and poster but below the controls */
+    z-index:4500 !important;
+
+    /* overlaid position and dimensions
+       nb. the height must be auto so it can expand with content and text wrapping */
+    bottom:8% !important;
+    left:12% !important;
+    width:76% !important;
+    height:auto !important;
+
+    /* nb. enforce display */
+    display:block !important;
+
+    border:none !important;
+
+    /* margin adjustment to bring the captions above the controls
+       nb. using margin so we don't have to change bottom
+       and since that's relative to the bottom of the player
+       it's the same for stack "controls" as it is for "row" */
+    margin-bottom:32px !important;
+
+    /* base font-size and line-height */
+    font-size:18px !important;
+    line-height:1.5 !important;
+
+    /* center alignment is most usual for captions */
+    text-align:center !important;
+
+    /* override the default text cursor, since that cursor implies
+       that the text is selectable, which it isn't in this case */
+    cursor:default !important;
+
+
+    /*** DEV TMP ***//*
+    bottom:0 !important;
+    border:2px solid orange !important;
+    margin-bottom:34px !important;
+    display:none !important;
+    background:darkorange !important; */
+}
+
+/* captions => margin reset for hidden stack controls
+   nb. this has enough specificity to reset large captions too */
+.oz-stack.oz-auto-hidden .oz-captions
+{
+    margin-bottom:0 !important;
+}
+
+/* captions => internal resets */
+.ozplayer .oz-captions *
+{
+    float:none !important;
+    visibility:visible !important;
+    margin:0 !important;
+    padding:0 !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+    quotes:none !important;
+
+    /* default color */
+    color:#fff !important;
+
+    /* override the default text cursor, since that cursor implies
+       that the text is selectable, which it isn't in this case */
+    cursor:default !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+}
+.ozplayer .oz-captions *:before,
+.ozplayer .oz-captions *:after
+{
+    content:"" !important;
+    display:none !important;
+}
+
+/* captions when captions are disabled */
+.ozplayer .oz-captions.oz-disabled
+{
+    display:none !important;
+}
+
+/* large captions */
+.oz-large .oz-captions
+{
+    /* large margin adjustment */
+    margin-bottom:64px !important;
+}
+
+/* smallscreen => captions */
+.ozplayer.oz-smallscreen .oz-captions
+{
+    /* reduce the overlaid position and dimensions to create more space */
+    left:4% !important;
+    width:92% !important;
+
+    /* reduce the base font-size and line-height to provide more space for the captions */
+    font-size:15px !important;
+    line-height:1.4 !important;
+}
+
+
+
+/* captions => caption cue markup */
+.ozplayer .oz-captions p
+{
+    /* caption text-shadow to improve visual contrast */
+    text-shadow:0.1em 0.1em 0.1em #000, 0 0 0.25em #000 !important;
+}
+.ozplayer .oz-captions p,
+.ozplayer .oz-captions p *
+{
+    /* caption font */
+    font:normal normal normal 18px/1.5 verdana, sans-serif !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+}
+
+/* captions => captions spacing blocks
+   nb. these are for when the player is viewed without CSS
+   to enforce an effective minimum height on the captions container
+   and thereby prevent it from moving the controls up and down too much */
+.ozplayer .oz-captions p.oz-captions-spacing
+{
+    display:none !important;
+}
+
+/* captions => standard and alternating text colors */
+.ozplayer .oz-captions p,
+.ozplayer .oz-captions p *,
+.ozplayer .oz-captions p:nth-child(2n+2) + p *
+{
+    color:#fff !important;
+}
+.ozplayer .oz-captions p + p *
+{
+    color:#ff0 !important;
+}
+
+/* captions => inner markup */
+.ozplayer .oz-captions p i,
+.ozplayer .oz-captions p i *
+{
+    font-style:italic !important;
+}
+.ozplayer .oz-captions p b,
+.ozplayer .oz-captions p b *
+{
+    font-weight:bold !important;
+}
+.ozplayer .oz-captions p u,
+.ozplayer .oz-captions p u *
+{
+    text-decoration:underline !important;
+}
+/* nb. hyperlinks are not actually allowed within VTT, and I remain unconvinced
+   that they're a good idea; but then I'm not convinced of the reverse either
+   so the parser does support them and we should style them if they're present */
+.ozplayer .oz-captions p u,
+.ozplayer .oz-captions p a
+{
+    cursor:pointer !important;
+    text-decoration:underline !important;
+}
+
+/* large captions => caption cue markup */
+.oz-large .oz-captions p,
+.oz-large .oz-captions p *
+{
+    /* large caption font */
+    font-size:40px !important;
+}
+
+/* captions => caption cue line */
+.ozplayer .oz-captions p q
+{
+    /* nb. keep this inline so you can add a background color
+       and it will only apply to the line boxes, not to the whole block */
+    display:inline !important;
+
+    /* add a small amount of horizontal padding, so that when it does
+       have a background, the text doesn't butt right against its edge
+       nb. this only applies to the start and end of the line-box
+       it doesn't apply to the edges created by flow breaks */
+    padding:0 0.15em !important;
+
+    /* line-box corner radius
+       nb. this is defined in em so it scales with larger text */
+    -moz-border-radius:0.125em !important;
+    -webkit-border-radius:0.125em !important;
+    border-radius:0.125em !important;
+
+    /* rgba line-box background with legacy fallback */
+    background:#000 !important;
+    background:rgba(0,0,0,0.65) !important;
+}
+
+/* add a slight offset to 2nd and subsequent cues */
+.ozplayer .oz-captions p + p
+{
+    margin-top:0.25em !important;
+}
+
+/* smallscreen => captions => caption cue markup */
+.ozplayer.oz-smallscreen .oz-captions p,
+.ozplayer.oz-smallscreen .oz-captions p *
+{
+    /* reduce the font-size and line-height to provide more space for the captions */
+    font-size:15px !important;
+    line-height:1.4 !important;
+}
+
+
+
+
+
+
+
+/* controls */
+.oz-controls
+{
+    /* position the controls above everything else */
+    z-index:5000 !important;
+
+    border:none !important;
+
+    /* nb. display and visibility can't be used for the hidden state */
+    display:block !important;
+    visibility:visible !important;
+
+    /* default auto width (which is then set by scripting) */
+    width:auto;                                           /* [STYLE MODIFIED] */
+
+    /* default overall height (same as the buttons) */
+    height:32px !important;
+
+    /* nb. use transparency on the form so the fieldset
+       can use margin to create a space around the controls */
+    background:transparent !important;
+
+    /* base font
+       nb. this is quite small because space is very limited */
+    font:normal normal normal 11px/1 "lucida grande", verdana, sans-serif !important;
+    text-shadow:none !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+
+    /*** DEV TMP ***//*
+    height:64px !important; */
+
+
+    /*** DEV TMP ***//*
+    background-color:#f0f !important; */
+}
+
+/* no-images controls */
+.oz-no-images .oz-controls
+{
+    /* apply a transparent border-top to delineate the controls
+       which will show as a solid foreground color if a high-contrast theme
+       is in use, but will still be transparent if images are merely disabled */
+    border-top:2px solid transparent !important;
+}
+
+/* large controls */
+.oz-large .oz-controls
+{
+    /* large overall height (same as the buttons) */
+    height:64px !important;
+
+
+
+    /*** DEV TMP ***//*
+    height:128px !important; */
+}
+
+/* no-images large controls */
+.oz-large.oz-no-images .oz-controls
+{
+    /* larger delineation border */
+    border-top:4px solid transparent !important;
+}
+
+/* controls => stack layout */
+.oz-stack .oz-controls
+{
+    /* position the controls on top the video, aligned to the bottom edge */
+    position:absolute !important;
+    left:0 !important;
+    bottom:0 !important;
+
+    /* default full opacity and no transform */
+    -moz-transform:none !important;
+    -ms-transform:none !important;
+    -webkit-transform:none !important;
+    transform:none !important;
+    opacity:1 !important;
+}
+
+/* controls => auto-hiding stack */
+.oz-stack.oz-auto-hiding .oz-controls
+{
+    /* hide the controls below the fold using zero opacity */
+    opacity:0 !important;
+
+    /* define a fade transition to switch to the hidden state
+       nb. this is only for this state, so that switching to visible is instant */
+    -moz-transition:opacity 0.5s !important;
+    -ms-transition:opacity 0.5s !important;
+    -webkit-transition:opacity 0.5s !important;
+    transition:opacity 0.5s !important;
+}
+
+/* controls => hidden stack for most browsers
+   nb. all hiding properties must retain keyboard accessibility
+   so you can still tab to hidden controls to make them visible again */
+.oz-stack.oz-auto-hidden .oz-controls
+{
+    /* fallback hidden state for browsers that don't support the transition
+       which is also applied to those that do at the end of the transition
+       nb. originally I used bottom:-100% for this, but that's no good
+       now that the player has visible overflow, however zero height
+       and hidden overflow works just fine, and retains keyboard
+       accessibility, and screenreaders can still read the content */
+    height:0 !important;
+    overflow:hidden !important;
+}
+
+/* no-images controls => hidden stack for most browsers */
+.oz-stack.oz-auto-hidden.oz-no-images .oz-controls
+{
+    /* negate the delineation border since the bottom hiding doesn't account for it */
+    border-top:none !important;
+}
+
+
+
+/* controls => internal resets */
+.oz-controls *
+{
+    float:none !important;
+    visibility:visible !important;
+    margin:0 !important;
+    padding:0 !important;
+
+    border:none !important;
+    -moz-border-radius:0 !important;
+    -webkit-border-radius:0 !important;
+    border-radius:0 !important;
+
+    /* default font and line-height */
+    font-size:11px !important;
+    line-height:1 !important;
+
+    text-align:left !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    /* nb. if we don't specify a default cursor
+       then some browsers will show a text cursor */
+    cursor:default !important;
+
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+
+    -moz-opacity:1 !important;
+    -khtml-opacity:1 !important;
+    opacity:1 !important;
+    filter:none !important;
+}
+.oz-large .oz-controls *
+{
+    /* large default font */
+    font-size:22px !important;
+}
+/* button inner layout reset hack for Firefox */
+.oz-controls button::-moz-focus-inner
+{
+    padding:0 !important;
+    border:none !important;
+}
+/* nb. there's a couple of cheeky <br> inside the controls
+   which provide some basic formatting when CSS is not available
+   so when CSS is available (like now!) we must undisplay them */
+.oz-controls br
+{
+    display:none !important;
+}
+
+
+
+/* controls => fieldset */
+.oz-controls fieldset
+{
+    display:block !important;
+    visibility:visible !important;
+
+    /* fieldset background and default foreground color */
+    background:#202020 !important;
+    color:#fff !important;
+
+    /* edge bordering and shadow effects */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:0 -1px 0 #202020, inset 0 1px 0 #404040, inset -1px 0 1px #303030, inset 1px 0 1px #303030 !important;
+    -webkit-box-shadow:0 -1px 0 #202020, inset 0 1px 0 #404040, inset -1px 0 1px #303030, inset 1px 0 1px #303030 !important;
+    box-shadow:0 -1px 0 #202020, inset 0 1px 0 #404040, inset -1px 0 1px #303030, inset 1px 0 1px #303030 !important;
+    */
+    -moz-box-shadow:0 -1px 0 #202020 !important;
+    -webkit-box-shadow:0 -1px 0 #202020 !important;
+    box-shadow:0 -1px 0 #202020 !important;
+
+    /* vertical gradient effect */
+    /*** DEV MAYBE OLD ***//*
+    background:-moz-linear-gradient(top, #303030, #101010) !important;
+    background:-ms-linear-gradient(top, #303030, #101010) !important;
+    background:-o-linear-gradient(top, #303030, #101010) !important;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0%, #303030), color-stop(100%, #101010)) !important;
+    background:-webkit-linear-gradient(top, #303030, #101010) !important;
+    background:linear-gradient(top, #303030, #101010) !important;
+    */
+
+
+    /*** DEV TMP ***//*
+    background:rgba(32,32,32,0.88) !important;
+    box-shadow:0 -1px 0 rgba(32,32,32,0.88), inset 0 1px 0 rgba(64,64,64,0.88), inset -1px 0 1px rgba(48,48,48,0.88), inset 1px 0 1px rgba(48,48,48,0.88) !important;
+      background:-o-linear-gradient(top, rgba(48,48,48,0.88), rgba(16,16,16,0.88)) !important;
+    height:100% !important; */
+}
+
+/* no-images controls => fieldset */
+.oz-no-images .oz-controls fieldset
+{
+    /* apply a solid backround-color, for the benefit of firefox when
+       author colors are disabled, which otherwise makes it transparent
+       this does mean that we'll lose the gradient effect in browsers
+       where images are merely off, but that's can't really be helped */
+    background:#000 !important;
+}
+
+/* large controls => fieldset */
+.oz-large .oz-controls fieldset
+{
+    /* large edge effects */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:0 -2px 0 #202020, inset 0 2px 0 #404040, inset -2px 0 2px #303030, inset 2px 0 2px #303030 !important;
+    -webkit-box-shadow:0 -2px 0 #202020, inset 0 2px 0 #404040, inset -2px 0 2px #303030, inset 2px 0 2px #303030 !important;
+    box-shadow:0 -2px 0 #202020, inset 0 2px 0 #404040, inset -2px 0 2px #303030, inset 2px 0 2px #303030 !important;
+    */
+    -moz-box-shadow:0 -2px 0 #202020 !important;
+    -webkit-box-shadow:0 -2px 0 #202020 !important;
+    box-shadow:0 -2px 0 #202020 !important;
+}
+
+/* controls => fieldset structural legend */
+.oz-controls fieldset legend
+{
+    position:absolute !important;
+    left:-10000px !important;
+}
+
+
+
+/* controls => field wrappers */
+.oz-controls .oz-field
+{
+    /* nb. fields must have static positioning so that the
+       buttons don't overlap the previous button's tooltip */
+    position:static !important;
+
+    /* set the default z-index for all fields the same */
+    z-index:1000 !important;
+
+    /* use table-cell display to prevent buttons from breaking over the line
+       which could happen in some cases when using inline-block display
+       but we can only do this now because we've dropped IE7 support */
+    display:table-cell !important;
+
+    /* prevent white-space wrapping for when images are disabled
+       so that button text like "AD (off)" can't split into two lines */
+    white-space:nowrap !important;
+
+    /* nb. set auto width unless no-images scripting sets a specific width */
+    width:auto;                                           /* [STYLE MODIFIED] */
+
+    margin:0 !important;
+    padding:0 !important;
+    border:none !important;
+
+    /* fix the line-height so it doesn't expand with non-zooming font-size */
+    line-height:0 !important;
+
+    /* nb. this prevents some kind of weird displacement in safari */
+    vertical-align:top !important;
+
+    /* right-edge bordering and shadow effect */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:inset -1px 0 0 0 #202020, 1px 0 0 0 #303030 !important;
+    -webit-box-shadow:inset -1px 0 0 0 #202020, 1px 0 0 0 #303030 !important;
+    box-shadow:inset -1px 0 0 0 #202020, 1px 0 0 0 #303030 !important;
+    */
+
+
+    /*** DEV TMP ***//*
+    box-shadow:inset -1px 0 0 0 rgba(32,32,32,0.88), 1px 0 0 0 rgba(48,48,48,0.88) !important;
+    background:cyan !important;
+    box-shadow:inset 0 0 0 2px darkcyan !important; */
+}
+.oz-controls .oz-last-field,
+.oz-controls .oz-mute
+{
+    /* remove the edge effect from the last field
+       and also from the mute field so it looks like part of volume */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+    */
+}
+
+/* large field wrappers */
+.oz-large .oz-controls .oz-field
+{
+    /* large right-edge effect */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:inset -2px 0 0 0 #202020, 2px 0 0 0 #303030 !important;
+    -webkit-box-shadow:inset -2px 0 0 0 #202020, 2px 0 0 0 #303030 !important;
+    box-shadow:inset -2px 0 0 0 #202020, 2px 0 0 0 #303030 !important;
+    */
+}
+.oz-large .oz-controls .oz-last-field,
+.oz-large .oz-controls .oz-mute
+{
+    /* remove the large edge effect from the last field and mute field */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:none !important;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+    */
+}
+
+/* smallscreen => mute and volume field wrappers */
+.ozplayer.oz-smallscreen .oz-controls .oz-field.oz-mute,
+.ozplayer.oz-smallscreen .oz-controls .oz-field.oz-volume
+{
+    /* hide the wrappers entirely so the controls are not displayed
+       nb. but may still be announced to ATs, which is ideally what we want
+       so we use aria-hidden=false to try to encourage that to happen */
+    display:none !important;
+}
+
+
+/* controls => buttons */
+.oz-controls .oz-field button
+{
+    position:relative !important;
+
+    display:inline-block !important;
+
+    /* nb. constrain the button box for the benefit of legacy IE */
+    overflow:hidden !important;
+
+    /* default size (same height as the form) */
+    width:32px !important;
+    height:32px !important;
+
+    /* fallback text font
+       nb. this is quite small because space is very limited */
+    font:normal normal normal 11px/1 "lucida grande", verdana, sans-serif !important;
+    text-shadow:none !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    /* fallback text default color */
+    color:#fff !important;
+
+    /* default icon background */
+    background:transparent none no-repeat !important;
+
+
+    /*** DEV TMP ***//*
+    padding:4px 8px !important;
+    background:#ccc !important;
+    color:black !important;
+    border:2px solid gray !important; */
+}
+
+/* large controls => buttons */
+.oz-large .oz-controls .oz-field button
+{
+    /* larger font-size for fallback text */
+    font-size:22px !important;
+}
+
+/* no-images controls => buttons */
+.oz-no-images .oz-controls .oz-field button,
+.oz-large.oz-no-images .oz-controls .oz-field button
+{
+    /* set auto-width so the buttons expand with their inner text
+       plus a little padding so the text doesn't butt against the edges */
+    width:auto !important;
+    padding:0 0.5em !important;
+
+    /* stretch prevention hack for older IE */
+    overflow:visible !important;
+
+    /* negate the background image */
+    background-image:none !important;
+}
+
+/* controls => button inner text element
+   nb. this will only be seen if css or images are unavailable
+   nnb. it's hidden with display to avoid the focus displacement
+   that offleft positioning sometimes causes in webkit, so to compensate
+   screenreaders, the button also has an identical "aria-label" (and "title")
+   as well as explicit aria-hidden=false, to counteract its lack of display */
+.oz-controls .oz-field button strong
+{
+    display:none !important;
+}
+
+/* no-images controls => button inner text element */
+.oz-no-images .oz-controls .oz-field button strong
+{
+    /* show the text
+       nb. most browsers will align this in the middle of the button
+       although some will put it at the top or bottom, I don't
+       think it's worth tweaking padding-top and height for them */
+    display:inline !important;
+
+    /* re-inforce inherited font-size
+       but increase line-height to prevent text clipping in older IE */
+    font-size:1em !important;
+    line-height:1.4 !important;
+}
+
+/* controls => disabled buttons */
+.oz-controls .oz-field.oz-disabled button
+{
+    -moz-opacity:0.51 !important;
+    -khtml-opacity:0.51 !important;
+    opacity:0.51 !important;
+    filter:alpha(opacity:51) !important;
+}
+
+/* filter removal hack for IE9 */
+@media only all
+{
+    .oz-controls .oz-field.oz-disabled button
+    {
+        filter:none !important;
+    }
+}
+
+/* controls => button pseudo states */
+.oz-controls .oz-field button:focus
+{
+    /* move the outline far enough inside the button that the
+       mac-focusring isn't clipped outside its bounds, but don't specify
+       any other outline properties, or we'll lose the focusring entirely */
+    outline-offset:-5px !important;
+}
+
+
+
+/* controls => button icons by field class, state class and pseudo state
+   nb. we need to prevent it from taking the active and focus states when it's disabled
+   (but keyboard users will still get focus indication from the other style changes) */
+.oz-controls .oz-playpause button.oz-off,
+.oz-controls .oz-playpause.oz-disabled button.oz-off:hover,
+.oz-controls .oz-playpause.oz-disabled button.oz-off:focus,
+.oz-controls .oz-playpause.oz-disabled button.oz-off:active
+    { background-position:0 0 !important; }
+.oz-controls .oz-playpause button.oz-off:hover,
+.oz-controls .oz-playpause button.oz-off:focus,
+.oz-controls .oz-playpause button.oz-off:active
+    { background-position:0 -32px !important; }
+
+.oz-controls .oz-playpause button.oz-on,
+.oz-controls .oz-playpause.oz-disabled button.oz-on:hover,
+.oz-controls .oz-playpause.oz-disabled button.oz-on:focus,
+.oz-controls .oz-playpause.oz-disabled button.oz-on:active
+    { background-position:-32px 0 !important; }
+.oz-controls .oz-playpause button.oz-on:hover,
+.oz-controls .oz-playpause button.oz-on:focus,
+.oz-controls .oz-playpause button.oz-on:active
+    { background-position:-32px -32px !important; }
+
+.oz-controls .oz-mute button.oz-off.oz-high,
+.oz-controls .oz-mute button.oz-off.oz-low,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:active,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:active
+    { background-position:-128px 0 !important; }
+.oz-controls .oz-mute button.oz-off.oz-high:hover,
+.oz-controls .oz-mute button.oz-off.oz-low:hover,
+.oz-controls .oz-mute button.oz-off.oz-high:focus,
+.oz-controls .oz-mute button.oz-off.oz-low:focus,
+.oz-controls .oz-mute button.oz-off.oz-high:active,
+.oz-controls .oz-mute button.oz-off.oz-low:active
+    { background-position:-128px -32px !important; }
+
+.oz-controls .oz-mute button.oz-on.oz-high,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:active
+    { background-position:-64px 0 !important; }
+.oz-controls .oz-mute button.oz-on.oz-high:hover,
+.oz-controls .oz-mute button.oz-on.oz-high:focus,
+.oz-controls .oz-mute button.oz-on.oz-high:active
+    { background-position:-64px -32px !important; }
+.oz-controls .oz-mute button.oz-on.oz-low,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:active
+    { background-position:-96px 0 !important; }
+.oz-controls .oz-mute button.oz-on.oz-low:hover,
+.oz-controls .oz-mute button.oz-on.oz-low:focus,
+.oz-controls .oz-mute button.oz-on.oz-low:active
+    { background-position:-96px -32px !important; }
+
+.oz-controls .oz-cc button.oz-off,
+.oz-controls .oz-cc.oz-disabled button.oz-off:hover,
+.oz-controls .oz-cc.oz-disabled button.oz-off:focus,
+.oz-controls .oz-cc.oz-disabled button.oz-off:active
+    { background-position:-160px 0 !important; }
+.oz-controls .oz-cc button.oz-off:hover,
+.oz-controls .oz-cc button.oz-off:focus,
+.oz-controls .oz-cc button.oz-off:active
+    { background-position:-160px -32px !important; }
+.oz-controls .oz-cc button.oz-on,
+.oz-controls .oz-cc.oz-disabled button.oz-on:hover,
+.oz-controls .oz-cc.oz-disabled button.oz-on:focus,
+.oz-controls .oz-cc.oz-disabled button.oz-on:active
+    { background-position:-192px 0 !important; }
+.oz-controls .oz-cc button.oz-on:hover,
+.oz-controls .oz-cc button.oz-on:focus,
+.oz-controls .oz-cc button.oz-on:active
+    { background-position:-192px -32px !important; }
+
+.oz-audio .oz-controls .oz-cc button.oz-off,
+.oz-audio .oz-controls .oz-cc.oz-disabled button.oz-off:hover,
+.oz-audio .oz-controls .oz-cc.oz-disabled button.oz-off:focus,
+.oz-audio .oz-controls .oz-cc.oz-disabled button.oz-off:active
+    { background-position:-352px 0 !important; }
+.oz-audio .oz-controls .oz-cc button.oz-off:hover,
+.oz-audio .oz-controls .oz-cc button.oz-off:focus,
+.oz-audio .oz-controls .oz-cc button.oz-off:active
+    { background-position:-352px -32px !important; }
+.oz-audio .oz-controls .oz-cc button.oz-on,
+.oz-audio .oz-controls .oz-cc.oz-disabled button.oz-on:hover,
+.oz-audio .oz-controls .oz-cc.oz-disabled button.oz-on:focus,
+.oz-audio .oz-controls .oz-cc.oz-disabled button.oz-on:active
+    { background-position:-384px 0 !important; }
+.oz-audio .oz-controls .oz-cc button.oz-on:hover,
+.oz-audio .oz-controls .oz-cc button.oz-on:focus,
+.oz-audio .oz-controls .oz-cc button.oz-on:active
+    { background-position:-384px -32px !important; }
+
+.oz-controls .oz-ad button.oz-off,
+.oz-controls .oz-ad.oz-disabled button.oz-off:hover,
+.oz-controls .oz-ad.oz-disabled button.oz-off:focus,
+.oz-controls .oz-ad.oz-disabled button.oz-off:active
+    { background-position:-224px 0 !important; }
+.oz-controls .oz-ad button.oz-off:hover,
+.oz-controls .oz-ad button.oz-off:focus,
+.oz-controls .oz-ad button.oz-off:active
+    { background-position:-224px -32px !important; }
+.oz-controls .oz-ad button.oz-on,
+.oz-controls .oz-ad.oz-disabled button.oz-on:hover,
+.oz-controls .oz-ad.oz-disabled button.oz-on:focus,
+.oz-controls .oz-ad.oz-disabled button.oz-on:active
+    { background-position:-256px 0 !important; }
+.oz-controls .oz-ad button.oz-on:hover,
+.oz-controls .oz-ad button.oz-on:focus,
+.oz-controls .oz-ad button.oz-on:active
+    { background-position:-256px -32px !important; }
+
+.oz-controls .oz-fullscreen button.oz-off,
+.oz-controls .oz-fullscreen.oz-disabled button.oz-off:hover,
+.oz-controls .oz-fullscreen.oz-disabled button.oz-off:focus,
+.oz-controls .oz-fullscreen.oz-disabled button.oz-off:active
+    { background-position:-288px 0 !important; }
+.oz-controls .oz-fullscreen button.oz-off:hover,
+.oz-controls .oz-fullscreen button.oz-off:focus,
+.oz-controls .oz-fullscreen button.oz-off:active
+    { background-position:-288px -32px !important; }
+.oz-controls .oz-fullscreen button.oz-on,
+.oz-controls .oz-fullscreen.oz-disabled button.oz-on:hover,
+.oz-controls .oz-fullscreen.oz-disabled button.oz-on:focus,
+.oz-controls .oz-fullscreen.oz-disabled button.oz-on:active
+    { background-position:-320px 0 !important; }
+.oz-controls .oz-fullscreen button.oz-on:hover,
+.oz-controls .oz-fullscreen button.oz-on:focus,
+.oz-controls .oz-fullscreen button.oz-on:active
+    { background-position:-320px -32px !important; }
+
+
+
+/* large controls => buttons */
+.oz-large .oz-controls .oz-field button
+{
+    /* large size */
+    width:64px !important;
+    height:64px !important;
+}
+
+/* large no-images controls => buttons */
+.oz-large.oz-no-images .oz-controls .oz-field button
+{
+    /* re-inforce auto-width */
+    width:auto !important;
+}
+
+/* large controls => button icons by field class, state class and dynamic state */
+.oz-large .oz-playpause button.oz-off,
+.oz-large .oz-playpause.oz-disabled button.oz-off:hover,
+.oz-large .oz-playpause.oz-disabled button.oz-off:focus,
+.oz-large .oz-playpause.oz-disabled button.oz-off:active
+    { background-position:0 0 !important; }
+.oz-large .oz-playpause button.oz-off:hover,
+.oz-large .oz-playpause button.oz-off:focus,
+.oz-large .oz-playpause button.oz-off:active
+    { background-position:0 -64px !important; }
+.oz-large .oz-playpause button.oz-on,
+.oz-large .oz-playpause.oz-disabled button.oz-on:hover,
+.oz-large .oz-playpause.oz-disabled button.oz-on:focus,
+.oz-large .oz-playpause.oz-disabled button.oz-on:active
+    { background-position:-64px 0 !important; }
+.oz-large .oz-playpause button.oz-on:hover,
+.oz-large .oz-playpause button.oz-on:focus,
+.oz-large .oz-playpause button.oz-on:active
+    { background-position:-64px -64px !important; }
+
+.oz-large .oz-mute button.oz-off.oz-high,
+.oz-large .oz-mute button.oz-off.oz-low,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:hover,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:hover,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:focus,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:focus,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:active,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:active
+    { background-position:-256px 0 !important; }
+.oz-large .oz-mute button.oz-off.oz-high:hover,
+.oz-large .oz-mute button.oz-off.oz-low:hover,
+.oz-large .oz-mute button.oz-off.oz-high:focus,
+.oz-large .oz-mute button.oz-off.oz-low:focus,
+.oz-large .oz-mute button.oz-off.oz-high:active,
+.oz-large .oz-mute button.oz-off.oz-low:active
+    { background-position:-256px -64px !important; }
+
+.oz-large .oz-mute button.oz-on.oz-high,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:hover,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:focus,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:active
+    { background-position:-128px 0 !important; }
+.oz-large .oz-mute button.oz-on.oz-high:hover,
+.oz-large .oz-mute button.oz-on.oz-high:focus,
+.oz-large .oz-mute button.oz-on.oz-high:active
+    { background-position:-128px -64px !important; }
+.oz-large .oz-mute button.oz-on.oz-low,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:hover,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:focus,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:active
+    { background-position:-192px 0 !important; }
+.oz-large .oz-mute button.oz-on.oz-low:hover,
+.oz-large .oz-mute button.oz-on.oz-low:focus,
+.oz-large .oz-mute button.oz-on.oz-low:active
+    { background-position:-192px -64px !important; }
+
+.oz-large .oz-cc button.oz-off,
+.oz-large .oz-cc.oz-disabled button.oz-off:hover,
+.oz-large .oz-cc.oz-disabled button.oz-off:focus,
+.oz-large .oz-cc.oz-disabled button.oz-off:active
+    { background-position:-320px 0 !important; }
+.oz-large .oz-cc button.oz-off:hover,
+.oz-large .oz-cc button.oz-off:focus,
+.oz-large .oz-cc button.oz-off:active
+    { background-position:-320px -64px !important; }
+.oz-large .oz-cc button.oz-on,
+.oz-large .oz-cc.oz-disabled button.oz-on:hover,
+.oz-large .oz-cc.oz-disabled button.oz-on:focus,
+.oz-large .oz-cc.oz-disabled button.oz-on:active
+    { background-position:-384px 0 !important; }
+.oz-large .oz-cc button.oz-on:hover,
+.oz-large .oz-cc button.oz-on:focus,
+.oz-large .oz-cc button.oz-on:active
+    { background-position:-384px -64px !important; }
+
+.oz-audio.oz-large .oz-cc button.oz-off,
+.oz-audio.oz-large .oz-cc.oz-disabled button.oz-off:hover,
+.oz-audio.oz-large .oz-cc.oz-disabled button.oz-off:focus,
+.oz-audio.oz-large .oz-cc.oz-disabled button.oz-off:active
+    { background-position:-704px 0 !important; }
+.oz-audio.oz-large .oz-cc button.oz-off:hover,
+.oz-audio.oz-large .oz-cc button.oz-off:focus,
+.oz-audio.oz-large .oz-cc button.oz-off:active
+    { background-position:-704px -64px !important; }
+.oz-audio.oz-large .oz-cc button.oz-on,
+.oz-audio.oz-large .oz-cc.oz-disabled button.oz-on:hover,
+.oz-audio.oz-large .oz-cc.oz-disabled button.oz-on:focus,
+.oz-audio.oz-large .oz-cc.oz-disabled button.oz-on:active
+    { background-position:-768px 0 !important; }
+.oz-audio.oz-large .oz-cc button.oz-on:hover,
+.oz-audio.oz-large .oz-cc button.oz-on:focus,
+.oz-audio.oz-large .oz-cc button.oz-on:active
+    { background-position:-768px -64px !important; }
+
+.oz-large .oz-ad button.oz-off,
+.oz-large .oz-ad.oz-disabled button.oz-off:hover,
+.oz-large .oz-ad.oz-disabled button.oz-off:focus,
+.oz-large .oz-ad.oz-disabled button.oz-off:active
+    { background-position:-448px 0 !important; }
+.oz-large .oz-ad button.oz-off:hover,
+.oz-large .oz-ad button.oz-off:focus,
+.oz-large .oz-ad button.oz-off:active
+    { background-position:-448px -64px !important; }
+.oz-large .oz-ad button.oz-on,
+.oz-large .oz-ad.oz-disabled button.oz-on:hover,
+.oz-large .oz-ad.oz-disabled button.oz-on:focus,
+.oz-large .oz-ad.oz-disabled button.oz-on:active
+    { background-position:-512px 0 !important; }
+.oz-large .oz-ad button.oz-on:hover,
+.oz-large .oz-ad button.oz-on:focus,
+.oz-large .oz-ad button.oz-on:active
+    { background-position:-512px -64px !important; }
+
+.oz-large .oz-fullscreen button.oz-off,
+.oz-large .oz-fullscreen.oz-disabled button.oz-off:hover,
+.oz-large .oz-fullscreen.oz-disabled button.oz-off:focus,
+.oz-large .oz-fullscreen.oz-disabled button.oz-off:active
+    { background-position:-576px 0 !important; }
+.oz-large .oz-fullscreen button.oz-off:hover,
+.oz-large .oz-fullscreen button.oz-off:focus,
+.oz-large .oz-fullscreen button.oz-off:active
+    { background-position:-576px -64px !important; }
+.oz-large .oz-fullscreen button.oz-on,
+.oz-large .oz-fullscreen.oz-disabled button.oz-on:hover,
+.oz-large .oz-fullscreen.oz-disabled button.oz-on:focus,
+.oz-large .oz-fullscreen.oz-disabled button.oz-on:active
+    { background-position:-640px 0 !important; }
+.oz-large .oz-fullscreen button.oz-on:hover,
+.oz-large .oz-fullscreen button.oz-on:focus,
+.oz-large .oz-fullscreen button.oz-on:active
+    { background-position:-640px -64px !important; }
+
+
+
+/* background size for retina buttons (if the skin defines them) */
+@media
+    only all and (-webkit-min-device-pixel-ratio:1.5),
+    only all and (-moz-min-device-pixel-ratio:1.5),
+    only all and (min--moz-device-pixel-ratio:1.5),
+    only all and (-o-min-device-pixel-ratio:3/2),
+    only all and (min-device-pixel-ratio:1.5)
+{
+    .oz-controls .oz-field button
+    {
+        background-size:416px 64px !important;
+    }
+    .oz-large .oz-controls .oz-field button
+    {
+        background-size:832px 128px !important;
+    }
+}
+
+
+
+/* controls => text and range inputs */
+.oz-controls .oz-field input
+{
+    /* undisplay these controls, so you don't see them unless CSS is disabled
+       nb. this will also hide them from screenreaders, which is what we want,
+       and is re-inforced by the presence of aria-hidden on the field
+       because all the relevant data is encoded in the slider's thumb */
+    display:none !important;
+}
+
+
+
+/* controls => popup menus */
+.oz-controls .oz-menu
+{
+    position:absolute !important;
+    top:auto !important;
+    left:auto !important;
+    bottom:32px !important;
+    right:0;                                              /* [STYLE MODIFIED] */
+
+    /* nb. block display is required for overflow */
+    display:block !important;
+    max-width:none;                                       /* [STYLE MODIFIED] */
+    max-height:none;                                      /* [STYLE MODIFIED] */
+    white-space:nowrap !important;
+    overflow: auto !important;
+
+    /* nb. border-box sizing is required for max-height to ignore padding */
+    box-sizing:border-box !important;
+
+    margin:0 0 5px 0 !important;
+    padding:5px 0 !important;
+
+    border:1px solid #202020 !important;
+    border-radius:2px !important;
+
+    background-color:#202020 !important;
+    color:#fff !important;
+}
+.oz-audio .oz-controls .oz-menu
+{
+    top:32px !important;
+    bottom:auto !important;
+
+    margin:5px 0 0 0 !important;
+}
+/* nb. the second selector overrides visibility appled to
+  ".oz-controls *" when the menu is supposed to be hidden */
+.oz-controls .oz-menu[aria-hidden="true"],
+.oz-controls .oz-menu[aria-hidden="true"] *
+{
+    visibility: hidden !important;
+}
+.oz-large .oz-controls .oz-menu
+{
+    bottom:64px !important;
+    padding:10px 0 !important;
+}
+.oz-controls .oz-menuitem
+{
+    /* nb. table display is required so that item highlights can extend outside
+       the visible menu when overflow scrolling is used, otherwise the black text
+       used in some skins wouldn't be legible against the black menu background */
+    display:table !important;
+    width:100% !important;
+
+    /* nb. border-box sizing is required for 100% width to ignore padding */
+    box-sizing:border-box !important;
+
+    padding:5px 20px 5px 10px !important;
+
+    font-size:12px !important;
+}
+.oz-large .oz-controls .oz-menuitem
+{
+    padding:10px 40px 10px 20px !important;
+
+    font-size:24px !important;
+}
+.oz-controls .oz-menuitem[aria-disabled="true"]
+{
+    color:#898989 !important;
+}
+/* nb. this is for "off" item in the audio-only player
+   which only becomes used if a language fails to load */
+.oz-controls .oz-menuitem[aria-hidden="true"]
+{
+    display:none !important;
+}
+/* n.b. IE8 doesn't support the proper double-colon syntax for pseudo-elements */
+.oz-controls .oz-menuitem:before
+{
+    content:"" !important;
+
+    display:inline-block !important;
+    width:0.5em !important;
+
+    margin:0 5px 0 0 !important;
+}
+.oz-large .oz-controls .oz-menuitem:before
+{
+    margin-right:10px !important;
+}
+/* n.b. the unicode check-mark symbols (U+2713 and U+2714)
+   aren't supported in Windows XP, but this bullet does the job for all */
+.oz-controls .oz-menuitem[aria-checked="true"]:before
+{
+    content:"\2022" !important;
+}
+
+
+
+
+
+
+
+/* custom sliders => container */
+.oz-controls .oz-slider
+{
+    position:relative !important;
+
+    display:block !important;
+
+    /* nb. wrap around the contents yet expand to fill the field wrapper */
+    float:left !important;
+    width:100% !important;
+    height:auto !important;
+
+    background:transparent !important;
+}
+
+
+
+/* custom sliders => track and time-range indicators */
+.oz-controls .oz-slider .oz-slider-track
+{
+    position:relative !important;
+
+    float:none !important;
+    display:block !important;
+
+    /* nb. set auto width so it expands with the slider container */
+    width:auto !important;
+
+    /* track height and offset */
+    height:6px !important;
+    margin:13px 16px !important;
+
+    padding:0 !important;
+    border:none !important;
+
+    /* track background with legacy fallback */
+    /*** DEV MAYBE OLD ***//*
+    background:#616161 !important;
+    background:rgba(255,255,255,0.3) !important;
+    */
+    background:#515151 !important;
+
+    /* recess effect */
+    /*** DEV MAYBE OLD ***//*
+    background:rgba(255,255,255,0.22) !important;
+    -moz-box-shadow:inset 0 1px 1px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.2) !important;
+    -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.2) !important;
+    box-shadow:inset 0 1px 1px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.2) !important;
+    */
+}
+.oz-slider-track .oz-timerange
+{
+    position:absolute !important;
+
+    /* position the time ranges below the thumb */
+    z-index:1000 !important;
+
+    /* prevent any possible expansion */
+    overflow:hidden !important;
+
+    display:inline-block !important;
+
+    /* range indicator height
+       nb. the width is set by script as a % of the track */
+    height:6px !important;
+
+    /* indicator background with legacy fallback */
+    background:#989898 !important;
+    background:rgba(255,255,255,0.35) !important;
+}
+.oz-controls .oz-slider .oz-slider-track,
+.oz-slider-track .oz-timerange
+{
+    /* corner radius */
+    -moz-border-radius:4px !important;
+    -webkit-border-radius:4px !important;
+    border-radius:4px !important;
+}
+
+/* no-images controls => custom sliders => track and time-range indicators */
+.oz-no-images .oz-controls .oz-slider .oz-slider-track
+{
+    /* reduce the height to account for the border */
+    height:4px !important;
+
+    /* apply transparent borders so that the track becomes visible
+       which will show as a solid foreground color if a high-contrast theme
+       is in use, but it will be transparent if images are merely disabled
+       although it will also displace the box shadow effects, that can't be helped */
+    border-top:1px solid transparent !important;
+    border-bottom:1px solid transparent !important;
+}
+.oz-no-images .oz-slider-track .oz-timerange
+{
+    /* reduce the height to account for the border */
+    height:2px !important;
+
+    /* apply transparent dashed borders so the indicators become visible
+       (they'll show as an expanding dashed line on the inside of the track) */
+    border-top:1px dashed transparent !important;
+    border-bottom:1px dashed transparent !important;
+}
+
+/* large controls => custom sliders => track and time-range indicators */
+.oz-large .oz-controls .oz-slider .oz-slider-track
+{
+    /* large track height and offset */
+    height:12px !important;
+    margin:26px 32px !important;
+
+    /* large recess effect */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:inset 0 2px 2px rgba(0,0,0,0.6), inset 0 -2px 2px rgba(255,255,255,0.2) !important;
+    -webkit-box-shadow:inset 0 2px 2px rgba(0,0,0,0.6), inset 0 -2px 2px rgba(255,255,255,0.2) !important;
+    box-shadow:inset 0 2px 2px rgba(0,0,0,0.6), inset 0 -2px 2px rgba(255,255,255,0.2) !important;
+    */
+}
+.oz-large .oz-controls .oz-slider .oz-slider-track .oz-timerange
+{
+    /* large range indicator height */
+    height:12px !important;
+}
+.oz-large .oz-controls .oz-slider .oz-slider-track,
+.oz-large .oz-slider-track .oz-timerange
+{
+    /* large corner radius */
+    -moz-border-radius:8px !important;
+    -webkit-border-radius:8px !important;
+    border-radius:8px !important;
+}
+
+/* no-images large controls => custom sliders => track and time-range indicators */
+.oz-large.oz-no-images .oz-controls .oz-slider .oz-slider-track
+{
+    /* larger reduced height */
+    height:8px !important;
+
+    /* larger delineation borders */
+    border-top:2px solid transparent !important;
+    border-bottom:2px solid transparent !important;
+}
+.oz-large.oz-no-images .oz-controls .oz-slider-track .oz-timerange
+{
+    /* larger reduced height */
+    height:4px !important;
+
+    /* larger indicator borders */
+    border-top:2px dashed transparent !important;
+    border-bottom:2px dashed transparent !important;
+}
+
+
+
+/* custom sliders => thumb target */
+.ozplayer .oz-controls .oz-slider .oz-slider-thumb,
+.ozplayer .oz-controls .oz-slider .oz-slider-thumb:hover,
+.ozplayer .oz-controls .oz-slider .oz-slider-thumb:focus,
+.ozplayer .oz-controls .oz-slider .oz-slider-thumb:active
+{
+    position:absolute !important;
+
+    /* default position until scripted left is applied */
+    left:0;                                               /* [STYLE MODIFIED] */
+    top:0 !important;
+
+    /* position the thumb above the time ranges */
+    z-index:2000 !important;
+
+    overflow:hidden !important;
+
+    display:inline-block !important;
+
+    /* thumb size (same as the buttons)
+       nb. this is four times the area of the visual inner thumb,
+       and is used to improve usability, by increasing the size of the
+       event target without changing the apparent size of the thumb */
+    width:32px !important;
+    height:32px !important;
+    margin:-13px 0 0 0 !important;
+    padding:0 !important;
+
+    border:none !important;
+
+    /* nb. override the backround image and highlights used on normal buttons */
+    background:transparent !important;
+}
+
+/* custom sliders => disabled thumb target */
+.ozplayer .oz-controls .oz-slider.oz-disabled .oz-slider-thumb
+{
+    /* override the opacity reduction inherited from disabled buttons */
+    -moz-opacity:1 !important;
+    -khtml-opacity:1 !important;
+    opacity:1 !important;
+    filter:none !important;
+}
+
+/* large controls => custom sliders => thumb target */
+.ozplayer.oz-large .oz-controls .oz-slider .oz-slider-thumb,
+.ozplayer.oz-large .oz-controls .oz-slider .oz-slider-thumb:hover,
+.ozplayer.oz-large .oz-controls .oz-slider .oz-slider-thumb:focus,
+.ozplayer.oz-large .oz-controls .oz-slider .oz-slider-thumb:active
+{
+    /* large thumb size */
+    width:64px !important;
+    height:64px !important;
+    margin:-26px 0 0 0 !important;
+
+    /* nb. override the backround image and highlights used on normal buttons */
+    background:transparent !important;
+}
+
+
+
+/* custom sliders => visual thumb */
+.ozplayer .oz-controls .oz-slider .oz-slider-thumb strong
+{
+    overflow:hidden !important;
+
+    display:block !important;
+    width:14px !important;
+    height:14px !important;
+    margin:0 0 0 9px !important;
+
+    -moz-border-radius:7px !important;
+    -webkit-border-radius:7px !important;
+    border-radius:7px !important;
+
+    /* default background */
+    background:#fff !important;
+
+    /* shadow effects */
+    /*** DEV MAYBE OLD ***//*
+    */
+    -moz-box-shadow:0 0 0 1px #303030, 0 0 0 2px #fff, 0 1px 2px 2px #000 !important;
+    -webkit-box-shadow:0 0 0 1px #303030, 0 0 0 2px #fff, 0 1px 2px 2px #000 !important;
+    box-shadow:0 0 0 1px #303030, 0 0 0 2px #fff, 0 1px 2px 2px #000 !important;
+}
+
+/* no-images controls => custom sliders => visual thumb */
+.oz-no-images .oz-controls .oz-slider .oz-slider-thumb strong
+{
+    /* reduce the width and height to compensate for the border */
+    width:12px !important;
+    height:12px !important;
+
+    /* apply a transparent border so that the thumb becomes visible
+       which will show as a solid foreground color if a high-contrast theme
+       is in use, but it will be transparent if images are merely disabled */
+    border:1px solid transparent !important;
+}
+
+/* custom sliders => disabled visual thumb */
+.ozplayer .oz-controls .oz-slider.oz-disabled .oz-slider-thumb strong,
+.ozplayer .oz-controls .oz-slider.oz-disabled .oz-slider-thumb:hover strong,
+.ozplayer .oz-controls .oz-slider.oz-disabled .oz-slider-thumb:focus strong,
+.ozplayer .oz-controls .oz-slider.oz-disabled .oz-slider-thumb:active strong
+{
+    /* disabled background */
+    background:#898989 !important;
+
+    /* disabled shadow effects */
+    /*** DEV MAYBE OLD ***//*
+    */
+    -moz-box-shadow:0 0 0 1px #303030, 0 0 0 2px #898989, 0 1px 2px 2px #000 !important;
+    -webkit-box-shadow:0 0 0 1px #303030, 0 0 0 2px #898989, 0 1px 2px 2px #000 !important;
+    box-shadow:0 0 0 1px #303030, 0 0 0 2px #898989, 0 1px 2px 2px #000 !important;
+}
+
+/* large custom sliders => visual thumb */
+.ozplayer.oz-large .oz-controls .oz-slider .oz-slider-thumb strong
+{
+    width:28px !important;
+    height:28px !important;
+    margin:0 0 0 18px !important;
+
+    -moz-border-radius:14px !important;
+    -webkit-border-radius:14px !important;
+    border-radius:14px !important;
+
+    /* large shadow effects */
+    /*** DEV MAYBE OLD ***//*
+    */
+    -moz-box-shadow:0 0 0 2px #303030, 0 0 0 4px #fff, 0 2px 4px 4px #000 !important;
+    -webkit-box-shadow:0 0 0 2px #303030, 0 0 0 4px #fff, 0 2px 4px 4px #000 !important;
+    box-shadow:0 0 0 2px #303030, 0 0 0 4px #fff, 0 2px 4px 4px #000 !important;
+}
+
+/* no-images large controls => custom sliders => visual thumb */
+.oz-large.oz-no-images .oz-controls .oz-slider .oz-slider-thumb strong
+{
+    /* larger reduced width and height */
+    width:24px !important;
+    height:24px !important;
+
+    /* larger delineation border */
+    border:2px solid transparent !important;
+}
+
+/* large custom sliders => disabled visual thumb */
+.ozplayer.oz-large .oz-controls .oz-slider.oz-disabled .oz-slider-thumb strong
+{
+    /* large disabled shadow effects */
+    /*** DEV MAYBE OLD ***//*
+    */
+    -moz-box-shadow:0 0 0 2px #303030, 0 0 0 4px #898989, 0 2px 4px 4px #000 !important;
+    -webkit-box-shadow:0 0 0 2px #303030, 0 0 0 4px #898989, 0 2px 4px 4px #000 !important;
+    box-shadow:0 0 0 2px #303030, 0 0 0 4px #898989, 0 2px 4px 4px #000 !important;
+}
+
+
+
+
+
+
+
+/* custom tooltips */
+.ozplayer .oz-skip-links li .oz-button-tooltip,
+.oz-controls .oz-field .oz-button-tooltip,
+.oz-controls .oz-slider .oz-slider-tooltip
+{
+    position:absolute !important;
+
+    /* position the tooltip above the thumb */
+    z-index:3000 !important;
+
+    /* default position until scripted left is applied */
+    left:0;                                               /* [STYLE MODIFIED] */
+
+    /* use pixel position to align the bottom edge
+       with the top edge of the visual thumb */
+    bottom:10px !important;
+
+    float:none !important;
+    visibility:visible !important;
+
+    /* nb. this display is crucial for calculating tooltip positions
+       (which is why the state classes only use visibility) */
+    display:inline-block !important;
+
+    /* internal padding */
+    padding:0.2em 0.4em !important;
+
+    /* offset from default alignment
+       (which is the bottom of the tooltip against the top of the slider thumb) */
+    margin:0 0 7px 0 !important;
+
+    /* size to content but don't allow text-wrapping */
+    width:auto !important;
+    white-space:nowrap !important;
+
+    /* tooltip border and radius
+       nb. the radius is in em so it scales for large controls
+       and it doesn't ultimately matter what it computes to
+       (ie. it doesn't need the precision of eg. range indicators) */
+    border:1px solid #b4b4b4 !important;
+
+    -moz-border-radius:0.35em !important;
+    -webkit-border-radius:0.35em !important;
+    border-radius:0.35em !important;
+
+    /* tooltip font */
+    font:normal normal normal 12px/1.3 "lucida grande", verdana, sans-serif !important;
+    text-align:center !important;
+    text-indent:0 !important;
+    letter-spacing:0 !important;
+
+    /* tooltip text-shadow effect */
+    /*** DEV MAYBE OLD ***//*
+    text-shadow:0 0.1em 0.1em rgba(0,0,0,0.5) !important;
+    */
+
+    /* tooltip colors */
+    background:#292929 !important;
+    color:#fff !important;
+
+    /* drop shadow and inset effects
+       nb. the radius is in em so it scales for large controls
+       and it doesn't ultimately matter what it computes to
+       (ie. it doesn't need the precision of eg. range indicators) */
+    /*** DEV MAYBE OLD ***//*
+    -moz-box-shadow:inset 0 0 0.1em 0.05em #191919, 0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
+    -webkit-box-shadow:inset 0 0 0.1em 0.05em #191919, 0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
+    box-shadow:inset 0 0 0.1em 0.05em #191919, 0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
+    */
+    -moz-box-shadow:0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
+    -webkit-box-shadow:0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
+    box-shadow:0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
+}
+.oz-controls .oz-field .oz-button-tooltip
+{
+    /* nb. the button tooltips have a different context from the slider
+       tooltips, so we adjust their bottom position so that the same
+       margin-bottom can be applied to both with the same reuslt */
+    bottom:23px !important;
+}
+.ozplayer .oz-skip-links li .oz-button-tooltip
+{
+    /* nb. the skip link tooltips have inverted positions,
+       so they open beneath their trigger rather than above */
+    bottom:-14px !important;
+
+    /* nb. invert the margin to go with the inverted positions
+       (which align the top of the tooltip against the bottom of the link) */
+    margin:0 0 -7px 0 !important;
+}
+
+
+/* custom tooltips => slider tooltip hidden state
+   nb. the button tooltips are dynamically appended and removed
+   whereas the slider tooltips are permanent content that's shown and hidden  */
+.oz-controls .oz-slider .oz-slider-tooltip.oz-hidden
+{
+    visibility:hidden !important;
+}
+
+/* large controls => custom tooltips */
+.oz-large .oz-controls .oz-field .oz-button-tooltip,
+.oz-large .oz-controls .oz-slider .oz-slider-tooltip
+{
+    /* large alignment position */
+    bottom:20px !important;
+
+    /* large offset from default alignment */
+    margin-bottom:13px !important;
+
+    /* large border */
+    border-width:2px !important;
+
+    /* large font-size */
+    font-size:24px !important;
+}
+.oz-large .oz-controls .oz-field .oz-button-tooltip
+{
+    /* large alignment position for button tooltips
+       nb. we don't need to do this for skip links tooltips
+       because the skip links aren't visible in fullscreen mode */
+    bottom:46px !important;
+}
+
+
+
+
