@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>OzPlayer (Responsive Demo)</title>
+
+
+    <!-- mobile viewport settings -->
+    <meta name="viewport" content="width=device-width" />
+
+
+    <!-- (general demo styles, not required for player to function) -->
+    <style type="text/css">
+
+        /* canvas */
+        html, body
+        {
+            font:normal normal normal 100%/1.4 verdana,sans-serif;
+
+            background:#fff;
+            color:#000;
+        }
+
+    </style>
+
+
+    <!-- MediaElement library (this must be in the head) -->
+    <script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"></script>
+
+    <!-- required player + required highlights
+         (these must go in order: player, highlights) -->
+    <link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css" media="all" type="text/css" />
+    <!-- (select from blue, purple, pink, red, orange, yellow, green) -->
+    <link rel="stylesheet" href="./ozplayer-skin/highlights-orange.css" media="all" type="text/css" />
+
+    <!-- (sample transcript styles) -->
+    <link rel="stylesheet" href="transcript.css" media="all" type="text/css" />
+
+    <!-- (override styles to make the transcript flexible) -->
+    <style type="text/css">
+
+        .ozplayer-expander,
+        .ozplayer-transcript
+        {
+            box-sizing:border-box;
+            width:auto;
+            max-width:644px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+
+    <!-- responsive container
+         "id"                           can be anything, but must the same
+                                        as the player's "data-responsive" attribute
+         n.b. the responsive container must be flexible to window width
+    -->
+    <div id="container">
+
+
+        <!-- player container
+             "id"                       can be anything, but must the same as in the config script
+             "class"                    must be "ozplayer"
+             "data-responsive"          optionally specifies the ID of a responsive container
+                                        the width of which will be monitored to maintain responsive layout
+                                        or omit the attribute entirely to disable responsive layout
+             "data-transcript"          optionally specifies the ID of the transcript container
+                                        or omit the attribute entirely for no transcript
+             "data-controls"            either "stack" for superimposed controls, or "row" for a separate row
+        -->
+        <div id="demo" class="ozplayer" data-responsive="container" data-transcript="demo-transcript" data-controls="stack">
+
+            <!-- video element
+                 "width"                can be anything, or defaults to 400 if omitted
+                 "height"               can be anything, or defaults to 225 if omitted
+                 "poster"               optionally specifies the poster image
+                 "preload"              can be "none" (don't preload) or "auto" (do preload)
+                 "controls"             must be "controls"
+            -->
+            <video width="640" height="360" poster="../media/poster.png" preload="none" controls="controls">
+
+                <!-- one or more video sources
+                     "src"              specifies the path to a video file
+                     "type"             specifies the mime-type e.g. "video/mp4"
+                     n.b. for best browser support include both "mp4" and "webm"
+                -->
+                <source src="../media/video.mp4" type="video/mp4" />
+                <source src="../media/video.webm" type="video/webm" />
+
+                <!-- none or more caption/transcript language sources
+                     "src"              specifies the path to a VTT or SRT file
+                     "kind"             must be "captions"
+                     "data-sync"        optionally specifies a timing offset in +/- seconds
+                     "srclang"          specifies the ISO language code of the captions
+                     "label"            specifies a label to be used in the language menu
+                                        which should be in the same langauge as the captions
+                     "default"          can be "default" to have the captions enabled by default,
+                                        or omit the attribute entirely to have them off by default
+                    n.b. if multiple languages are included then the player will create a menu
+                    for users to select which language to display (or to turn them off entirely)
+                    while the default attribute specifies which language to show by default
+                -->
+                <track src="../media/captions-en.vtt" kind="captions" data-sync="0" srclang="en" label="English" default="default" />
+                <track src="../media/captions-de.vtt" kind="captions" data-sync="0" srclang="de" label="Deutsch" />
+
+                <!-- none or more additional transcript data sources
+                     "src"              specifies the path to a VTT or SRT file
+                     "kind"             must be "metadata"
+                     "data-kind"        must be "transcript"
+                     "data-sync"        optionally specifies a timing offset in +/- seconds
+                     "srclang"          specifies the ISO language code of the data
+                     n.b. if multiple languages are included then the transcript will
+                     use whichever one matches the language of the selected captions track
+                -->
+                <track src="../media/transcript-en.vtt" kind="metadata" data-kind="transcript" data-sync="0" srclang="en" />
+                <track src="../media/transcript-de.vtt" kind="metadata" data-kind="transcript" data-sync="0" srclang="de" />
+
+                <!-- static fallback content (for when video sources are not supported)
+                     "class"            must be "ozplayer-fallback"
+                     n.b. the content can be anything, but recommend including
+                     a set of links to download the video and captions files
+                     n.b. ensure that any CSS you define for the fallback content
+                     is specified with a descendent selector from ".ozplayer-fallback"
+                -->
+                <div class="ozplayer-fallback">
+                    <ul>
+                        <li><a href="../media/video.mp4">Download MP4</a></li>
+                        <li><a href="../media/video.webm">Download WebM</a></li>
+                        <li><a href="../media/captions-en.vtt">Download Captions <span lang="en">(English)</span></a></li>
+                        <li><a href="../media/captions-de.vtt">Download Captions <span lang="de">(Deutsch)</span></a></li>
+                    </ul>
+                </div>
+
+            </video>
+
+            <!-- audio descriptions element
+                 "data-default"         can be "default" to have descriptions enabled by default,
+                                        or omit the attribute entirely to have them off by default
+                 "preload"              should be "none" to prevent preloading in unsupported browsers
+                                        n.b. in supported browsers the video's preload setting will be used
+            -->
+            <audio preload="none" data-default="default">
+
+                <!-- one or more audio sources
+                     "src"              specifies the path to an audio file
+                     "type"             specifies the mime-type e.g. "audio/mp3"
+                     n.b. for best browser support include both "mp3" and "ogg"
+                -->
+                <source src="../media/descriptions.mp3" type="audio/mp3" />
+                <source src="../media/descriptions.ogg" type="audio/ogg" />
+
+            </audio>
+
+        </div>
+
+
+        <!-- optional transcript expander
+             "class"                    must be "ozplayer-expander"
+             "open"                     can be "open" to have the expander expanded by default,
+                                        or omit the attribute entirely to have it collapsed
+        -->
+        <details class="ozplayer-expander" open="open">
+
+            <!-- transcript expander trigger
+                 n.b. if the expander is present then this must be its first-child -->
+            <summary>Video Transcript</summary>
+
+
+            <!-- optional player transcript container
+                 "id"                   can be anything, but must be the same
+                                        as the player's "data-transcript" attribute
+                 "class"                must be "ozplayer-transcript"
+            -->
+            <div id="demo-transcript" class="ozplayer-transcript"></div>
+
+        </details>
+
+
+    </div>
+    <!-- / responsive container (must be flexible to window width) -->
+
+
+
+
+
+
+
+    <!-- required player + optional lang + required configuration
+         (these should be at the end of the body, and must go in order: core, lang, configuration) -->
+    <script src="./ozplayer-core/ozplayer.min.js" type="text/javascript"></script>
+    <script src="./ozplayer-lang/en.js" type="text/javascript"></script>
+    <script src="config.js" type="text/javascript"></script>
+
+
+</body>
+</html>
