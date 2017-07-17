@@ -172,9 +172,9 @@
 
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
-    <link rel="stylesheet" href="./ozplayer-core/ozplayer.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
+    <link rel="stylesheet" href="./tools/css_compressor.php?codebase=../ozplayer-core/ozplayer.css<?php echo('&amp;nocache=' . microtime(true)); ?>" media="all" type="text/css" />
     <!--
-    <link rel="stylesheet" href="../_dev/_css_compressor.php?codebase=../OzPlayer-WORKING/$devsrc/ozplayer.css<?php echo('&amp;nocache=' . microtime(true)); ?>" media="all" type="text/css" />
+    <link rel="stylesheet" href="./ozplayer-core/ozplayer.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
     -->
     <link rel="stylesheet" href="./ozplayer-skin/highlights-pink.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
 
@@ -425,11 +425,11 @@
 
     <!-- required player + optional lang + required configuration
          (these should be at the end of the body, and must go in order: core, lang, configuration) -->
-    <script src="./ozplayer-core/ozplayer.js<?php echo('?nocache=' . microtime(true)); ?>" type="text/javascript"></script>
+    <script src="./tools/compressor.php?codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
     <!--
-    <script src="../_dev/_compressor.php?codebase=../OzPlayer-WORKING/$devsrc/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
-    <script src="../_dev/_compressor.php?fork=subs&amp;do-compression=false&amp;codebase=../OzPlayer-WORKING/$devsrc/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
-    <script src="../_dev/_compressor.php?fork=free&amp;do-compression=false&amp;codebase=../OzPlayer-WORKING/$devsrc/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
+    <script src="./ozplayer-core/ozplayer.js<?php echo('?nocache=' . microtime(true)); ?>" type="text/javascript"></script>
+    <script src="./tools/compressor.php?fork=subs&amp;do-compression=false&amp;codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
+    <script src="./tools/compressor.php?fork=free&amp;do-compression=false&amp;codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
     <script src="https://ozplayer.global.ssl.fastly.net/3.0/ozplayer-core/ozplayer.free.js" type="text/javascript"></script>
     -->
     <script src="./ozplayer-lang/en.js<?php echo('?nocache=' . microtime(true)); ?>" type="text/javascript"></script>
