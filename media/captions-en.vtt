@@ -1,0 +1,214 @@
+WEBVTT
+
+1
+00:00:05.810 --> 00:00:09.460
+Gian: Hi, my name is Gian Wild and I'm the Director of AccessibilityOz.
+
+2
+00:00:09.460 --> 00:00:14.200
+We've been operating for two years and today I would like to introduce you
+
+3
+00:00:14.200 --> 00:00:17.000
+to the world's first accessible video player, OzPlayer.
+
+4
+00:00:22.000 --> 00:00:27.179
+Web accessibility is about making websites and applications accessible to people with disabilities.
+
+5
+00:00:27.179 --> 00:00:33.660
+When it comes to online videos, this is about people with deafness, or people
+
+6
+00:00:33.660 --> 00:00:38.910
+who are blind or visually impaired, as well as people who have physical disabilities or
+
+7
+00:00:38.910 --> 00:00:45.000
+cognitive disabilities. So we developed OzPlayer to address the needs of all people with disabilities.
+
+8
+00:00:52.000 --> 00:00:56.300
+We've tested over 100 web sites in the last year and approximately eighty per cent of
+
+9
+00:00:56.300 --> 00:01:02.200
+those websites had a video player of some sort. Every single video player that we tested
+
+10
+00:01:02.200 --> 00:01:07.430
+was inaccessible in some form. Some contained keyboard traps, others couldn't be operated
+
+11
+00:01:07.430 --> 00:01:13.240
+via the keyboard, others allowed some operation via the keyboard but really important features
+
+12
+00:01:13.240 --> 00:01:17.640
+like captions and audio descriptions couldn't be activated via the keyboard. There are other
+
+13
+00:01:17.640 --> 00:01:23.359
+issues such as videos starting automatically and the lack of audio descriptions and captions.
+
+14
+00:01:23.359 --> 00:01:29.130
+So our clients kept asking us what video player they should use and we decided that we had
+
+15
+00:01:29.130 --> 00:01:33.130
+to build our own in order to meet this need.
+
+16
+00:01:43.199 --> 00:01:49.990
+Some videos contain keyboard traps and this is a known bug of Flash features within Firefox.
+
+17
+00:01:49.990 --> 00:01:54.909
+When a video contains a keyboard trap, the user essentially needs to close the browser
+
+18
+00:01:54.909 --> 00:02:00.209
+window entirely and start again therefore rendering the content completely inaccessible
+
+19
+00:02:00.209 --> 00:02:02.000
+to the user.
+
+20
+00:02:07.500 --> 00:02:12.370
+When a video is inaccessible to the keyboard, then users with physical disabilities such
+
+21
+00:02:12.370 --> 00:02:18.230
+as Parkinson's disease can't access the video content. We found in a number of video players
+
+22
+00:02:18.230 --> 00:02:23.890
+that video controls such as play and pause could be activated via the keyboard, but other
+
+23
+00:02:23.890 --> 00:02:29.220
+controls such as volume or activating captions or audio descriptions could not be activated
+
+24
+00:02:29.220 --> 00:02:34.000
+by the keyboard rendering these players inaccessible.
+
+25
+00:02:39.500 --> 00:02:44.730
+When videos start automatically they can be extremely disorientating to the end user.
+
+26
+00:02:44.730 --> 00:02:50.439
+This is when a video starts as soon as you open the page and this can be specifically
+
+27
+00:02:50.439 --> 00:02:56.299
+problematic to screen reader users. Screen reader users have a aural version of the page
+
+28
+00:02:56.299 --> 00:03:00.799
+spoken aloud to them and as you can imagine, if a video starts playing as soon as you load
+
+29
+00:03:00.799 --> 00:03:05.689
+a page then a screen reader user isn't going to be able to hear the contents of their screen
+
+30
+00:03:05.689 --> 00:03:10.500
+reader and be able to navigate the page - even to the point of being able to turn off that
+
+31
+00:03:10.500 --> 00:03:17.500
+video. So starting automatically, which YouTube does, is a serious accessibility issue.
+
+32
+00:03:24.390 --> 00:03:29.310
+OzPlayer is fully keyboard accessible. You can turn captions on and off, you can move
+
+33
+00:03:29.310 --> 00:03:35.909
+the slider controls up and down, you can change the volume using the keyboard only. We also
+
+34
+00:03:35.909 --> 00:03:40.739
+have a unique feature in skip links at the top of the video allowing users to skip straight
+
+35
+00:03:40.739 --> 00:03:47.099
+to the transcript or skip the video entirely. We have native keyboard controls and one of
+
+36
+00:03:47.099 --> 00:03:52.829
+the things that is unique within OzPlayer is the use of HTML5. We've used a variety
+
+37
+00:03:52.829 --> 00:03:58.049
+of HTML5 features such as the VIDEO and AUDIO elements. There are a number of features that
+
+38
+00:03:58.049 --> 00:04:03.560
+we haven't used such as the native Text Track API because it's not very well supported but
+
+39
+00:04:03.560 --> 00:04:07.500
+as the browsers change, we will of course be including these issues.
+
+40
+00:04:12.849 --> 00:04:18.130
+Of course video content can be made inaccessible at the source. So containing flickering or
+
+41
+00:04:18.130 --> 00:04:23.100
+flashing content can trigger epilepsy and migraines in some people. In fact I've actually
+
+42
+00:04:23.100 --> 00:04:29.360
+had migraine triggered myself when watching some videos. There are other issues such as
+
+43
+00:04:29.360 --> 00:04:34.300
+colour contrast and the use of colour. But of course the most important issues are the
+
+44
+00:04:34.300 --> 00:04:38.979
+use of captions and audio descriptions. It is absolutely essential that any videos that
+
+45
+00:04:38.979 --> 00:04:44.470
+are created are created with captions and with audio descriptions. A text transcript,
+
+46
+00:04:44.470 --> 00:04:50.710
+although not specifically required by WCAG2 is also an absolutely essential part of making
+
+47
+00:04:50.710 --> 00:04:53.850
+any video accessible.
+
+48
+00:04:59.000 --> 00:05:03.069
+We are really proud of OzPlayer but of course we are working to include new features in
+
+49
+00:05:03.069 --> 00:05:09.599
+our next version. These features include interactive media elements, sign language support and
+
+50
+00:05:09.599 --> 00:05:11.599
+extended audio descriptions.
+
+51
+00:05:17.449 --> 00:05:22.590
+At AccessibilityOz we're continually iterating and we would love to improve our video player
+
+52
+00:05:22.590 --> 00:05:26.990
+for all users. So please let us know if there is anything you would like to see in the next
+
+53
+00:05:26.990 --> 00:05:28.100
+version of OzPlayer
+
