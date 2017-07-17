@@ -1,0 +1,1744 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>OzPlayer 3.0 Markup Reference</title>
+
+    <!-- (arbitrary canvas and text styles) -->
+    <link rel="stylesheet" type="text/css" href="help-etc.css" />
+
+    <!-- necessary code example styles -->
+    <link rel="stylesheet" type="text/css" href="help-code.css" />
+
+</head>
+<body>
+
+    <div class="container">
+
+
+
+        <h1>OzPlayer 3.0 Markup Reference</h1>
+
+        <p>
+            This is a detailed reference of every element that OzPlayer uses.
+        </p>
+
+        <nav>
+            <ol>
+                <li>
+                    <a href="#container">Player Container</a>
+                    <ol>
+                        <li>
+                            <a href="#video">Video Element</a>
+                            <ol>
+                                <li><a href="#video-source">Video Source Elements</a></li>
+                                <li><a href="#video-source-youtube">YouTube Source Element</a></li>
+                                <li><a href="#captions-track">Captions Track Elements</a></li>
+                                <li><a href="#transcript-track">Transcript Track Elements</a></li>
+                                <li><a href="#fallback">Fallback Content Container</a></li>
+                            </ol>
+                        </li>
+                        <li>
+                            <a href="#audio-only">Audio-Only Element</a>
+                            <ol>
+                                <li><a href="#audio-only-source">Audio-Only Source Elements</a></li>
+                                <li><a href="#audio-only-captions-track">Audio-Only Captions Track Elements</a></li>
+                                <li><a href="#audio-only-transcript-track">Audio-Only Transcript Track Elements</a></li>
+                                <li><a href="#audio-only-fallback">Audio-Only Fallback Content Container</a></li>
+                            </ol>
+                        </li>
+                        <li>
+                            <a href="#audio">Audio Descriptions Element</a>
+                            <ol>
+                                <li>
+                                    <a href="#audio-source">Audio Descriptions Source Elements</a>
+                                </li>
+                            </ol>
+                        </li>
+                        <li><a href="#audiolinks">Audio Linking Element</a></li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#transcript">Transcript Container</a>
+                    <ol>
+                        <li><a href="#expander">Transcript Expander</a></li>
+                    </ol>
+                </li>
+            </ol>
+        </nav>
+
+
+
+        <section tabindex="-1" id="container">
+
+            <h2>Player Container</h2>
+
+            <p id="code-container-description">
+                The player container is a wrapper element that holds all the
+                others together, while defining a reference to the transcript
+                container, and specifying how the controls are laid out:
+            </p>
+
+<figure class="code" id="code-container">
+    <pre aria-describedby="code-container-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> id=<u>"demo"</u></b><b> class=<u>"ozplayer"</u></b><b> data-transcript=<u>"demo-transcript"</u></b><b> data-responsive=<u>"content"</u></b><b> data-controls=<u>"stack"</u></b><b>&gt;</b></code></pre>
+</figure>
+
+            <ol>
+
+                <li>
+                    <details id="container-id">
+                        <summary><code>"id"</code> <strong>(required)</strong></summary>
+                        <div>
+
+                            <p>
+                                The player container <code>ID</code>, which can
+                                be anything you like.
+                            </p>
+                            <p>
+                                The <code>ID</code> is used
+                                by JavaScript to initialise the player.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="container-class">
+                        <summary><code>"class"</code> <strong>(required)</strong></summary>
+                        <div>
+
+                            <p>
+                                The player container <code>class</code>, which
+                                must have the exact value <code>"ozplayer"</code>.
+                            </p>
+                            <p>
+                                The <code>class</code> is used as a
+                                descendent root for much of the player's
+                                <abbr title="Cascading Style Sheets">CSS</abbr>.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="container-data-transcript">
+                        <summary><code>"data-transcript"</code> <em>(recommended)</em></summary>
+                        <div>
+
+                            <p>
+                                The transcript <code>ID</code> reference,
+                                which specifies the
+                                <a href="#transcript-id"><code>ID</code></a>
+                                of the
+                                <a href="#transcript">transcript container</a>,
+                                if you have one.
+                            </p>
+                            <p>
+                                If you don't have a transcript then you should
+                                omit this attribute. However the use of a
+                                transcript is strongly encouraged, for best
+                                accessibility and user engagement.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="container-data-responsive">
+                        <summary><code>"data-responsive"</code> <small>(optional)</small></summary>
+                        <div>
+
+                            <p>
+                                The responsive container <code>ID</code> reference,
+                                which can specify a reference to any page element,
+                                that OzPlayer will adapt itself to.
+                            </p>
+                            <p>
+                                If this attribute is specified, and points to a
+                                flexible container, then OzPlayer will continually
+                                resize itself to be no larger than the container
+                                (down to a minimum of <code>240</code> pixels).
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="container-data-controls">
+                        <summary><code>"data-controls"</code> <small>(optional)</small></summary>
+                        <div>
+
+                            <p>
+                                The player controls layout, which can either
+                                be <code>"stack"</code> or <code>"row"</code>.
+                            </p>
+                            <p>
+                                If it has the value <code>"stack"</code>
+                                then the controls will be superimposed
+                                over the bottom of the video, with a timer
+                                that automatically hides them after 4
+                                seconds of user inactivity.
+                            </p>
+                            <p>
+                                If it has the value <code>"row"</code>
+                                then the controls will be a separate row, which
+                                is positioned underneath the video and remains
+                                permanently visible.
+                            </p>
+                            <p>
+                                If this attribute is not defined, the layout
+                                defaults to <code>"row"</code>.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+            </ol>
+
+
+
+            <section tabindex="-1" id="video">
+
+                <h3>Video Element</h3>
+
+                <p id="code-video-description">
+                    The video element defines the video's default appearance
+                    and layout, and controls how preloading should be handled
+                    for both the video and
+                    <a href="#audio">audio descriptions</a>:
+                </p>
+
+<figure class="code" id="code-video">
+    <pre aria-describedby="code-video-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;video</b><b> width=<u>"640"</u></b><b> height=<u>"360"</u></b><b> poster=<u>"./media/poster.jpg"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b></code></pre>
+</figure>
+
+                <ol>
+
+                    <li>
+                        <details id="video-width">
+                            <summary><code>"width"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The video width in pixels, which must be
+                                    <code>240</code> or more.
+                                </p>
+                                <p>
+                                    If this attribute is not defined, the
+                                    width defaults to <code>400</code>.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="video-height">
+                            <summary><code>"height"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The video height in pixels, which must be
+                                    <code>135</code> or more.
+                                </p>
+                                <p>
+                                    If this attribute is not defined, the
+                                    height defaults to <code>225</code>.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="video-poster">
+                            <summary><code>"poster"</code> <small>(optional)</small></summary>
+                            <div>
+
+                                <p>
+                                    The video poster image, which specifies the
+                                    path to an image file, usually a JPEG or PNG.
+                                </p>
+                                <p>
+                                    If a poster is defined, it will be shown
+                                    as a video placeholder until playback starts,
+                                    with a large <q>click to play</q> icon in
+                                    the middle. The poster will be automatically
+                                    scaled to match the video's
+                                    <code>width</code> and <code>height</code>
+                                </p>
+                                <p>
+                                    If a poster is not defined, then the video
+                                    will show a black background (except for
+                                    YouTube videos).
+                                </p>
+
+                                <figure class="note">
+                                    <p>
+                                        <em>
+                                            Poster images are
+                                            <strong>not implemented</strong> for
+                                            YouTube videos, because they would
+                                            obscure the familiar play icon,
+                                            which is part of user expectation.
+                                            YouTube videos typically display a
+                                            single frame as their poster image,
+                                            taken from around the middle of the
+                                            video (or whatever the owner specified).
+                                        </em>
+                                    </p>
+                                </figure>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="video-preload">
+                            <summary><code>"preload"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The video and <a href="#audio">audio</a>
+                                    preload setting, which can be
+                                    <code>"auto"</code> or <code>"none"</code>.
+                                </p>
+                                <p>
+                                    If preload is <code>"auto"</code> then the
+                                    video and audio will start
+                                    preloading as soon as the page loads.
+                                </p>
+                                <p>
+                                    If preload is <code>"none"</code> then
+                                    no preloading will occur until the
+                                    user first presses <q>Play</q>. Once
+                                    playback has started, it will continue
+                                    to load in the background either way.
+                                </p>
+                                <p>
+                                    If this attribute is not defined, preload
+                                    defaults to <code>"none"</code>.
+                                </p>
+
+                                <figure class="note">
+                                    <p>
+                                        <em>
+                                            The <code>"auto"</code> setting is
+                                            not very efficient with bandwidth,
+                                            since it means that every page view
+                                            will be loading large files, even
+                                            if the user never plays the video.
+                                            So the recommended setting is
+                                            <code>"none"</code>.
+                                        </em>
+                                    </p>
+                                    <p>
+                                        <em>
+                                            The <code>"metadata"</code> setting
+                                            is not supported and will behave the
+                                            same as <code>"auto"</code>.
+                                        </em>
+                                    </p>
+                                    <p>
+                                        <em>
+                                            Preload settings won't have any
+                                            effect with YouTube videos, because
+                                            loading and buffering is controlled
+                                            by YouTube's
+                                            <abbr title="Application Programming Interface">API</abbr>.
+                                        </em>
+                                    </p>
+                                    <p>
+                                        <em>
+                                            Preloading is also disabled on
+                                            mobile devices (running iOS, Android
+                                            or Windows Mobile), which is system
+                                            behaviour that can't be changed.
+                                        </em>
+                                    </p>
+                                </figure>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="video-controls">
+                            <summary><code>"controls"</code> <strong>(required)</strong></summary>
+                            <div>
+
+                                <p>
+                                    This is a boolean attribute, which tells
+                                    the browser to provide native controls for
+                                    the video.
+                                </p>
+                                <p>
+                                    Although native controls are removed
+                                    once the scripted controls are added,
+                                    this attribute is still important to
+                                    ensure that the video can be played
+                                    without scripting.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                </ol>
+
+
+
+                <section tabindex="-1" id="video-source">
+
+                    <h4>Video Source Elements</h4>
+
+                    <p id="code-video-source-description">
+                        One or more video sources define the path and mime-type
+                        of each of the files that the player will be using:
+                    </p>
+
+<figure class="code" id="code-video-source">
+    <pre aria-describedby="code-video-source-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
+<b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="video-source-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The path to a video file.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="video-source-type">
+                                <summary><code>"type"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The video file's mime-type,
+                                        such as <code>"video/mp4"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For best cross-browser compatibility you should
+                                include <strong>two video sources</strong>
+                                &#x2014; one encoded as MP4 and the other as
+                                WebM, which between them will work in every
+                                browser that OzPlayer supports. The Flash
+                                fallback player uses MP4.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You can source the video files
+                                from any external domain, for example, using a
+                                <abbr title="Content Delivery Network">CDN</abbr>.
+                                If you're using your own server, make sure it's
+                                configured to serve the video files with the
+                                correct mime-types.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> define an
+                                <code>src</code> or <code>type</code> on the
+                                <a href="#video">video element</a> itself.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="video-source-youtube">
+
+                    <h4>YouTube Source Element</h4>
+
+                    <p id="code-video-source-youtube-description">
+                        For YouTube videos, a single source defines the
+                        <abbr title="Uniform Resource Locator">URL</abbr>
+                        and a proprietary type, and optionally controls the
+                        appearance of embedded YouTube captions:
+                    </p>
+
+<figure class="code" id="code-video-source-youtube">
+    <pre aria-describedby="code-video-source-youtube-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;source</b><b> src=<u>"http://www.youtube.com/watch?v=12345"</u></b><b> type=<u>"video/x-youtube"</u></b><b> data-captions=<u>"true"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="video-source-youtube-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies a YouTube
+                                        <abbr title="Uniform Resource Locator">URL</abbr>,
+                                        such as
+                                        <code>"http://www.youtube.com/watch?v=12345"</code>.
+                                    </p>
+                                    <p>
+                                        It can also use a short-link such as
+                                        <code>"http://youtu.be/12345"</code>
+                                        or an embeddable
+                                        <abbr title="Uniform Resource Locator">URL</abbr>
+                                        like
+                                        <code>"//www.youtube.com/embed/12345"</code>.
+                                    </p>
+
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                YouTube <abbr title="Uniform Resource Locators">URLs</abbr>
+                                                <strong>must not</strong> contain any query-string
+                                                values apart from the video <code>ID</code>.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="video-source-youtube-type">
+                                <summary><code>"type"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        This must have the exact value
+                                        <code>"video/x-youtube"</code>,
+                                        which is a proprietary
+                                        value used by the script to
+                                        identify YouTube videos.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="video-source-youtube-captions">
+                                <summary><code>"data-captions"</code> <small>(optional)</small></summary>
+                                <div>
+
+                                    <p>
+                                        Adding this attribute specifies that
+                                        embedded YouTube captions should be
+                                        controllable via the player interface.
+                                    </p>
+                                    <p>
+                                        If present, the value of this attribute
+                                        controls whether the embedded captions
+                                        should be enabled (<code>"true"</code>)
+                                        or disabled (<code>"false"</code>) by
+                                        default.
+                                    </p>
+                                    <figure class="note">
+                                       <p>
+                                            <em>
+                                                Embedded captions in YouTube
+                                                videos are usually removed in
+                                                favour of
+                                                <a href="#captions-track">track captions</a>,
+                                                so that you don't see both sets
+                                                of captions at the same time.
+                                                However, if you don't have any
+                                                track captions but the video
+                                                does have embedded captions,
+                                                then you can use this attribute
+                                                to provide control over them.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                This functionality is provided
+                                                for convenience, but is not the
+                                                best approach, since embedded
+                                                YouTube captions cannot be used
+                                                to create a transcript.
+                                            </em>
+                                        </p>
+                                    </figure
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="captions-track">
+
+                    <h4>Captions Track Elements</h4>
+
+                    <p id="code-captions-track-description">
+                        One or more caption-track elements define the data to
+                        use for the captions and
+                        <a href="#transcript-track">transcript</a>, and specify
+                        whether the captions should be shown by default:
+                    </p>
+
+<figure class="code" id="code-captions-track">
+    <pre aria-describedby="code-captions-track-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <p id="code-captions-track-languages-description">
+                        You can specify multiple languages by adding
+                        multiple tracks:
+                    </p>
+
+<figure class="code" id="code-captions-track-languages">
+    <pre aria-describedby="code-captions-track-languages-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;track</b><b> src=<u>"./media/en/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"en"</u></b><b> label=<u>"English"</u></b><b> default=<u>"default"</u></b><b> data-default-transcript=<u>"default"</u></b> <b>/&gt;</b>
+<b>&lt;track</b><b> src=<u>"./media/de/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"de"</u></b><b> label=<u>"Deutsch"</u></b> <b>/&gt;</b>
+<b>&lt;track</b><b> src=<u>"./media/fr/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"fr"</u></b><b> label=<u>"Français"</u></b> <b>/&gt;</b>
+</code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="captions-track-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The path to a captions cues file,
+                                        in WebVTT or SRT format.
+                                    </p>
+
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                Although OzPlayer supports both
+                                                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Video_Text_Tracks_Format">WebVTT</a>
+                                                and <a href="https://en.wikipedia.org/wiki/SubRip#SubRip_text_file_format">SRT</a>
+                                                formats, only WebVTT is supported
+                                                natively by browsers. So if the
+                                                video is played without scripting,
+                                                only WebVTT captions will work,
+                                                and therefore this format is
+                                                recommended in preference to SRT.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                Captions files <strong>must be
+                                                on the same server</strong> as
+                                                the page itself, and served
+                                                with a mime-type of
+                                                <code>text/vtt</code> or
+                                                <code>text/plain</code>.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="captions-track-kind">
+                                <summary><code>"kind"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies what kind of track this is,
+                                        which must have the exact value
+                                        <code>"captions"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="captions-track-data-sync">
+                                <summary><code>"data-sync"</code> <small>(optional)</small></summary>
+                                <div>
+
+                                    <p>
+                                        The synchronisation offset,
+                                        which can specify a timing adjustment
+                                        in seconds.
+                                    </p>
+                                    <p>
+                                        If this attribute is defined, as an
+                                        integer or floating-point number, then
+                                        its value will be added to the timing
+                                        of every cue. For example, if
+                                        it has the value <code>"3.5"</code>,
+                                        then a cue defined for
+                                        <code>"02.000 --&gt; 03.000"</code>
+                                        would appear at
+                                        <code>"05.500 --&gt; 06.500"</code>.
+                                    </p>
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                This allows you to globally
+                                                adjust the cue timings, for
+                                                cases where you can't edit the
+                                                captions file, e.g. when
+                                                proxy-loading a remote file
+                                                from a third-party repository
+                                                to sync over YouTube content.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                But it can only be applied when
+                                                scripting is available, so it
+                                                won't make any difference to the
+                                                timing of native captions.
+                                                Therefore this feature must
+                                                be used with caution
+                                                &#x2014; reserved for cases
+                                                where you have no alternative,
+                                                or for use with YouTube videos
+                                                (which aren't supported without
+                                                scripting anyway).
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="captions-track-srclang">
+                                <summary><code>"srclang"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The
+                                        <abbr title="International Standards Organisation">ISO</abbr>
+                                        language code of the captions data.
+                                    </p>
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                The language code for each captions
+                                                track must be unique &#x2014;
+                                                you can't have multiple captions
+                                                tracks with the same code.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="captions-track-label">
+                                <summary><code>"label"</code> <strong>(required for multiple tracks)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        A short label for the captions track.
+                                    </p>
+                                    <p>
+                                        If multiple tracks are included in
+                                        different languages, then the labels
+                                        will be used to create a menu for users
+                                        to choose between them.
+                                    </p>
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                Track labels should be in the
+                                                same language as the captions
+                                                themselves, e.g. for captions
+                                                in German the label would be
+                                                <code>"Deutsch"</code>
+                                                rather than <code>"German"</code>.
+                                            </em>
+                                        </p>
+                                    </figure>
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="captions-track-default">
+                                <summary><code>"default"</code> <em>(recommended)</em></summary>
+                                <div>
+
+                                    <p>
+                                        This is a boolean attribute, which
+                                        specifies whether the captions should
+                                        be shown by default.
+                                    </p>
+                                    <p>
+                                        If this attribute is omitted, then the
+                                        captions will be off by default.
+                                    </p>
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                If you've included multiple
+                                                tracks in different languages,
+                                                then the <code>default</code>
+                                                attribute should only be added
+                                                to <strong>one</strong> of them,
+                                                to specify which will be shown
+                                                by default.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="captions-track-data-default-transcript">
+                                <summary><code>"data-default-transcript"</code> <em>(recommended for multiple tracks if no default)</em></summary>
+                                <div>
+
+                                    <p>
+                                        This is a boolean attribute, which
+                                        specifies which track should be used
+                                        to create the default transcript output,
+                                        in cases where multiple languages are
+                                        defined, but captions are off by default.
+                                    </p>
+                                    <p>
+                                        If none of the tracks have this attribute
+                                        then the first one will be used.
+                                    </p>
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                If you've included multiple
+                                                tracks in different languages,
+                                                but none of them have the
+                                                <code>default</code> attribute,
+                                                then this attribute should be
+                                                added to <strong>one</strong> of
+                                                the tracks, to specify which will
+                                                be used by default.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                But if you've only specified a
+                                                single language, or captions
+                                                are shown by default, or if you
+                                                don't have a transcript, then you
+                                                don't need to use this attribute.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="transcript-track">
+
+                    <h4>Transcript Track Elements</h4>
+
+                    <p id="code-transcript-track-description">
+                        One or more transcript-track elements can define
+                        additional cues that only appear in the transcript.
+                        These will be merged with the
+                        <a href="#captions-track">captions</a> cues according
+                        to their timings:
+                    </p>
+
+<figure class="code" id="code-transcript-track">
+    <pre aria-describedby="code-transcript-track-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;track</b><b> src=<u>"./media/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="transcript-track-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The path to a transcript cues file,
+                                        in WebVTT or SRT format.
+                                    </p>
+
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                Transcript files <strong>must be
+                                                on the same server</strong> as
+                                                the page itself, and served
+                                                with a mime-type of
+                                                <code>text/vtt</code> or
+                                                <code>text/plain</code>.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="transcript-track-kind">
+                                <summary><code>"kind"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies what kind of track this is,
+                                        which must have the exact value
+                                        <code>"metadata"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="transcript-track-data-kind">
+                                <summary><code>"data-kind"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies what kind of meta-data
+                                        this is, which must have the exact value
+                                        <code>"transcript"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="transcript-track-data-sync">
+                                <summary><code>"data-sync"</code> <small>(optional)</small></summary>
+                                <div>
+
+                                    <p>
+                                        The synchronisation offset,
+                                        which can specify a timing adjustment
+                                        in seconds.
+                                    </p>
+                                    <p>
+                                        This works in exactly the same way as
+                                        the <a href="#captions-track-data-sync">
+                                            captions track <code>data-sync</code>
+                                            attribute</a>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="transcript-data-srclang">
+                                <summary><code>"srclang"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The
+                                        <abbr title="International Standards Organisation">ISO</abbr>
+                                        language code of the transcript data.
+                                    </p>
+                                    <p>
+                                        When multiple tracks are included in
+                                        different languages, the data from each
+                                        transcript track will be merged with the
+                                        captions data that matches its language code.
+                                    </p>
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                The language code for each transcript
+                                                track must be unique &#x2014;
+                                                you can't have multiple transcript
+                                                tracks with the same code.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="fallback">
+
+                    <h4>Fallback Content Container</h4>
+
+                    <p id="code-fallback-description">
+                        The fallback content container is a wrapper for
+                        any content you want to show to older browsers,
+                        i.e. those which don't support the video sources
+                        or the Flash replacement:
+                    </p>
+
+<figure class="code" id="code-fallback">
+    <pre aria-describedby="code-fallback-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="fallback-class">
+                                <summary><code>"class"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The fallback container
+                                        <code>class</code>, which must have the
+                                        exact value
+                                        <code>"ozplayer-fallback"</code>.
+                                    </p>
+                                    <p>
+                                        The <code>class</code> can used as
+                                        a descendent root for any
+                                        <abbr title="Cascading Style Sheets">CSS</abbr>
+                                        you want to define for the fallback
+                                        content.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                    <figure class="note">
+                        <p id="code-fallback-suggestion-description">
+                            <em>
+                                The fallback content can be anything you like,
+                                but a good recommendation is to include a set of
+                                links to download the video and captions files:
+                            </em>
+                        </p>
+
+<figure class="code" id="code-fallback-suggestion">
+    <pre aria-describedby="code-fallback-suggestion-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
+    <b>&lt;ul</b><b>&gt;</b>
+        <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+        <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.webm"</u></b><b>&gt;</b>Download WebM<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+        <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+    <b>&lt;/ul</b><b>&gt;</b>
+<b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+                        <p>
+                            <em>
+                                Once the player is up and running, you can
+                                test how the fallback content will
+                                appear by temporarily removing all the
+                                <a href="#video-source">video source</a>
+                                elements.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> add fallback
+                                content directly inside the
+                                <a href="#video">video element</a>, it must
+                                always be inside the fallback container.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                If you're using OzPlayer within a
+                                <a href="#container-data-responsive">responsive layout</a>
+                                then you should avoid having any large content
+                                (such as an image) inside the fallback container,
+                                because it <strong>won't be resized</strong>
+                                to match the responsive container.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="audio-only">
+
+                <h3>Audio-Only Element</h3>
+
+                <p id="code-audio-only-description">
+                    The audio element defines the audio-only player's
+                    default appearance and layout, and controls how
+                    preloading should be handled:
+                </p>
+
+<figure class="code" id="code-audio-only">
+<pre aria-describedby="code-audio-only-description"><code
+     contentEditable="true" tabindex="0" spellcheck="false"
+     class="html"><b>&lt;audio</b><b> data-width=<u>"640"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b></code></pre>
+</figure>
+
+                <ol>
+
+                    <li>
+                        <details id="audio-only-width">
+                            <summary><code>"data-width"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The player width in pixels, which must
+                                    be <code>240</code> or more.
+                                </p>
+                                <p>
+                                    If this attribute is not defined, the
+                                    width defaults to <code>400</code>.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="audio-only-preload">
+                            <summary><code>"preload"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The audio preload setting, which can be
+                                    <code>"auto"</code> or <code>"none"</code>.
+                                </p>
+                                <p>
+                                    If preload is <code>"auto"</code> then
+                                    the audio will start preloading as soon
+                                    as the page loads.
+                                </p>
+                                <p>
+                                    If preload is <code>"none"</code> then
+                                    no preloading will occur until the
+                                    user first presses <q>Play</q>. Once
+                                    playback has started, it will continue
+                                    to load in the background either way.
+                                </p>
+                                <p>
+                                    If this attribute is not defined, preload
+                                    defaults to <code>"none"</code>.
+                                </p>
+
+                                <figure class="note">
+                                    <p>
+                                        <em>
+                                            The <code>"auto"</code> setting is
+                                            not very efficient with bandwidth,
+                                            since it means that every page view
+                                            will be loading large files, even
+                                            if the user never plays the audio.
+                                            So the recommended setting is
+                                            <code>"none"</code>.
+                                        </em>
+                                    </p>
+                                    <p>
+                                        <em>
+                                            The <code>"metadata"</code> setting
+                                            is not supported and will behave the
+                                            same as <code>"auto"</code>.
+                                        </em>
+                                    </p>
+                                    <p>
+                                        <em>
+                                            Preloading is not supported on
+                                            mobile devices (running iOS, Android
+                                            or Windows Mobile), which is system
+                                            behaviour that can't be changed.
+                                        </em>
+                                    </p>
+                                </figure>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="audio-only-controls">
+                            <summary><code>"controls"</code> <strong>(required)</strong></summary>
+                            <div>
+
+                                <p>
+                                    This is a boolean attribute, which tells
+                                    the browser to provide native controls for
+                                    the audio.
+                                </p>
+                                <p>
+                                    Although native controls are removed
+                                    once the scripted controls are added,
+                                    this attribute is still important to
+                                    ensure that the audio can be played
+                                    without scripting.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                </ol>
+
+
+
+                <section tabindex="-1" id="audio-only-source">
+
+                    <h4>Audio-Only Source Elements</h4>
+
+                    <p id="code-audio-only-source-description">
+                        One or more audio sources define the path and mime-type
+                        of each of the files that the player will be using:
+                    </p>
+
+<figure class="code" id="code-audio-only-source">
+<pre aria-describedby="code-audio-only-source-description"><code
+     contentEditable="true" tabindex="0" spellcheck="false"
+     class="html"><b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+<b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="audio-only-source-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The path to an audio file.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="audio-only-source-type">
+                                <summary><code>"type"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The audio file's mime-type,
+                                        such as <code>"audio/mp3"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For best cross-browser compatibility you should
+                                include <strong>two video sources</strong>
+                                &#x2014; one encoded as MP3 and the other as
+                                OGG, which between them will work in every
+                                browser that OzPlayer supports. The Flash
+                                fallback player uses MP3.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You can source the video files
+                                from any external domain, for example, using a
+                                <abbr title="Content Delivery Network">CDN</abbr>.
+                                If you're using your own server, make sure it's
+                                configured to serve the audio files with the
+                                correct mime-types.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> define an
+                                <code>src</code> or <code>type</code> on the
+                                <a href="#audio-only">audio element</a> itself.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="audio-only-captions-track">
+
+                    <h4>Audio-Only Captions Track Elements</h4>
+
+                    <p>
+                        These are defined in exactly the same way as
+                        <a href="#captions-track">video captions track elements</a>.
+                    </p>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                Captions are not shown with the audio-only
+                                player, but are used to create the transcript.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="audio-only-transcript-track">
+
+                    <h4>Audio-Only Transcript Track Elements</h4>
+
+                    <p>
+                        These are defined in exactly the same way as
+                        <a href="#transcript-track">video transcript track elements</a>.
+                    </p>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="audio-only-fallback">
+
+                    <h4>Audio-Only Fallback Content Container</h4>
+
+                    <p>
+                        This is defined in exactly the same way as the
+                        <a href="#transcript-track">video fallback content container</a>.
+                    </p>
+
+                </section>
+
+
+
+            </section>
+
+
+
+            <section tabindex="-1" id="audio">
+
+                <h3>Audio Descriptions Element</h3>
+
+                <p id="code-audio-description">
+                    The audio element specifies whether audio descriptions
+                    are enabled by default, and controls preloading for
+                    browsers which don't support them:
+                </p>
+
+<figure class="code" id="code-audio">
+    <pre aria-describedby="code-audio-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;audio</b><b> preload=<u>"none"</u></b><b> data-default=<u>"default"</u></b><b>&gt;</b></code></pre>
+</figure>
+
+                <ol>
+
+                    <li>
+                        <details id="audio-data-default">
+                            <summary><code>"data-default"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    This is a boolean attribute, which specifies
+                                    whether the audio descriptions should be
+                                    enabled by default.
+                                </p>
+                                <p>
+                                    If this attribute is omitted, then the
+                                    audio descriptions will be off by default.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="audio-preload">
+                            <summary><code>"preload"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The audio preload setting, which should be
+                                    set to <code>"none"</code> to prevent
+                                    preloading in browsers which don't support
+                                    audio descriptions.
+                                </p>
+                                <p>
+                                    For browsers that do support audio
+                                    descriptions, the <a href="#video-preload">
+                                        video's preload setting</a> will be
+                                    used, so the audio preload is only used by
+                                    browsers which don't support them, or where
+                                    scripting is unavailable.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                </ol>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            Audio descriptions are not supported with the
+                            audio-only player.
+                        </em>
+                    </p>
+                </figure>
+
+
+
+                <section tabindex="-1" id="audio-source">
+
+                    <h4>Audio Descriptions Source Elements</h4>
+
+                    <p id="code-audio-source-description">
+                        One or more audio sources define the path and mime-type
+                        of each of the files that the player will be using:
+                    </p>
+
+<figure class="code" id="code-audio-source">
+    <pre aria-describedby="code-audio-source-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+<b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="audio-source-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The path to an audio file.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="audio-source-type">
+                                <summary><code>"type"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The audio file's mime-type,
+                                        such as <code>"audio/mp3"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For best cross-browser compatibility you should
+                                include <strong>two audio sources</strong>
+                                &#x2014; one encoded as MP3 and the other as
+                                OGG, which between them will work in every
+                                browser which supports audio descriptions.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You can source the audio files
+                                from any external domain, for example, using a
+                                <abbr title="Content Delivery Network">CDN</abbr>.
+                                If you're using your own server, make sure it's
+                                configured to serve the audio files with the
+                                correct mime-types.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> define an
+                                <code>src</code> or <code>type</code> on the
+                                <a href="#audio">audio element</a> itself.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="audiolinks">
+
+                <h3>Audio Linking Element</h3>
+
+                <p id="code-audiolinks-description">
+                    The audio element can alternatively be used as a means of
+                    linking between two pages addresses, one of which has a
+                    version of the video with audio descriptions built-in:
+                </p>
+
+<figure class="code" id="code-audiolinks">
+    <pre aria-describedby="code-audiolinks-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;audio</b><b> data-off=<u>"./video.html"</u></b><b> data-on=<u>"./video-described.html"</u></b><b>&gt;</b><b>&lt;/audio&gt;</b></code></pre>
+</figure>
+
+                <ol>
+
+                    <li>
+                        <details id="audiolinks-off">
+                            <summary><code>"data-off"</code> <strong>(required)</strong></summary>
+                            <div>
+
+                                <p>
+                                    The address of a page containing the
+                                    non-described version of the video.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="audiolinks-on">
+                            <summary><code>"data-on"</code> <strong>(required)</strong></summary>
+                            <div>
+
+                                <p>
+                                    The address of a page containing the
+                                    audio-described version of the video.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                </ol>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            OzPlayer will automatically compare these attributes
+                            with the current page address, to determine whether
+                            the <q>AD</q> button should be highlighted.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="transcript">
+
+            <h2>Transcript Container</h2>
+
+            <p id="code-transcript-description">
+                The transcript container is an empty element, which the
+                <a href="#captions-track">generated transcript</a>
+                will be built inside:
+            </p>
+
+<figure class="code" id="code-transcript">
+    <pre aria-describedby="code-transcript-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> id=<u>"demo-transcript"</u></b><b> class=<u>"ozplayer-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+            <ol>
+
+                <li>
+                    <details id="transcript-id">
+                        <summary><code>"id"</code> <strong>(required)</strong></summary>
+                        <div>
+
+                            <p>
+                                The transcript container <code>ID</code>,
+                                which can be anything you like,
+                                but must be the same as the
+                                <a href="#container-data-transcript">
+                                    <code>data-transcript</code></a> attribute
+                                defined for the
+                                <a href="#container">player container</a>.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="transcript-class">
+                        <summary><code>"class"</code> <strong>(required)</strong></summary>
+                        <div>
+
+                            <p>
+                                The transcript container class, which must have
+                                the exact value
+                                <code>"ozplayer-transcript"</code>.
+                            </p>
+                            <p>
+                                The <code>class</code> is used as a
+                                descendent root for all the transcript
+                                <abbr title="Cascading Style Sheets">CSS</abbr>
+                                defined in <cite>transcript.css</cite>.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+            </ol>
+
+
+
+            <section tabindex="-1" id="expander">
+
+                <h3>Transcript Expander</h3>
+
+                <p id="code-expander-description">
+                    The transcript expander is an optional parent element of the
+                    <a href="#transcript">transcript container</a>, which makes
+                    it possible to expand and collapse the transcript:
+                </p>
+
+<figure class="code" id="code-expander">
+    <pre aria-describedby="code-expander-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;details</b><b> class=<u>"ozplayer-expander"</u></b><b> open=<u>"open"</u></b><b>&gt;</b>
+
+    <b>&lt;summary</b><b>&gt;</b>Video Transcript<b>&lt;/summary</b><b>&gt;</b>
+
+    <small>&lt;div id="demo-transcript" class="ozplayer-transcript"&gt;&lt;/div&gt;</small>
+
+<b>&lt;/details</b><b>&gt;</b></code></pre>
+</figure>
+
+                <ol>
+
+                    <li>
+                        <details id="expander-class">
+                            <summary><code>"class"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    The expander class, which must have
+                                    the exact value <code>"ozplayer-expander"</code>.
+                                </p>
+                                <p>
+                                    If the <code>class</code> is omitted, then
+                                    the native behaviour of the <code>DETAILS</code>
+                                    element will not be polyfilled for older browsers.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                    <li>
+                        <details id="expander-open">
+                            <summary><code>"open"</code> <em>(recommended)</em></summary>
+                            <div>
+
+                                <p>
+                                    This is a boolean attribute, which specifies whether
+                                    the transcript should be expanded by default.
+                                </p>
+                                <p>
+                                    If this attribute is omitted, then the transcript
+                                    will be collapsed by default.
+                                </p>
+
+                            </div>
+                        </details>
+                    </li>
+
+                </ol>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The expander <strong>must</strong> have a first-child
+                            <code>SUMMARY</code> element with visible text. This is
+                            used as the trigger element, and will be automatically
+                            appended with a triangular-arrow icon.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+        </section>
+
+
+
+        <!-- necessary code example scripting -->
+        <script type="text/javascript" src="help-code.js"></script>
+
+
+
+    </div>
+
+</body>
+</html>

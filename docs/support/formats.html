@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>Supported formats in OzPlayer 3.0</title>
+
+    <!-- (arbitrary canvas and text styles) -->
+    <link rel="stylesheet" type="text/css" href="support-etc.css" />
+
+    <!-- necessary table matrix styles -->
+    <link rel="stylesheet" type="text/css" href="support-matrix.css" />
+
+    <!-- necessary responsive table styles                              (nb. max-width query is different for each page) -->
+    <link rel="stylesheet" type="text/css" href="support-responsive.css" media="only all and (max-width:33em)" />
+
+</head>
+<body>
+
+    <div class="container">
+
+
+
+        <!-- browser formats -->
+        <table class="formats matrix" border="1"
+            role="grid" aria-readonly="true"
+            summary="This table has a column for each supported format, then a row for each desktop browser indicating its support for each format.">
+            <caption>Supported formats in OzPlayer 3.0, by desktop browser</caption>
+            <thead role="rowgroup">
+                <tr role="row">
+                    <td rowspan="2"></td>
+                    <th role="columnheader" scope="col" colspan="2">Video</th>
+                    <th role="columnheader" scope="col" colspan="2">Audio-Only</th>
+                    <th role="columnheader" scope="col" colspan="2">Audio Descriptions</th>
+                </tr>
+                <tr role="row">
+                    <th role="columnheader" scope="col">MP4</th>
+                    <th role="columnheader" scope="col">WebM</th>
+                    <th role="columnheader" scope="col">MP3</th>
+                    <th role="columnheader" scope="col">OGG</th>
+                    <th role="columnheader" scope="col">MP3</th>
+                    <th role="columnheader" scope="col">OGG</th>
+                </tr>
+            </thead>
+            <tbody role="rowgroup">
+
+                <!-- chrome 6+ -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Chrome 6 or later"><span>Chrome 6+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Video/WebM"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                </tr>
+
+                <!-- edge 20+ -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Chrome 6 or later"><span>Edge 20+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="AD/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                </tr>
+
+                <!-- ie10-11 -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Internet Explorer 10 to 11"><span>IE10&#x2013;11</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="AD/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                </tr>
+
+                <!-- ie9 -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Internet Explorer 9"><span>IE9</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/MP3"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/OGG"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                </tr>
+
+                <!-- ie8 -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Internet Explorer 8"><span>IE8</span></th>
+                    <td role="gridcell" class="conditional" data-header="Video/MP4"><span><span>Yes, using the Flash fallback player</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser1" title="Using the Flash fallback player">1</a></sup></span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="conditional" data-header="Audio/MP3"><span><span>Yes, using the Flash fallback player</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser1" title="Using the Flash fallback player">1</a></sup></span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/MP3"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/OGG"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                </tr>
+
+                <!-- firefox 35+ -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Firefox 35 or later"><span>Firefox 35+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Video/WebM"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                </tr>
+
+                <!-- firefox 16-34 -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Firefox 10 to 34"><span>Firefox 16&#x2013;34</span></th>
+                    <td role="gridcell" class="conditional" data-header="Video/MP4"><span><span>Yes, using the Flash fallback player</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser1" title="Using the Flash fallback player">1</a></sup></span></span></td>
+                    <td role="gridcell" class="supported" data-header="Video/WebM"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="conditional" data-header="Audio/MP3"><span><span>Yes, using the Flash fallback player</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser1" title="Using the Flash fallback player">1</a></sup></span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="AD/MP3"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                </tr>
+
+                <!-- opera 25+ -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Opera 25 or later"><span>Opera 25+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Video/WebM"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                </tr>
+
+                <!-- opera 15-24 -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Opera 15 to 24"><span>Opera 15&#x2013;24</span></th>
+                    <td role="gridcell" class="conditional" data-header="Video/MP4"><span><span>Yes, using the Flash fallback player</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser1" title="Using the Flash fallback player">1</a></sup></span></span></td>
+                    <td role="gridcell" class="supported" data-header="Video/WebM"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="conditional" data-header="Audio/MP3"><span><span>Yes, using the Flash fallback player</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser1" title="Using the Flash fallback player">1</a></sup></span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="AD/MP3"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                </tr>
+
+                <!-- safari 6 or later -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Safari 6 or later"><span>Safari 6+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="AD/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="AD/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                </tr>
+
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td rowspan="3"></td>
+                    <th>MP4</th>
+                    <th>WebM</th>
+                    <th>MP3</th>
+                    <th>OGG</th>
+                    <th>MP3</th>
+                    <th>OGG</th>
+                </tr>
+                <tr role="row">
+                    <th colspan="2">Video</th>
+                    <th colspan="2">Audio-Only</th>
+                    <th colspan="2">Audio Descriptions</th>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <p><strong>Footnotes to browser support:</strong></p>
+                        <dl>
+                            <dt id="footnote-browser1" tabindex="-1"><strong>1.</strong></dt>
+                            <dd>Using the Flash fallback player.</dd>
+                        </dl>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+
+
+        <!-- mobile os formats -->
+        <table class="formats matrix" border="1"
+            role="grid" aria-readonly="true"
+            summary="This table has a column for each supported format, then a row for each mobile OS indicating its support for each format.">
+            <caption>Supported formats in OzPlayer 3.0, by mobile OS</caption>
+            <thead role="rowgroup">
+                <tr role="row">
+                    <td rowspan="2"></td>
+                    <th role="columnheader" scope="col" colspan="2">Video</th>
+                    <th role="columnheader" scope="col" colspan="2">Audio-Only</th>
+                    <th role="columnheader" scope="col" colspan="2">Audio Descriptions</th>
+                </tr>
+                <tr role="row">
+                    <th role="columnheader" scope="col">MP4</th>
+                    <th role="columnheader" scope="col">WebM</th>
+                    <th role="columnheader" scope="col">MP3</th>
+                    <th role="columnheader" scope="col">OGG</th>
+                    <th role="columnheader" scope="col">MP3</th>
+                    <th role="columnheader" scope="col">OGG</th>
+                </tr>
+            </thead>
+            <tbody role="rowgroup">
+
+                <!-- android 4 or later -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Android 4 or later"><span>Android 4+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Video/WebM"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/OGG"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/MP3"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/OGG"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                </tr>
+
+                <!-- ios 6 or later -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="iOS 6 or later"><span>iOS 6+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/MP3"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/OGG"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                </tr>
+
+                <!-- windows phone 8 or later -->
+                <tr role="row">
+                    <th role="rowheader" scope="row" title="Windows Phone 8 or later"><span>Windows Phone 8+</span></th>
+                    <td role="gridcell" class="supported" data-header="Video/MP4"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Video/WebM"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Audio/MP3"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Audio/OGG"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/MP3"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="AD/OGG"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                </tr>
+
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td rowspan="3"></td>
+                    <th>MP4</th>
+                    <th>WebM</th>
+                    <th>MP3</th>
+                    <th>OGG</th>
+                    <th>MP3</th>
+                    <th>OGG</th>
+                </tr>
+                <tr>
+                    <th colspan="2">Video</th>
+                    <th colspan="2">Audio-Only</th>
+                    <th colspan="2">Audio Descriptions</th>
+                </tr>
+                <tr>
+                    <td colspan="6">
+                        <p><strong>No footnotes to mobile OS support.</strong></p>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+
+
+
+    </div>
+
+</body>
+</html>

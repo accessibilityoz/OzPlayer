@@ -1,0 +1,204 @@
+
+/* matrix tables */
+table.matrix
+{
+    margin:0 0 1em 0;
+
+    border-spacing:2px;
+    empty-cells:hide;
+
+    cursor:default;
+}
+table.matrix + table.matrix
+{
+    margin-top:3em;
+}
+
+/* inline semantics */
+table.matrix td > span > span:first-child
+{
+    position:absolute;
+    left:-1000em;
+}
+table.matrix sup
+{
+    font-size:0.75em;
+    line-height:0;
+}
+table.matrix sup a,
+table.matrix sup a:visited
+{
+    text-decoration:none;
+}
+
+/* table caption */
+table.matrix caption
+{
+    margin:0 0 0.5em 14em;
+
+    font-size:1.4em;
+}
+table.matrix.formats caption
+{
+    margin-left:0;
+}
+
+/* dynamic caption scripting info */
+table.matrix caption > small
+{
+    display:block;
+
+    font-size:0.75em;
+}
+table.matrix caption > small > span[data-icon-state]::before
+{
+    margin:0 0.5em 0 0;
+
+    color:#009;
+}
+table.matrix caption > small > span[data-icon-state="true"]::before
+{
+    content:attr(data-icon-true);
+}
+table.matrix caption > small > span[data-icon-state="false"]::before
+{
+    content:attr(data-icon-false);
+}
+table.matrix caption > small > span[data-scripting-state]
+{
+    font-weight:bold;
+    text-decoration:underline;
+
+    color:#009;
+
+    cursor:pointer;
+}
+
+/* table headers and cells */
+table.matrix,
+table.matrix td,
+table.matrix th
+{
+    border:none;
+}
+table.matrix td,
+table.matrix th
+{
+    padding:0.4em 0.6em 0.3em 0.6em;
+    line-height:1.2;
+
+    border:1px solid #666;
+
+    vertical-align:middle;
+    text-align:center;
+    font-weight:bold;
+}
+table.matrix th,
+table.matrix th *
+{
+    color:#000;
+}
+table.matrix th
+{
+    background:#ffd;
+}
+table.matrix.formats thead td
+{
+    width:20%;
+}
+table.matrix.formats thead tr + tr > th
+{
+    width:10%;
+}
+table.matrix thead tr:first-child > td:first-child
+{
+    border-left:none;
+    border-top:none;
+}
+table.matrix tbody th
+{
+    white-space:nowrap;
+
+    text-align:left;
+}
+table.matrix tbody th[title]
+{
+    min-width:10em;
+}
+table.matrix tbody tr th[title] + th
+{
+    background:#dfc;
+}
+table.matrix tbody tr th:not([title])
+{
+    background:#fdd;
+}
+
+/* table footer */
+table.matrix tfoot tr:last-child > td:first-child
+{
+    border-left:none;
+}
+table.matrix tfoot p
+{
+    position:absolute;
+    left:-1000em;
+}
+table.matrix tfoot td
+{
+    padding:1em 0 0 1em;
+
+    border:none;
+
+    text-align:left;
+}
+table.matrix tfoot td dl
+{
+    margin:0;
+}
+table.matrix tfoot td dt
+{
+    float:left;
+    clear:left;
+
+    margin:0 0.5em 0.5em 0;
+}
+table.matrix tfoot td dt strong
+{
+    display:block;
+}
+table.matrix tfoot td dd
+{
+    float:left;
+    clear:none;
+
+    margin:0 0.5em 0.5em 0;
+
+    font-weight:normal;
+}
+
+/* table cell data */
+table.matrix tbody td > span *
+{
+    color:#fff;
+}
+table.matrix tbody td
+{
+    text-shadow:0 0 0.2em #000, 0 0.1em 0.05em #000;
+}
+table.matrix tbody td.supported
+{
+    background:#7e7;
+}
+table.matrix tbody td.unsupported
+{
+    background:#f99;
+}
+table.matrix tbody td.conditional
+{
+    background:#bd5;
+}
+table.matrix tbody td.nonapplicable
+{
+    background:#c0c0c0;
+}

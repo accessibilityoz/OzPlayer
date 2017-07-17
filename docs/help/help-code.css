@@ -1,0 +1,269 @@
+
+/* temporary code examples (for development purposes only) */
+xmp
+{
+    display:block;
+
+    margin:0 0 1.25em 0;
+    padding:1em;
+
+    border:1px solid #ccc;
+
+    font:normal normal normal 0.8em/1.4 monaco, courier, monospace;
+
+    background:#eee;
+    color:#505050;
+}
+
+/* code examples, with syntax-highlighting elements and line numbers
+   http://www.sitepoint.com/best-practice-for-code-examples */
+figure.code
+{
+    display:block;
+
+    margin:0 0 1.25em 0;
+    padding:0;
+
+    border:1px solid #ccc;
+}
+figure.code pre,
+figure.code pre *
+{
+    font:normal normal normal 1em/1.4 monaco, courier, monospace;
+}
+figure.code pre
+{
+    padding:0;
+
+    border:none;
+    border-radius:0;
+
+    white-space:pre;
+    word-wrap:normal;
+    overflow-wrap:normal;
+
+    font-size:0.8em;
+
+    background:#eee;
+    color:#505050;
+}
+figure.code pre,
+figure.code pre code
+{
+    display:block;
+    margin:0;
+
+    cursor:text;
+}
+figure.code pre code small
+{
+    color:#909090;
+}
+figure.code pre code
+{
+    overflow-x:auto;
+
+    padding:1em;
+
+    white-space:pre;
+    word-wrap:normal;
+    overflow-wrap:normal;
+
+    -moz-tab-size:4;
+    -o-tab-size:4;
+    tab-size:4;
+
+}
+figure.code pre [contenteditable]:focus
+{
+    background:#fff;
+
+    outline:none;
+
+    box-shadow:inset 0 0 0 1px #eee, inset 0 1px 4px 2px rgba(0,0,0,0.5);
+}
+figure.code pre.line-numbers
+{
+    position:relative;
+}
+figure.code pre.line-numbers code
+{
+    margin-left:3em;
+
+    border-left:1px solid #ccc;
+}
+figure.code pre.line-numbers > div
+{
+    display:block;
+
+    position:absolute;
+    top:0;
+    left:0;
+
+    height:100%;
+
+    background:#e5e5e5;
+
+    overflow:hidden;
+
+    counter-reset:line;
+}
+figure.code pre.line-numbers > div > span
+{
+    display:block;
+    -moz-box-sizing:content-box;
+    -webkit-box-sizing:content-box;
+    box-sizing:content-box;
+
+    width:2.5em;
+    padding:0 0.5em 0 0;
+
+    text-align:right;
+
+    color:#777;
+
+    overflow:hidden;
+
+    counter-increment:line;
+}
+figure.code pre.line-numbers > div > span::before
+{
+    content:counter(line);
+}
+figure.code pre.line-numbers > div > span:first-child
+{
+    margin-top:1em;
+}
+figure.code pre.line-numbers > div > span:nth-child(odd)
+{
+    background:#dfdfdf;
+}
+@media print
+{
+    figure.code pre code
+    {
+        overflow-x:visible;
+
+        white-space:pre-wrap;
+        word-wrap:break-word;
+        overflow-wrap:break-word;
+    }
+    figure.code pre.line-numbers div
+    {
+        display:none;
+    }
+    figure.code pre.line-numbers > code
+    {
+        margin-left:0;
+    }
+}
+figure.code pre b, pre strong
+{
+    font-weight:normal;
+    color:#039;
+}
+figure.code pre u, pre u b, pre u strong
+{
+    text-decoration:none;
+    color:#083;
+}
+figure.code pre i, pre em, pre i *, pre em *, pre i * *, pre em * *
+{
+    letter-spacing:-0.1em;
+    text-decoration:none;
+    font-style:normal;
+    color:#c55;
+}
+
+/* ordered details > summary pairs for attribute documentation */
+figure.code + ol,
+figure.code + ol *
+{
+    margin:0;
+    padding:0;
+
+    list-style-type:none;
+}
+figure.code + ol
+{
+    margin:2em 0 1em 0;
+}
+
+figure.code + ol > li details > summary
+{
+    margin-bottom:0.5em;
+
+    cursor:default;
+}
+figure.code + ol details > summary[tabindex]
+{
+    cursor:pointer;
+}
+figure.code + ol details > summary > span.twisty
+{
+    display:inline-block;
+    width:1em;
+    margin:0 0.6em 0 0;
+
+    font-size:0.8em;
+}
+figure.code + ol details > summary > span.twisty::before
+{
+    content:attr(data-twisty);
+}
+figure.code + ol > li
+{
+    clear:both;
+}
+figure.code + ol > li details > summary > strong,
+figure.code + ol > li details > summary > em,
+figure.code + ol > li details > summary > small
+{
+    float:right;
+
+    letter-spacing:-0.05em;
+}
+figure.code + ol details > summary strong
+{
+    color:#d22;
+}
+figure.code + ol details > summary em
+{
+    font-style:normal;
+    color:#4a4;
+}
+figure.code + ol details > summary small
+{
+    font-size:1em;
+    color:#909090;
+}
+figure.code + ol > li div
+{
+    margin-top:0.5em;
+}
+figure.code + ol > li div[aria-expanded="false"]
+{
+    display:none;
+}
+figure.code + ol > li p
+{
+    margin-bottom:0.5em;
+}
+figure.code + ol > li p:last-child
+{
+    margin-bottom:1em;
+}
+
+/* indented notes */
+figure.note
+{
+    margin-left:2.5em;
+}
+@media all and (max-width:29em)
+{
+    figure.note
+    {
+        margin-left:0;
+    }
+}
+

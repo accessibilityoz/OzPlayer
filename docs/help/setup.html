@@ -1,0 +1,1589 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>OzPlayer 3.0 Setup Guide</title>
+
+    <!-- (arbitrary canvas and text styles) -->
+    <link rel="stylesheet" type="text/css" href="help-etc.css" />
+
+    <!-- necessary code example styles -->
+    <link rel="stylesheet" type="text/css" href="help-code.css" />
+
+</head>
+<body>
+
+    <div class="container">
+
+
+
+        <h1>OzPlayer 3.0 Setup Guide</h1>
+
+        <p>
+            OzPlayer uses
+            <abbr title="HyperText Markup Language Version 5">HTML5</abbr>
+            to define the video, audio, captions and transcript data it uses.
+            This guide introduces the elements you need to create a working
+            player, with the best possible accessibility and graceful
+            degradation.
+        </p>
+
+        <nav>
+            <ol>
+                <li>
+                    <a href="#markup">Creating the Player's Markup</a>
+                    <ul>
+                        <li><a href="#complete">The Complete Player</a>
+                    </ul>
+                </li>
+                <li><a href="#head">Content for the HEAD Section</a></li>
+                <li>
+                    <a href="#body">Content for the BODY Section</a>
+                    <ul>
+                        <li><a href="#body-init">Initialising OzPlayer</a>
+                    </ul>
+                </li>
+            </ol>
+        </nav>
+
+
+
+        <section tabindex="-1" id="markup">
+
+            <h2>Creating the Player's Markup</h2>
+
+            <p id="code-markup-description">
+                The first thing you need is two container elements &#x2014;
+                one for the player, and one for the transcript:
+            </p>
+
+<figure class="code" id="code-markup">
+    <pre aria-describedby="code-markup-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> id=<u>"demo"</u></b><b> class=<u>"ozplayer"</u></b><b> data-transcript=<u>"demo-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b>
+
+<b>&lt;div</b><b> id=<u>"demo-transcript"</u></b><b> class=<u>"ozplayer-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+            <p>
+                Both containers need an <code>ID</code> &#x2014; which can
+                be anything you like &#x2014; but the transcript container's
+                <code>ID</code> must be the same as the player's
+                <code>data-transcript</code> attribute (which is how the player
+                knows where the transcript is).
+            </p>
+            <p>
+                The <code>class</code> names must be exactly as shown.
+            </p>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        If you don't have a transcript, then you can omit the
+                        transcript container and the player's
+                        <code>data-transcript</code> attribute. However the
+                        use of a transcript is strongly encouraged, for
+                        best accessibility and user engagement.
+                    </em>
+                </p>
+            </figure>
+
+
+
+            <section tabindex="-1" id="markup-semantics">
+
+                <h3>Adding Richer Semantics</h3>
+
+                <p>
+                    The containers should be <code>DIV</code> elements, since
+                    they're just generic containers.
+                </p>
+
+                <p id="code-markup-semantics-description">
+                    But you can add richer semantic by wrapping them both
+                    in a <code>FIGURE</code> element. This can optionally have a
+                    <code>FIGCAPTION</code> element &#x2014; usually with the
+                    video's title &#x2014; while the <code>FIGURE</code>
+                    itself can be used as a hook for additional layout styles
+                    (e.g. for centering the player):
+                </p>
+
+<figure class="code" id="code-markup-semantics">
+    <pre aria-describedby="code-markup-semantics-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;figure</b><b>&gt;</b>
+
+    <b>&lt;figcaption</b><b>&gt;</b>Title of Video<b>&lt;/figcaption</b><b>&gt;</b>
+
+    <small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;&lt;/div&gt;</small>
+
+    <small>&lt;div id="demo-transcript" class="ozplayer-transcript"&gt;&lt;/div&gt;</small>
+
+<b>&lt;/figure</b><b>&gt;</b></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            You <strong>should not</strong> apply any extra
+                            <abbr title="Cascading Style Sheets">CSS</abbr> to
+                            the player container &#x2014; always wrap
+                            an element around it and apply the styles to that.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            However the transcript container can be styled any
+                            way you like. It can also be positioned elsewhere
+                            on the page &#x2014; although the usual expectation
+                            is to have it directly after the player, since that
+                            creates a logical reading order.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-markup-collapsing-description">
+                    If you want to expand and collapse the transcript you can
+                    wrap it in a <code>DETAILS</code> element, and OzPlayer will
+                    automatically polyfill its behaviour for older browsers:
+                </p>
+<figure class="code" id="code-markup-collapsing">
+    <pre aria-describedby="code-markup-collapsing-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;figure&gt;</small>
+
+    <small>&lt;figcaption&gt;Title of Video&lt;/figcaption&gt;</small>
+
+    <small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;&lt;/div&gt;</small>
+
+    <b>&lt;details</b><b> class=<u>"ozplayer-expander"</u></b><b> open=<u>"open"</u></b><b>&gt;</b>
+
+        <b>&lt;summary</b><b>&gt;</b>Video Transcript<b>&lt;/summary</b><b>&gt;</b>
+
+        <small>&lt;div id="demo-transcript" class="ozplayer-transcript"&gt;&lt;/div&gt;</small>
+
+    <b>&lt;/details</b><b>&gt;</b>
+
+<small>&lt;/figure&gt;</small></code></pre>
+</figure>
+                <p>
+                    The <code>DETAILS</code> element must have a first-child
+                    <code>SUMMARY</code> with visible text, which is then
+                    immediately followed by the transcript container. If the
+                    <code>DETAILS</code> has an <code>open</code> attribute
+                    then the transcript will be expanded by default, otherwise
+                    it will be collapsed. If you omit the <code>"ozplayer-expander"</code>
+                    class then the native behaviour will not be polyfilled.
+                </p>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-responsive">
+
+                <h3>Using Responsive Design</h3>
+
+                <p id="code-responsive-column-description">
+                    OzPlayer can adapt to responsive design &#x2014; if it's
+                    placed within a flexible column that the player can identify.
+                    For example, if the player is inside the main
+                    <code>"content"</code> column, then you would specify that
+                    column's <code>ID</code> using the player's
+                    <code>data-responsive</code> attribute:
+                </p>
+
+<figure class="code" id="code-responsive-column">
+    <pre aria-describedby="code-responsive-column-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;main</b><b> id=<u>"content"</u></b><b>&gt;</b>
+
+    <i>&lt;!-- surrounding content --&gt;</i>
+
+    <small>&lt;figure&gt;</small>
+
+        <small>&lt;figcaption&gt;Title of Video&lt;/figcaption&gt;</small>
+
+        <small>&lt;div id="demo" class="ozplayer"</small><b> data-responsive=<u>"content"</u></b><small> data-transcript="demo-transcript"&gt;&lt;/div&gt;</small>
+
+        <small>&lt;div id="demo-transcript" class="ozplayer-transcript"&gt;&lt;/div&gt;</small>
+
+    <small>&lt;/figure&gt;</small>
+
+    <i>&lt;!-- surrounding content --&gt;</i>
+
+<b>&lt;/main</b><b>&gt;</b></code></pre>
+</figure>
+
+                <p>
+                    OzPlayer will then shrink itself to fit that content column,
+                    whenever the column is smaller (similar to the behaviour
+                    of image max-width). This is measured during page load,
+                    and whenever the window size or orientation changes.
+                </p>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            In order for this to work, the content column itself
+                            <strong>must</strong> be flexible to window size.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Likewise, any element between that column and the player
+                            (such as the wrapping <code>FIGURE</code> element)
+                            must also be flexible. If you have a transcript,
+                            that should also be flexible.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Resizing will occur even if OzPlayer is not inside the
+                            specified column.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-video">
+
+                <h3>Adding the Video</h3>
+
+                <p id="code-markup-video-description">
+                    The next thing to add is the <code>VIDEO</code> itself,
+                    which goes inside the player container:
+                </p>
+
+<figure class="code" id="code-markup-video">
+    <pre aria-describedby="code-markup-video-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <b>&lt;video</b><b> controls=<u>"controls"</u></b><b>&gt;</b>
+
+    <b>&lt;/video</b><b>&gt;</b>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p>
+                    The only required attribute is <code>controls</code>,
+                    which tells the browser to provide native controls when
+                    JavaScript is unavailable. This is important to ensure that
+                    the video can still be played without scripting (if the scripting
+                    fails to load, or is blocked or disabled).
+                </p>
+
+                <p id="code-markup-video-preload-description">
+                    It's also a good idea to add a <code>preload</code>
+                    attribute, to control whether or not the browser should
+                    start preloading the video straight away. This can have
+                    the value <code>"none"</code> to disable preloading,
+                    or <code>"auto"</code> to enable it:
+                </p>
+
+<figure class="code" id="code-markup-video-preload">
+    <pre aria-describedby="code-markup-video-preload-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video</small><b> preload=<u>"none"</u></b><small> controls="controls"&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            A preload setting of <code>"auto"</code> is not
+                            very efficient with bandwidth, since it means that
+                            every page view will be loading large files,
+                            even if the user never plays the video. The
+                            <code>"none"</code> setting is therefore
+                            recommended, since it only starts using bandwidth
+                            when the video is actually played.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-markup-video-optional-description">
+                    There are three other optional attributes you might like to
+                    add &#x2014; to define the video's standard <code>width</code>
+                    and <code>height</code>, and to specify the <code>poster</code>
+                    image that will show until it's first played:
+                </p>
+
+<figure class="code" id="code-markup-video-optional">
+    <pre aria-describedby="code-markup-video-optional-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video<b> width=<u>"640"</u></b><b> height=<u>"360"</u></b><b> poster=<u>"./media/poster.jpg"</u></b> preload="none" controls="controls"&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            If you don't define a width and height then the
+                            video will default to
+                            <code>400</code> &#x00d7; <code>225</code>.
+                            The absolute minimum size you can specify is
+                            <code>240</code> &#x00d7; <code>135</code>.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            If you don't define a poster then it will show a
+                            black background (except for YouTube videos).
+                        </em>
+                    </p>
+                </figure>
+
+
+
+                <section tabindex="-1" id="markup-video-sources">
+
+                    <h4>Defining the Video Sources</h4>
+
+                    <p id="code-markup-video-sources-description">
+                        To define the video source files, add one or
+                        more <code>SOURCE</code> elements inside the video:
+                    </p>
+
+<figure class="code" id="code-markup-video-sources">
+    <pre aria-describedby="code-markup-video-sources-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                    <p>
+                        Each source defines an <code>src</code>
+                        and a video <code>type</code>, both of which are
+                        required.
+                    </p>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For best cross-browser compatibility you should
+                                include <strong>two video sources</strong>
+                                &#x2014; one encoded as MP4 and the other as
+                                WebM,  which between them will work in every
+                                browser that OzPlayer supports. The Flash
+                                fallback player uses MP4.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> define an
+                                <code>src</code> or <code>type</code> on the
+                                <code>VIDEO</code> element itself.
+                            </em>
+                        </p>
+                    </figure>
+
+                    <p id="code-markup-video-sources-youtube-description">
+                        To play a YouTube video you only need a single
+                        <code>SOURCE</code>, with a YouTube
+                        <abbr title="Uniform Resource Locator">URL</abbr> and
+                        a type of <code>"video/x-youtube"</code>:
+                    </p>
+
+<figure class="code" id="code-markup-video-sources-youtube">
+    <pre aria-describedby="code-markup-video-sources-youtube-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <b>&lt;source</b><b> src=<u>"http://www.youtube.com/watch?v=12345"</u></b><b> type=<u>"video/x-youtube"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                YouTube <abbr title="Uniform Resource Locators">URLs</abbr>
+                                <strong>must not</strong> contain any query-string
+                                values apart from the video <code>ID</code>.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="markup-audio-only">
+
+                    <h4>Using the Audio-Only Player</h4>
+
+                    <p id="code-markup-audio-only-description">
+                        To create an audio-only player, use an
+                        <code>AUDIO</code> element rather than a video:
+                    </p>
+
+<figure class="code" id="code-markup-audio-only">
+    <pre aria-describedby="code-markup-audio-only-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <b>&lt;audio</b><b> data-width=<u>"640"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b>
+
+    <b>&lt;/audio</b><b>&gt;</b>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                    <p>
+                        This takes the same <code>preload</code> and
+                        <code>controls</code> attributes as a video, but it has
+                        no <code>width</code>, <code>height</code>, or
+                        <code>poster</code> attributes as these are not
+                        supported for audio-only. The standard width of the
+                        player controls can be specified using a
+                        <code>data-width</code> attribute.
+                    </p>
+
+                    <p id="code-markup-audio-only-sources-description">
+                        Audio sources are defined using <code>SOURCE</code>
+                        elements, exactly the same as for video:
+                    </p>
+
+<figure class="code" id="code-markup-audio-only-sources">
+    <pre aria-describedby="code-markup-audio-only-sources-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;audio data-width="640" preload="none" controls="controls"&gt;</small>
+
+        <b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/audio&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For best cross-browser compatibility you should
+                                include <strong>two audio sources</strong>
+                                &#x2014; one encoded as MP3 and the other as
+                                OGG,  which between them will work in every
+                                browser that OzPlayer supports. The Flash
+                                fallback player uses MP3.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> define an
+                                <code>src</code> or <code>type</code> on the
+                                <code>AUDIO</code> element itself.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                YouTube sources are not supported for the
+                                audio-only player.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-captions">
+
+                <h3>Adding Captions</h3>
+
+                <p id="code-markup-captions-description">
+                    Captions can be added using a <code>TRACK</code> element,
+                    which goes inside the <code>VIDEO</code> or
+                    <code>AUDIO</code> element. The captions will
+                    appear at the bottom of a video, and are also used to
+                    generate the transcript:
+                </p>
+
+<figure class="code" id="code-markup-captions">
+    <pre aria-describedby="code-markup-captions-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p>
+                    Each track has three required attributes &#x2014; an
+                    <code>src</code> which points to the captions file
+                    (in WebVTT or SRT format), a <code>kind</code> attribute
+                    which must have the value <code>"captions"</code>, and an
+                    <code>srclang</code> which specifies the
+                    <abbr title="International Standards Organisation">ISO</abbr>
+                    language code.
+                </p>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            Although OzPlayer supports both WebVTT and SRT
+                            formats, only WebVTT is supported natively by
+                            browsers. So if the video is played without
+                            scripting, only WebVTT captions will work,
+                            and therefore this format is recommended in
+                            preference to SRT.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-markup-captions-default-description">
+                    The example above has the captions switched off by default,
+                    but it's better to have them switched on by default, by
+                    adding a <code>default</code> attribute:
+                </p>
+
+<figure class="code" id="code-markup-captions-default">
+    <pre aria-describedby="code-markup-captions-default-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en"<b> default=<u>"default"</u></b> /&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p id="code-markup-captions-languages-description">
+                    You can also specify multiple languages by adding multiple
+                    tracks, each with different <code>src</code>,
+                    <code>srclang</code> and <code>label</code> attributes:
+                </p>
+
+<figure class="code" id="code-markup-captions-languages">
+    <pre aria-describedby="code-markup-captions-languages-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <b>&lt;track</b><b> src=<u>"./media/en/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> label=<u>"English"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
+        <b>&lt;track</b><b> src=<u>"./media/de/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"de"</u></b><b> label=<u>"Deutsch"</u></b> <b>/&gt;</b>
+        <b>&lt;track</b><b> src=<u>"./media/fr/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"fr"</u></b><b> label=<u>"Français"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            If multiple languages are specified, OzPlayer will
+                            create a menu for users to choose between them.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            If you're using the <code>default</code> attribute,
+                            then it should only be added to <strong>one</strong>
+                            of the tracks, to specify which will be shown by default.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Track labels should be in the same language as the
+                            captions themselves, e.g. for captions in German the
+                            label would be <code>"Deutsch"</code> rather than
+                            <code>"German"</code>.
+                        </em>
+                    </p>
+                </figure>
+
+
+
+                <section tabindex="-1" id="markup-captions-youtube">
+
+                    <h4>Embedded YouTube Captions</h3>
+
+
+                    <p>
+                        If you're using a YouTube video which already has
+                        embedded captions, then these will be switched off in
+                        favour of the captions added using
+                        <code>TRACK</code> elements, so that you don't
+                        see both sets of captions at the same time.
+                    </p>
+
+                    <p id="code-markup-captions-youtube-description">
+                        Alternatively, if the video has embedded captions but
+                        you <strong>don't</strong> have any <code>TRACK</code>
+                        elements defined, then the player controls can still be
+                        used to switch the embedded captions
+                        on and off. To enable this feature you should add a
+                        <code>"data-captions"</code> attribute to the
+                        <code>SOURCE</code> element, with a value of
+                        <code>"true"</code> or <code>"false"</code> to specify
+                        whether the embedded captions are enabled by default:
+                    </p>
+
+<figure class="code" id="code-markup-captions-youtube">
+    <pre aria-describedby="code-markup-captions-youtube-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;source src="http://www.youtube.com/watch?v=12345" type="video/x-youtube"</small><b> data-captions=<u>"true"</u></b><small> /&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            This functionality is provided for convenience, but
+                            is not the best approach, since embedded YouTube
+                            captions cannot be used to create a transcript.
+                            The recommended approach is to use a
+                            <code>TRACK</code> element to provide
+                            parseable captions data.
+                        </em>
+                    </p>
+                </figure>
+
+                </section>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-transcript">
+
+                <h3>Adding Extra Transcript Data</h3>
+
+                <p id="code-markup-transcript-description">
+                    You can add another <code>TRACK</code> to define additional
+                    transcript cues &#x2014; which will be added to the
+                    transcript, but won't be shown as captions:
+                </p>
+
+<figure class="code" id="code-markup-transcript">
+    <pre aria-describedby="code-markup-transcript-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <b>&lt;track</b><b> src=<u>"./media/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p>
+                    Each track has required <code>src</code> and
+                    <code>srclang</code> attributes, the same as the captions
+                    track, but the <code>kind</code> attribute in this case
+                    must have the value <code>"metadata"</code>, and there's
+                    also a <code>data-kind</code> attribute which must have
+                    the value <code>"transcript"</code>.
+                </p>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The extra transcript data can be used to describe
+                            visual details, such as text shown on the screen,
+                            and to transcribe the spoken text of audio
+                            descriptions. The transcript should aim to provide
+                            equivalent content to the video as a whole, so that
+                            a user can get the same information without
+                            playing it at all.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-markup-transcript-languages-description">
+                    You can also specify multiple languages by adding
+                    multiple tracks, and the transcript will use whichever
+                    language is selected for the captions:
+                </p>
+
+<figure class="code" id="code-markup-transcript-languages">
+    <pre aria-describedby="code-markup-transcript-languages-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/en/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+        <small>&lt;track src="./media/de/captions.vtt" kind="captions" srclang="de" /&gt;</small>
+        <small>&lt;track src="./media/es/captions.vtt" kind="captions" srclang="es" /&gt;</small>
+
+        <b>&lt;track</b><b> src=<u>"./media/en/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+        <b>&lt;track</b><b> src=<u>"./media/de/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"de"</u></b> <b>/&gt;</b>
+        <b>&lt;track</b><b> src=<u>"./media/es/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"es"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The extra transcript data is used in
+                            <strong>combination</strong> with the captions
+                            &#x2014; if a matching captions track is not defined
+                            then the transcript data will not be used.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-fallback">
+
+                <h3>Creating Fallback Content</h3>
+
+                <p id="code-markup-fallback-description">
+                    The final element inside the <code>VIDEO</code> or
+                    <code>AUDIO</code> is the fallback content container:
+                </p>
+
+<figure class="code" id="code-markup-fallback">
+    <pre aria-describedby="code-markup-fallback-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <small>&lt;track src="./media/transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" /&gt;</small>
+
+        <b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
+
+        <b>&lt;/div</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p>
+                    This can be any element, but its <code>class</code> name
+                    must be exactly as shown.
+                </p>
+
+                <p id="code-markup-fallback-content-description">
+                    Most will never see this, it's only for very old
+                    browsers &#x2014; those which don't support the script
+                    nor have Flash or native video support. You don't need to do
+                    anything particularly special, but it's a good idea to provide
+                    at least some links to download the video and captions files:
+                </p>
+
+<figure class="code" id="code-markup-fallback-content">
+    <pre aria-describedby="code-markup-fallback-content-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <small>&lt;track src="./media/transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" /&gt;</small>
+
+        <small>&lt;div class="ozplayer-fallback"&gt;</small>
+
+            <b>&lt;ul</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.webm"</u></b><b>&gt;</b>Download WebM<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+            <b>&lt;/ul</b><b>&gt;</b>
+
+        <small>&lt;/div&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            Once the player is up and running, you can test how
+                            the fallback content will appear by temporarily
+                            removing all the <code>SOURCE</code> elements.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-audio">
+
+                <h3>Adding Audio Descriptions</h3>
+
+                <p id="code-markup-audio-description">
+                    Audio descriptions can be added to video using an
+                    <code>AUDIO</code> element, which goes directly after
+                    the <code>VIDEO</code>. The audio will be synchronised to
+                    play in time with the video:
+                </p>
+
+<figure class="code" id="code-markup-audio">
+    <pre aria-describedby="code-markup-audio-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <small>&lt;track src="./media/transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" /&gt;</small>
+
+        <small>&lt;div class="ozplayer-fallback"&gt;</small>
+
+        <small>&lt;/div&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+    <b>&lt;audio</b><b>&gt;</b>
+
+    <b>&lt;/audio&gt;</b>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p id="code-markup-audio-preload-description">
+                    There are no required attributes, but it's a good idea to
+                    add a <code>preload</code> attribute with the value
+                    <code>"none"</code>, so that the audio isn't preloaded
+                    in browsers which don't support audio descriptions.
+                </p>
+
+<figure class="code" id="code-markup-audio-preload">
+    <pre aria-describedby="code-markup-audio-preload-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <small>&lt;track src="./media/transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" /&gt;</small>
+
+        <small>&lt;div class="ozplayer-fallback"&gt;</small>
+
+        <small>&lt;/div&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+    <small>&lt;audio<b> preload=<u>"none"</u></b>&gt;</small>
+
+    <small>&lt;/audio&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            For browsers that do support audio descriptions,
+                            the video's preload setting will be used, so
+                            the audio preload setting is purely for the
+                            benefit of browsers which don't support them, or
+                            where JavaScript is unavailable.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-markup-audio-default-description">
+                    The example above has the audio descriptions switched off
+                    by default, but you can have them on by default,
+                    by adding a <code>data-default</code> attribute:
+                </p>
+
+<figure class="code" id="code-markup-audio-default">
+    <pre aria-describedby="code-markup-audio-default-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <small>&lt;track src="./media/transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" /&gt;</small>
+
+        <small>&lt;div class="ozplayer-fallback"&gt;</small>
+
+        <small>&lt;/div&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+    <small>&lt;audio preload="none"<b> data-default=<u>"default"</u></b>&gt;</small>
+
+    <small>&lt;/audio&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            Audio descriptions are not supported with the
+                            audio-only player.
+                        </em>
+                    </p>
+                </figure>
+
+
+
+                <section tabindex="-1" id="markup-audio-sources">
+
+                    <h4>Defining the Audio Sources</h4>
+
+                    <p id="code-markup-audio-sources-description">
+                        To define the audio source files, add one or
+                        more <code>SOURCE</code> elements inside the audio:
+                    </p>
+
+<figure class="code" id="code-markup-audio-sources">
+    <pre aria-describedby="code-markup-audio-sources-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
+        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+
+        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
+
+        <small>&lt;track src="./media/transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" /&gt;</small>
+
+        <small>&lt;div class="ozplayer-fallback"&gt;</small>
+
+        <small>&lt;/div&gt;</small>
+
+    <small>&lt;/video&gt;</small>
+
+    <small>&lt;audio preload="none" data-default="default"&gt;</small>
+
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/audio&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                    <p>
+                        Each source defines an <code>src</code>
+                        and an audio <code>type</code>, both of which are
+                        required.
+                    </p>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For best cross-browser compatibility you should
+                                include <strong>two audio sources</strong>
+                                &#x2014; one encoded as MP3 and the other as
+                                OGG, which between them will work in every
+                                browser which supports audio descriptions.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                You <strong>must not</strong> define an
+                                <code>src</code> or <code>type</code> on the
+                                <code>AUDIO</code> element itself.
+                            </em>
+                        </p>
+                    </figure>
+
+                </section>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-audiolinks">
+
+                <h3>Linking to Audio-Described Videos</h3>
+
+                <p>
+                    Using separate audio files is the recommended way of
+                    implementing audio descriptions in OzPlayer.
+                    However, you might have existing video content with audio
+                    descriptions built-in, and in that case you can still use
+                    OzPlayer's <q>AD</q> button as a method of linking between
+                    the two versions.
+                </p>
+
+                <p id="code-markup-audiolinks-description">
+                    To do this, you should start with an empty <code>AUDIO</code>
+                    element, and then define <code>data-on</code> and
+                    <code>data-off</code> attributes which point to different
+                    page addresses:
+                </p>
+
+<figure class="code" id="code-markup-audiolinks">
+    <pre aria-describedby="code-markup-audiolinks-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;audio</b><b> data-off=<u>"./video.html"</u></b><b> data-on=<u>"./video-described.html"</u></b><b>&gt;</b><b>&lt;/audio&gt;</b></code></pre>
+</figure>
+
+                <p>
+                    Each page should have an instance of the player with different
+                    video sources (i.e. one with built-in audio and one without),
+                    then OzPlayer will compare the page addresses when it loads,
+                    to determine whether the <q>AD</q> button should be highlighted.
+                </p>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="complete">
+
+                <h3>The Complete Player</h3>
+
+                <p id="code-complete-description">
+                    Here's a complete example of OzPlayer's markup, with all
+                    the recommended features and fallback content:
+                </p>
+
+<figure class="code" id="code-complete">
+    <pre aria-describedby="code-complete-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> id=<u>"demo"</u></b><b> class=<u>"ozplayer"</u></b><b> data-transcript=<u>"demo-transcript"</u></b><b> data-controls=<u>"stack"</u></b><b>&gt;</b>
+
+    <b>&lt;video</b><b> width=<u>"640"</u></b><b> height=<u>"360"</u></b><b> poster=<u>"./media/poster.jpg"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b>
+
+        <b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b>
+
+        <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
+
+        <b>&lt;track</b><b> src=<u>"./media/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+
+        <b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
+            <b>&lt;ul</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.webm"</u></b><b>&gt;</b>Download WebM<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+            <b>&lt;/ul</b><b>&gt;</b>
+        <b>&lt;/div</b><b>&gt;</b>
+
+    <b>&lt;/video</b><b>&gt;</b>
+
+    <b>&lt;audio</b><b> preload=<u>"none"</u></b><b> data-default=<u>"default"</u></b><b>&gt;</b>
+
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+
+    <b>&lt;/audio</b><b>&gt;</b>
+
+<b>&lt;/div</b><b>&gt;</b>
+
+<b>&lt;div</b><b> id=<u>"demo-transcript"</u></b><b> class=<u>"ozplayer-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            You can source the video and audio files
+                            from any external domain, for example, using a
+                            <abbr title="Content Delivery Network">CDN</abbr>.
+                            However the captions and transcript data
+                            <strong>must be on the page's domain</strong>,
+                            because they're subject to the same-origin security policy.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-complete-youtube-description">
+                    Here's an example for a YouTube video, where the video
+                    source is YouTube's
+                    <abbr title="Application Programming Interface">API</abbr>,
+                    but the audio descriptions, captions and transcript data
+                    come from your own server:
+                </p>
+
+<figure class="code" id="code-complete-youtube">
+    <pre aria-describedby="code-complete-youtube-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> id=<u>"demo"</u></b><b> class=<u>"ozplayer"</u></b><b> data-transcript=<u>"demo-transcript"</u></b><b> data-controls=<u>"stack"</u></b><b>&gt;</b>
+
+    <b>&lt;video</b><b> width=<u>"640"</u></b><b> height=<u>"360"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b>
+
+        <b>&lt;source</b><b> src=<u>"http://www.youtube.com/watch?v=12345"</u></b><b> type=<u>"video/x-youtube"</u></b> <b>/&gt;</b>
+
+        <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
+
+        <b>&lt;track</b><b> src=<u>"./media/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+
+        <b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
+            <b>&lt;ul</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"http://www.website.com/about-this-video"</u></b><b>&gt;</b>More about this video<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+            <b>&lt;/ul</b><b>&gt;</b>
+        <b>&lt;/div</b><b>&gt;</b>
+
+    <b>&lt;/video</b><b>&gt;</b>
+
+    <b>&lt;audio</b><b> preload=<u>"none"</u></b><b> data-default=<u>"default"</u></b><b>&gt;</b>
+
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+
+    <b>&lt;/audio</b><b>&gt;</b>
+
+<b>&lt;/div</b><b>&gt;</b>
+
+<b>&lt;div</b><b> id=<u>"demo-transcript"</u></b><b> class=<u>"ozplayer-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The video <code>SOURCE</code> <code>src</code> can
+                            use the format of a standard YouTube
+                            <abbr title="Uniform Resource Locator">URL</abbr>,
+                            such as
+                            <code>"http://www.youtube.com/watch?v=12345"</code>.
+                        </em>
+                    </p>
+                    <p>
+                            Or it can use a short-link such as
+                            <code>"http://youtu.be/12345"</code>
+                            or an embeddable
+                            <abbr title="Uniform Resource Locator">URL</abbr>
+                            like
+                            <code>"//www.youtube.com/embed/12345"</code>.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            The <code>VIDEO</code> <code>poster</code> and
+                            <code>preload</code> attributes are not supported
+                            with YouTube videos.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-complete-audio-only-description">
+                    Here's an example for an audio-only player:
+                </p>
+
+<figure class="code" id="code-complete-audio-only">
+    <pre aria-describedby="code-complete-audio-only-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> id=<u>"demo"</u></b><b> class=<u>"ozplayer"</u></b><b> data-transcript=<u>"demo-transcript"</u></b><b>&gt;</b>
+
+    <b>&lt;audio</b><b> data-width=<u>"640"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b>
+
+        <b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+
+        <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
+
+        <b>&lt;track</b><b> src=<u>"./media/transcript.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"transcript"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+
+        <b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
+            <b>&lt;ul</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/audio.mp3"</u></b><b>&gt;</b>Download MP3<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/audio.ogg"</u></b><b>&gt;</b>Download OGG<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+            <b>&lt;/ul</b><b>&gt;</b>
+        <b>&lt;/div</b><b>&gt;</b>
+
+    <b>&lt;/audio</b><b>&gt;</b>
+
+<b>&lt;/div</b><b>&gt;</b>
+
+<b>&lt;div</b><b> id=<u>"demo-transcript"</u></b><b> class=<u>"ozplayer-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+            </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="head">
+
+            <h2>Content for the HEAD Section</h2>
+
+            <p>
+                Once you've defined the player's markup, it only remains to add
+                some scripts and style sheets to the page.
+            </p>
+
+            <p id="code-head-core-description">
+                The first two go in the <code>HEAD</code> section, to define
+                the media library and the player's core style sheet:
+            </p>
+
+<figure class="code" id="code-head-core">
+    <pre aria-describedby="code-head-core-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+            <p id="code-head-highlights-description">
+                Third is the highlights style sheet, which applies the colours
+                and icons used in the player's controls:
+            </p>
+
+<figure class="code" id="code-head-highlights">
+    <pre aria-describedby="code-head-highlights-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+
+<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css" media="all" type="text/css" /&gt;</small>
+
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+            <p>
+                OzPlayer has seven different colour-schemes, so you can change
+                the style sheet <code>href</code> to select the one you want:
+            </p>
+
+            <ul>
+                <li><code>"highlights-blue.css"</code></li>
+                <li><code>"highlights-green.css"</code></li>
+                <li><code>"highlights-orange.css"</code></li>
+                <li><code>"highlights-pink.css"</code></li>
+                <li><code>"highlights-purple.css"</code></li>
+                <li><code>"highlights-red.css"</code></li>
+                <li><code>"highlights-yellow.css"</code></li>
+            </ul>
+
+            <p id="code-head-transcript-description">
+                The fourth and final addition to the <code>HEAD</code>
+                is the transcript style sheet:
+            </p>
+
+<figure class="code" id="code-head-transcript">
+    <pre aria-describedby="code-head-transcript-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+
+<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css" media="all" type="text/css" /&gt;</small>
+
+<small>&lt;link rel="stylesheet" href="./ozplayer-skin/highlights-purple.css" media="all" type="text/css" /&gt;</small>
+
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+            <p>
+                If you don't have a transcript then you don't need this
+                style sheet.
+            </p>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        If you do have a transcript, you'll probably want to
+                        edit its appearance to match your site design.
+                        Use the existing style sheet as a guide to the necessary
+                        layout and selectors.
+                    </em>
+                </p>
+                <p>
+                    <em>
+                        You <strong>should not</strong> edit any of the other
+                        style sheets apart from <code>transcript.css</code>.
+                    </em>
+                </p>
+            </figure>
+
+
+
+            <section tabindex="-1" id="head-versions">
+
+                <h3>Content for the HEAD Section (Free and Subscription Versions)</h3>
+
+                <p id="code-head-versions-description">
+                    If you're using the free or subscription version of OzPlayer,
+                    then you can load the scripts and style sheets from our
+                    <abbr title="Content Delivery Network">CDN</abbr>:
+                </p>
+
+<figure class="code" id="code-head-versions">
+    <pre aria-describedby="code-head-versions-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.0/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.0/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.0/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.0/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                <p>
+                    If you want to edit the transcript style sheet so that it
+                    matches your site design, please download it from
+                    <a href="http://ozplayer.global.ssl.fastly.net/3.0/transcript.css">
+                        http://ozplayer.global.ssl.fastly.net/3.0/transcript.css</a>
+                    and then use your local copy instead.
+                </p>
+
+            </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="body">
+
+            <h2>Content for the BODY Section</h2>
+
+            <p>
+                Finally, there are three scripts that go in the <code>BODY</code>
+                section. These should go at the <strong>end of the body</strong>,
+                ideally as far down as possible, but at the very earliest they
+                must come <strong>after the player's markup</strong>.
+            </p>
+
+            <p id="code-body-description">
+                The first one you need is the player's core script:
+            </p>
+
+<figure class="code" id="code-body">
+    <pre aria-describedby="code-body-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/ozplayer.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+</figure>
+
+            <p id="code-body-lang-description">
+                Second is the optional language script, which you only need
+                to include at all if you're planning to edit the language:
+            </p>
+
+<figure class="code" id="code-body-lang">
+    <pre aria-describedby="code-body-lang-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+
+<b>&lt;script</b><b> src=<u>"./ozplayer-lang/en.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+</figure>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        If the language script is not included then the player
+                        will use its default (English) language.
+                    </em>
+                </p>
+                <p>
+                    <em>
+                        If you do want to edit the language, use the existing
+                        file as a guide, being careful to define every value
+                        and maintain the correct syntax.
+                    </em>
+                </p>
+            </figure>
+
+            <p id="code-body-config-description">
+                The third and final <code>BODY</code> script is for user
+                configuration:
+            </p>
+
+<figure class="code" id="code-body-config">
+    <pre aria-describedby="code-body-config-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+
+<small>&lt;script src="./ozplayer-lang/en.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+
+<b>&lt;script</b><b> src=<u>"./config.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+</figure>
+
+            <p>
+                This is where you initialise the player.
+            </p>
+
+
+
+            <section tabindex="-1" id="body-init">
+
+                <h3>Initialising OzPlayer</h3>
+
+                <p id="code-body-init-description">
+                    OzPlayer can be initialised using a single command in
+                    your config script, which specifies the <code>ID</code>
+                    of the player container:
+                </p>
+
+                <figure class="code" id="code-body-init">
+                    <pre aria-describedby="code-body-init-description"><code
+                         contentEditable="true" tabindex="0" spellcheck="false"
+                         class="javascript"><b>new</b> OzPlayer.Video(<u>"demo"</u>);</code></pre>
+                </figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The initialisation command
+                            <strong>must include</strong> the <code>new</code>
+                            keyword.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            If anything goes wrong with OzPlayer &#x2014; such as
+                            the captions failing to load, or the player <code>ID</code>
+                            being mis-defined &#x2014; then an error or warning message
+                            will be written to the browser console. So check the console
+                            when you're setting it up, to look for any such errors.
+                        </em>
+                    </p>
+                </figure>
+
+                <p id="code-body-batch-description">
+                    Alternatively, if you have more than one instance of OzPlayer
+                    on a single page, then you can initialise them all at once using
+                    the batch initialisation function. This is also useful for
+                    cases where the player's <code>ID</code> is not known:
+                </p>
+
+                <figure class="code" id="code-body-batch">
+                    <pre aria-describedby="code-body-batch-description"><code
+                         contentEditable="true" tabindex="0" spellcheck="false"
+                         class="javascript">OzPlayer.init();</code></pre>
+                </figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="body-versions">
+
+                <h3>Content for the BODY Section (Free and Subscription Versions)</h3>
+
+                <p id="code-body-free-description">
+                    If you're using the free or subscription version of OzPlayer,
+                    then you can load the player and language scripts from our
+                    <abbr title="Content Delivery Network">CDN</abbr>,
+                    using <code>"ozplayer.free.js"</code> for the free version:
+                </p>
+
+<figure class="code" id="code-body-free">
+    <pre aria-describedby="code-body-free-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.0/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+
+<b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.0/ozplayer-lang/en.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+</figure>
+
+                <p id="code-body-subs-description">
+                    Or <code>"ozplayer.subs.js"</code> for the subscription version:
+                </p>
+
+<figure class="code" id="code-body-subs">
+    <pre aria-describedby="code-body-subs-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.0/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+
+<small>&lt;script src="//ozplayer.global.ssl.fastly.net/3.0/ozplayer-lang/en.js" type="text/javascript"&gt;&lt;/script&gt;</small></code></pre>
+</figure>
+
+                <p>
+                    If you want to edit the language script, please download it from
+                    <a href="http://ozplayer.global.ssl.fastly.net/3.0/ozplayer-lang/en.js">
+                        http://ozplayer.global.ssl.fastly.net/3.0/ozplayer-lang/en.js</a>
+                    and then use your local copy instead.
+                </p>
+
+            </section>
+
+        </section>
+
+
+
+        <!-- necessary code example scripting -->
+        <script type="text/javascript" src="help-code.js"></script>
+
+
+
+    </div>
+
+</body>
+</html>

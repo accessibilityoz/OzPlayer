@@ -1,0 +1,115 @@
+
+/* matrix tables */
+table.matrix
+{
+    display:table;
+    width:100%;
+
+    border-spacing:0;
+}
+table.matrix.formats
+{
+    min-width:0;
+}
+
+/* table caption */
+table.matrix caption
+{
+    display:block;
+
+    margin-left:0;
+}
+
+/* table rows */
+table.matrix tbody > tr
+{
+    display:block;
+    width:auto;
+}
+
+/* table header and footer */
+table.matrix thead,
+table.matrix tfoot > tr:not(:last-child)
+{
+    position:absolute;
+    left:-1000em;
+
+    display:block;
+}
+table tfoot td[colspan]
+{
+    display:block;
+    width:auto;
+}
+
+/* table headers and cells */
+table.matrix tbody td,
+table.matrix tbody th
+{
+    display:block;
+    width:auto;
+}
+table.matrix tbody th
+{
+    margin:0 0 1px 0;
+}
+table.matrix tbody th[title]
+{
+    min-width:0;
+}
+table.matrix tbody td
+{
+    display:table;
+    width:100%;
+
+    margin:-1px 0 0 0;
+    padding:0;
+
+    border-spacing:1px;
+    border:none;
+}
+table.matrix tbody td[data-header]::before,
+table.matrix tbody td > span
+{
+    box-sizing:content-box;
+    display:table-cell;
+
+    padding:0.4em 0.6em 0.3em 0.6em;
+
+    border:1px solid #666;
+}
+table.matrix tbody td[data-header]::before
+{
+    content:attr(data-header);
+
+    width:40%;
+
+    text-align:left;
+    text-shadow:none;
+
+    background:#ffd;
+    color:#000;
+}
+
+/* table cell data */
+table.matrix tbody td[class]
+{
+    background:transparent;
+}
+table.matrix tbody td[class="supported"] > span
+{
+    background:#7e7;
+}
+table.matrix tbody td[class="unsupported"] > span
+{
+    background:#f99;
+}
+table.matrix tbody td[class="conditional"] > span
+{
+    background:#bd5;
+}
+table.matrix tbody td[class="nonapplicable"] > span
+{
+    background:#c0c0c0;
+}
+
