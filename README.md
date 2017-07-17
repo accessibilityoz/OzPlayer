@@ -15,6 +15,7 @@
 * `ozplayer-core` contains source scripts and core stylesheets for the **latest version**
 * `ozplayer-lang` contains source translation files for the **latest version**
 * `ozplayer-skin` contains source images and skin stylesheets for the **latest version**
+* `tools` contains build tools
 
 ## Top-Level Files
 
@@ -23,5 +24,5 @@
 * `responsive-test.php` is a test page for the responsive video player
 * `test.js` is a test configuration script
 * `test.php` is a test page for the standard video player
-* `transcript-cue.png` is the transcript cue marker image
-* `transcript.css` is the source version of the transcript sylesheet
+* `transcript-cue.png` is the transcript cue marker image for the **latest version**
+* `transcript.css` is the source version of the transcript sylesheet for the **latest version**
