@@ -1266,8 +1266,8 @@ var OzPlayer = (function()
         {
             //media wrapper (video or plugin wrapper) ID template,
             //which is parsed with the player instance ID if the element
-            //doesn't already have an ID, so that we can use it to
-            //make an aria-controls assignment on the controls form
+            //doesn't already have an ID, so that we can use it
+            //to create a fragment-ID action for the form
             'video'                   : '%id-ozplayer-video',
 
             //custom slider instance ID template,
@@ -5757,8 +5757,7 @@ var OzPlayer = (function()
 
         //if the wrapper doesn't have an ID, then assign one now
         //using the wrapper ID template parsed with the instance ID
-        //nb. this is needed to define aria-controls on the controls form
-        //and to create a fragment-ID action for the form, so it has one
+        //nb. this is needed to create a fragment-ID action for the form
         if(!player.wrapper.id)
         {
             player.wrapper.id = etc.sprintf(config.ids['video'],
