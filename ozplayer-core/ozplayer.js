@@ -6010,9 +6010,7 @@ var OzPlayer = (function()
 
         //create the controls form inside the container
         //including an offleft legend for assistive meta-data
-        //and an aria-controls attribute that points to the
-        //media wrapper ID (ie. this form controls the media object)
-        //and also an action that points to the same media wrapper ID
+        //including an action that points to the media wrapper ID
         //(which is better semantics than using javascript:void(null))
         //so then we need an onsubmit event to block native submission and bubbling
         //which is all we need as long as the form has no submit button
@@ -6020,10 +6018,14 @@ var OzPlayer = (function()
         //but now the specified width is something other browsers rely on
         //nb. the form has no padding, margin or borders, so that
         //we can size it without any added box-model complications
+        //nb. originally this had aria-controls pointing to the media wrapper ID
+        //however aria-controls is not well implemented among screenreaders
+        //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
+        //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
+        //which then always resulted in the message "Failed to move to controlled element"
         player.controlform = etc.build('form',
         {
             'class'         : config.classes['controls'],
-            'aria-controls' : player.wrapper.id,
             'action'        : '#' + player.wrapper.id,
             'onsubmit'        : function(){ return null },
             '#style'        :
@@ -14446,9 +14448,11 @@ var OzPlayer = (function()
         isnative = typeof(expander.open) == 'boolean',
         isexpanded = expander.getAttribute('open') !== null;
 
-        //define aria-controls on the trigger to point to the transcript content ID
-        //so that assistive technologies know which element it controls
-        trigger.setAttribute('aria-controls', player.transcript.id);
+        //nb. originally this had aria-controls pointing to the transcript content ID
+        //however aria-controls is not well implemented among screenreaders
+        //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
+        //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
+        //which then always resulted in the message "Failed to move to controlled element"
 
         //set tabindex on the trigger so it's keyboard accessible
         //nb. set this using the property name to avoid browser differences
@@ -14457,8 +14461,7 @@ var OzPlayer = (function()
         //set aria-expanded on the trigger and content element according to isexpanded
         //so that its initial state matches that specified by the open attribute
         //nb. originally aria-expanded was defined only the content element
-        //however since we're using aria-controls on the trigger
-        //it turns out that aria-expanded should also be on the trigger
+        //however  it turns out that aria-expanded should be on the trigger
         //http://www.marcozehe.de/2010/02/10/easy-aria-tip-5-aria-expanded-and-aria-controls/
         //and with that change, the expanded or collapsed state is correctly announced in NVDA and Jaws 16
         //however is that to specification, or is it a quirk in their implementations?
