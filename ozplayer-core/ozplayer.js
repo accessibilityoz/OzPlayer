@@ -5822,12 +5822,6 @@ var OzPlayer = (function()
         //is important, because it determines the reading order, both
         //for assistive technologies, and when viewing without CSS
 
-        //add the application role to unify keyboard interaction in screenreaders
-        etc.render(player.container,
-        {
-            'role' : 'application'
-        });
-
         //if this is not an audio-only player
         //create a custom poster overlay to shore-up the
         //native poster, and to provide an iconic click-to-play
