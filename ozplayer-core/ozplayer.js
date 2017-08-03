@@ -5848,18 +5848,24 @@ var OzPlayer = (function()
         //else it matches the cue id of the currently displayed caption
         //and is defined as an attribute rather than a property
         //so it can also be used in CSS attribute selectors
-        //nb. I did consider adding aria-live, but then why would a
-        //screenreader user want captions? and since time-based
-        //updates would be intrusive and potentially mis-timed anyway
-        //I think it's better overall if it's not a live region
-        //it's the transcript that really matters for this group of users
+        //also make this a polite aria-live region, so that the
+        //captions are announced by screenreaders but do not interrupt
+        //any interface or interaction speech; this will allow
+        //screenreader users to get the benefit of captions
+        //(e.g. for translations or non-native english speakers)
+        //although some users might not want them since they can
+        //hear the audio anyway, but they can always turn them off
+        //whereas not making them live would exclude them from these users
         player.captions = etc.build('div',
         {
-            '=parent'    : player.container,
-            'class'      : config.classes['captions']
-                         + ' '
-                         + config.classes['state-disabled'],
-            'data-cue'   : ''
+            '=parent'       : player.container,
+            'class'         : config.classes['captions']
+                            + ' '
+                            + config.classes['state-disabled'],
+            'data-cue'      : '',
+            'aria-live'     :'polite',
+            'aria-atomic'   :'true',
+            'aria-relevant' :'additions text'
         });
 
 
