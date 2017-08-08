@@ -5856,9 +5856,9 @@ var OzPlayer = (function()
                             + ' '
                             + config.classes['state-disabled'],
             'data-cue'      : '',
-            'aria-live'     :'polite',
-            'aria-atomic'   :'true',
-            'aria-relevant' :'additions text'
+            'aria-live'     : 'polite',
+            'aria-atomic'   : 'true',
+            'aria-relevant' : 'additions text'
         });
 
 
@@ -8838,6 +8838,7 @@ var OzPlayer = (function()
 
                     break;
 
+                /*** OLD ***//***
                 //the Space bar triggers play or pause unless it comes from inside the language menu
                 //* this is not generic enough to handle multiple menus; we'd need a special contains methods
                 //* that checks for containing context by attributes without reference to specific elements
@@ -8854,6 +8855,7 @@ var OzPlayer = (function()
                     //and anyway rapid playing and pausing puts a lot of strain on the browser
                     player.controlform.playpause.command();
                     return null;
+                ***/
 
             }
         });
@@ -8869,6 +8871,7 @@ var OzPlayer = (function()
             player.__keydelay = nullifyTimer(player.__keydelay);
             player.__keyrepeat = nullifyTimer(player.__keyrepeat);
 
+            /*** OLD ***//***
             //switch by evaluation
             switch(true)
             {
@@ -8884,6 +8887,7 @@ var OzPlayer = (function()
 
                     return null;
             }
+            ***/
 
             //now reset the keyclick flag whatever happens
             player.keyclick = false;
