@@ -2063,6 +2063,12 @@
     outline-offset:-5px !important;
 }
 
+/* controls => button used as a link (for AD linking behaviour) */
+.oz-controls .oz-field button[role="link"]
+{
+    cursor: pointer !important;
+}
+
 
 
 /* controls => button icons by field class, state class and pseudo state
