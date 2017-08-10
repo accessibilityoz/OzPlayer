@@ -2360,12 +2360,12 @@ var OzPlayer = (function()
                 player.video.style.display = 'none';
             }
 
+            //remove the video controls
+            player.video.removeAttribute('controls');
+
             /*** DEV TMP COMMENTED OUT ***//***
 
             ***/
-
-            //remove the video controls
-            player.video.removeAttribute('controls');
 
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
@@ -6113,10 +6113,6 @@ var OzPlayer = (function()
 
         //create a span-wrapped play/pause button inside the controls fieldset
         //with its state set to "off" and the button disabled by default
-        //** nb. I'd quite it like it if this could also be the "submit" button
-        //** just for the semantics of having a submit action, but then whenever
-        //** you press Enter from another input, the button's click event fires
-        //** (eg. from a text input where the range input is not supported)
         //nb. the open-bracket must be on the same line for function name compression
         addControlButton(
             player,
@@ -6125,14 +6121,8 @@ var OzPlayer = (function()
             'off',
             'off',
             {
-                //add a mouseup focuser for the benefit of webkit
-                //which otherwise doesn't focus the buttons when you click them
-                'onmouseup' : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                 //then define an abstraction for the button's command handler
                 //so we can call it programatically (eg. from the global key handler)
-                //nb. but bceause of that we won't always have an event
-                //so for all intents and purposes, we'll never have one
                 '.command'  : function()
                 {
                     //*** DEV TMP
@@ -6365,10 +6355,6 @@ var OzPlayer = (function()
                 statekey,
                 labelkey,
                 {
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup' : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //create an abstraction for loading and displaying the captions
                     //specified by the current caption track captions-selected flag
                     //and updating the transcript specified by transcript-selected flag
@@ -6998,16 +6984,6 @@ var OzPlayer = (function()
                 onstate,
                 onstate,
                 {
-                    //if we have audio links data then set the button role to "link"
-                    //so that screenreaders will indicate the difference in function
-                    //otherwise set it to null so that the attribute isn't defined at all
-                    //(for consistency with others which need no role since they're implicit buttons)
-                    'role'      : (player.audiolinks ? 'link' : null),
-
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup' : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //then define an abstraction for the button's command handler
                     '.command'  : function()
                     {
@@ -7153,12 +7129,8 @@ var OzPlayer = (function()
                 (player.media.muted ? 'off' : 'on'),
                 (player.media.muted ? 'off' : 'on'),
                 {
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup'            : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //then define an abstraction for the button's command handler
-                    '.command'            : function()
+                    '.command'  : function()
                     {
                         //reset the keyclick flag
                         player.keyclick = false;
@@ -7364,17 +7336,13 @@ var OzPlayer = (function()
                 'off',
                 'off',
                 {
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup'            : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //copy the screentype key
-                    '.screentype'        : screentype,
+                    '.screentype'   : screentype,
 
                     //create properties we can use for recording the
                     //video width and height before resizing into fullscreen
-                    '.videowidth'        : 0,
-                    '.videoheight'        : 0,
+                    '.videowidth'   : 0,
+                    '.videoheight'  : 0,
 
                     //then define an abstraction for the screenchange event
                     //nb. we would actually get smoother results if we resized the
@@ -7382,7 +7350,7 @@ var OzPlayer = (function()
                     //because we can't guarantee that it's happened until the event fires
                     //(eg. it won't fire if user permissions have already blocked fullscreen)
                     //indeed the overall process is pretty inelegant, but it does the job!
-                    '.screenchange'        : function(e, thetarget)
+                    '.screenchange' : function(e, thetarget)
                     {
                         //if this is not the designated fullscreen player, just ignore the event
                         if(screenplayer != player) { return; }
@@ -7743,7 +7711,7 @@ var OzPlayer = (function()
                     },
 
                     //then define an abstraction for the button's command handler
-                    '.command'            : function(e)
+                    '.command'      : function(e)
                     {
                         //*** DEV TMP
                         //etc.get('#info').innerHTML = ('fullscreen->command(' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
@@ -10310,24 +10278,43 @@ var OzPlayer = (function()
         //plus the disabled attribute if the button is disabled by default
         //applying the default text and aria-label from lang
         //with a wrapper around the text so we can hide it for the icon view
-        //nb. set aria-hidden=false on the wrapper to try to counteract its lack of display
-        //since we can't use off-left positioning on an element that can take the focus
-        //although it's most likely to be the aria-label that screenreaders actually read
         var dom =
         {
-            'type'              : 'button',
-            'name'              : key,
-            'class'             : config.classes['field-state-' + statekey],
-            'disabled'          : (!enabled ? 'disabled' : null),
-            'aria-label'        : getLang(player, 'button-' + key + '-' + labelkey),
-            '#dom'              : etc.build('strong',
+            'type'          : 'button',
+            'name'          : key,
+            'class'         : config.classes['field-state-' + statekey],
+            'disabled'      : (!enabled ? 'disabled' : null),
+            'aria-label'    : getLang(player, 'button-' + key + '-' + labelkey),
+            '#dom'          : etc.build('strong',
             {
-                'aria-hidden'   : 'false',
-                '#text'         : getLang(player, 'text-' + key + '-' + labelkey)
+                '#text'     : getLang(player, 'text-' + key + '-' + labelkey)
             }),
+
+            //add aria-pressed so that screenreaders announce this as a toggle button
+            //(which also fixes JAWS+Firefox not announcing changes in aria-label)
+            //unless this is the AD button and we have audio links data, in which
+            //case it shouldn't have aria-pressed because it's a link not a button
+            'aria-pressed'  : (key === 'ad' && player.audiolinks ? null : statekey == 'on' ? 'true' : 'false'),
+
             //also define a state flag, which is more efficient
-            //to refer to than checking the button's class each time
-            '.state'            : statekey
+            //to refer to than checking the button's attributes each time
+            '.state'        : statekey,
+
+            //if this is the AD button and we have audio links data then set the role to "link"
+            //so that screenreaders will describe it as a link to match its function
+            //otherwise add the button role to fix an issue with iOS10/VO not conveying
+            //the aria-pressed state (https://bugs.webkit.org/show_bug.cgi?id=162269)
+            'role'          : (key === 'ad' && player.audiolinks ? 'link' : 'button'),
+
+            //add a mouseup focuser for the benefit of older webkit
+            //which otherwise may not focus the buttons when you click them
+            'onmouseup'     : function(e, thetarget)
+            {
+                if(!thetarget.disabled)
+                {
+                    thetarget.focus();
+                }
+            }
         };
 
         //now iterate through the button props and add each one to the dictionary
@@ -10342,7 +10329,7 @@ var OzPlayer = (function()
         //plus the disabled state class if the button is disabled by default
         //defining a name so we can refer to it in the control form collection
         //but also explicitly creating that reference just to be on the safe side
-        //nb. also add a single space after button, just to create basic spacing
+        //nb. also add a single space after the button, just to create basic spacing
         //for viewing the page without CSS, which won't otherwise be seen
         //nb. also set aria-hidden=false to try to counteract lack of display on the
         //mute and volume fields when responsive layout has applied the smallscreen class
@@ -11390,7 +11377,7 @@ var OzPlayer = (function()
     //update the state of a control by name (eg. "playpause") and state (eg. "on")
     //nb. if the input state is an array then the first value is the state
     //property and the second is the state class, which is so that a button
-    //can have multiple state classes [while still only having one state]
+    //can have multiple state classes while still only having one state
     //eg. the mute button can be "on high" or "on low" (or "off high" or "off low")
     function updateControlState(player, name, state)
     {
@@ -11410,9 +11397,15 @@ var OzPlayer = (function()
         etc.render(player.controlform[name],
         {
             '.state'    : state,
-            'class'        : config.classes['field-state-' + state]
+            'class'     : config.classes['field-state-' + state]
                         + (!klass ? '' : (' ' + config.classes['field-state-' + klass]))
         });
+
+        //if the button has aria-pressed, update it to match the state
+        if(player.controlform[name].getAttribute('aria-pressed') !== null)
+        {
+            player.controlform[name].setAttribute('aria-pressed', state == 'on' ? 'true' : 'false');
+        }
 
         //update the aria-label unless the control is disabled, and the element's inner text
         //including re-applying the slider widths if images are disabled and it's necessary
