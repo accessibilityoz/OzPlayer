@@ -1254,12 +1254,13 @@ var OzPlayer = (function()
         'tooltip-show-delay'      : 400,
         'tooltip-hide-delay'      : 2500,
 
+        /*** OLD ***//***
         //aria valuetext persistence time for the seek slider (milliseconds)
         //nb. this is used to add and remove the seek slider's aria-valuetext
         //so that it's only announced on focus and manual change, not continously
         //(see applySliderAriaText for more notes about this)
         'seek-text-delay'         : 1000,
-
+        ***/
 
         //programatic element IDs
         ids :
@@ -7199,15 +7200,12 @@ var OzPlayer = (function()
             //and we'd have to arse about converting with ((round(10 / 11) * value) / 10)
             //which would mean that the volume you set might not be exactly what you get
             //nb. also add a single space after button, just to create basic spacing
-            //nb. also set aria-hidden=false to try to counteract lack of display on the
-            //mute and volume fields when responsive layout has applied the smallscreen class
             etc.build('span',
             {
                 '=parent'           : player.controlform.firstChild,
                 'class'             : config.classes['field-wrapper']
                                     + ' '
                                     + config.classes['field-volume'],
-                'aria-hidden'       : 'false',
                 '#dom'              : (player.controlform.volume = etc.build('input',
                 {
                     'type'          : slidertype,
@@ -12850,12 +12848,12 @@ var OzPlayer = (function()
             });
 
             //then create the thumb as a child of the track and give it the "slider" role
-            //including an empty-string for the aria-valuetext so that screenreaders don't
-            //announce the value at all, otherwise they'd read the time continuously while the
-            //seek slider has focus when the video is playing, so instead we have extra events
-            //that set the value momentarily, so that the value is only read when you tab
-            //to it or when you manually change the slider value, and not at any other time
-            //(for the seek slider, but the volume slider will set a normal permanent value)
+            //*** OLD ***//    //including an empty-string for the aria-valuetext so that screenreaders don't
+            //*** OLD ***//    //announce the value at all, otherwise they'd read the time continuously while the
+            //*** OLD ***//    //seek slider has focus when the video is playing, so instead we have extra events
+            //*** OLD ***//    //that set the value momentarily, so that the value is only read when you tab
+            //*** OLD ***//    //to it or when you manually change the slider value, and not at any other time
+            //*** OLD ***//    //(for the seek slider, but the volume slider will set a normal permanent value)
             //also define its ID using the prefix defined in config parsed with control ID
             //and add an inner element, that can be used to improve usability by increasing
             //the size of the event target without changing the apparent size of the thumb
@@ -12864,7 +12862,7 @@ var OzPlayer = (function()
                 '=parent'           : theslider.track,
                 'type'              : 'button',
                 'role'              : 'slider',
-                'aria-valuetext'    : '',
+                //*** OLD ***//    'aria-valuetext'    : '',
                 'class'             : config.classes['slider-thumb'],
                 'id'                : etc.sprintf(config.ids['slider-thumb'], { id : control.id }),
                 '#dom'              : etc.build('strong')
@@ -12920,7 +12918,7 @@ var OzPlayer = (function()
         {
             'aria-valuemin'     : theslider.options[0].value,
             'aria-valuemax'     : theslider.options[theslider.options.length - 1].value,
-            'aria-orientation'     : 'horizontal'
+            'aria-orientation'  : 'horizontal'
         });
 
         //if the range max is zero then this slider has been initialized
@@ -13036,6 +13034,7 @@ var OzPlayer = (function()
             //clear the mouse-pressed flag
             theslider.__mousepressed = false;
 
+            /*** OLD ***//***
             //then if we were sliding the seek slider, momentarily add its aria-valutext
             //so that screenreaders will announce it now, but not continuously
             //nb. screenreaders normally use keyboard events, but we should add a
@@ -13044,6 +13043,7 @@ var OzPlayer = (function()
             {
                 applySliderAriaText(theslider);
             }
+            ***/
 
             //call afterSlide and return the result to control native action
             return afterSlide(e, thetarget, theslider);
@@ -13164,12 +13164,14 @@ var OzPlayer = (function()
                 beforeSlide(e, thetarget, theslider);
                 doSlide(e, thetarget, theslider);
 
+                /*** OLD ***//***
                 //then if this is the seek slider, momentarily add its aria-valutext
                 //so that screenreaders will announce it now, but not continuously
                 if(theslider.control.name == 'seek')
                 {
                     applySliderAriaText(theslider);
                 }
+                ***/
 
                 //now we need to pause to implement the key-repeat delay
                 //unless the key-repeat rate is zero, which means no delay
@@ -13223,6 +13225,7 @@ var OzPlayer = (function()
             //clear the pressing flag
             theslider.__pressing = false;
 
+            /*** OLD ***//***
             //if a key-repeat timer is running on this slider
             //then we've just let go after a slider repeat
             if(theslider.__keyrepeat)
@@ -13234,6 +13237,7 @@ var OzPlayer = (function()
                     applySliderAriaText(theslider);
                 }
             }
+            ***/
 
             //then cancel any delay or repeat timers and nullify the references
             theslider.__keydelay = nullifyTimer(theslider.__keydelay);
@@ -13255,6 +13259,7 @@ var OzPlayer = (function()
 
 
 
+        /*** OLD ***//***
         //~~ keyboard thumb focus event ~~//
 
         //if this is the seek slider, bind a thumb focus event that momentarily adds its
@@ -13266,6 +13271,7 @@ var OzPlayer = (function()
                 applySliderAriaText(theslider);
             });
         }
+        ***/
 
 
 
@@ -13320,6 +13326,7 @@ var OzPlayer = (function()
                 //now we can call doSlide to implement the thumb movement
                 doSlide(e, thetarget, theslider);
 
+                /*** OLD ***//***
                 //if this is the seek slider, momentarily add its aria-valutext
                 //so that screenreaders will announce it now, but not continuously
                 //nb. screenreaders normally use keyboard events, but we just add a
@@ -13328,6 +13335,7 @@ var OzPlayer = (function()
                 {
                     applySliderAriaText(theslider);
                 }
+                ***/
 
                 //and then call afterSlide to reset the sliding flag and tooltip
                 afterSlide(e, thetarget, theslider);
@@ -13857,17 +13865,17 @@ var OzPlayer = (function()
             '1' : theslider.options[theslider.index].tooltip
         });
 
-        //then if this is not the seek slider,
+        //*** OLD ***//    //then if this is not the seek slider,
         //define ARIA "valuetext" using the tooltip text
-        //nb. the seek slider only has it defined momentarily
-        //(see applySliderAriaText for notes about this)
-        if(theslider.control.name != 'seek')
-        {
+        //*** OLD ***//    //nb. the seek slider only has it defined momentarily
+        //*** OLD ***//    //(see applySliderAriaText for notes about this)
+        //*** OLD ***//if(theslider.control.name != 'seek')
+        //*** OLD ***//{
             theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
             {
                 '1' : theslider.options[theslider.index].tooltip
             }));
-        }
+        //*** OLD ***//}
 
         //update the value of the underlying control
         theslider.control.value = theslider.value;
@@ -13939,6 +13947,7 @@ var OzPlayer = (function()
     }
 
 
+    /*** OLD ***//***
     //momentarily add the seek slider's aria-valutext
     //so that its value is announced, but doesn't keep getting
     //announced as the video plays and the slider still has focus
@@ -13991,6 +14000,7 @@ var OzPlayer = (function()
             //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
         });
     }
+    ***/
 
 
     //dispatch an API event, by looking through the slider's callbacks dictionary
