@@ -8419,6 +8419,7 @@ var OzPlayer = (function()
 
 
         //if the player offset width is already less than the smallscreen threshold
+        //(or the control form width if this is the audio-only player)
         //nb. now that we have the layout variations we need to handle smallscreen
         //we can do so by default even if we don't have a responsive container
         //nb. we need the wrapper offset width so it doesn't include the player borders
@@ -8426,7 +8427,7 @@ var OzPlayer = (function()
         //** what about the default width and height we sent to mediaelement for flash?
         //** it doesn't seem to matter now, but when we implement ways around the
         //** flash-of-too-large problem, that may well be one of the things we need to change
-        if(player.wrapper.offsetWidth < config['default-width'])
+        if((player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) < config['default-width'])
         {
             //*** DEV TMP
             //_.title = player.wrapper.nodeName + ' [!] ' + player.wrapper.offsetWidth;
