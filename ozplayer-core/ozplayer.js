@@ -1254,14 +1254,6 @@ var OzPlayer = (function()
         'tooltip-show-delay'      : 400,
         'tooltip-hide-delay'      : 2500,
 
-        /*** OLD ***//***
-        //aria valuetext persistence time for the seek slider (milliseconds)
-        //nb. this is used to add and remove the seek slider's aria-valuetext
-        //so that it's only announced on focus and manual change, not continously
-        //(see applySliderAriaText for more notes about this)
-        'seek-text-delay'         : 1000,
-        ***/
-
         //programatic element IDs
         ids :
         {
@@ -7972,18 +7964,6 @@ var OzPlayer = (function()
                                         : 'disabled';
                             });
 
-                            /*** OLD *//***
-                            etc.each(player.tracks.captions, function(track, srclang)
-                            {
-                                if(track.textTrack)
-                                {
-                                    track.textTrack.mode =
-                                        (player.tracks.captions.enabled && srclang == player.tracks.captions.selected.captions)
-                                            ? 'showing' : 'disabled';
-                                }
-                            });
-                            ***/
-
                             //bind a temporary change event to the textTracks object to handle native language changes
                             //so we can update the custom captions automatically for when you exit fullscreen again
                             //nb. we can't just check for mode differences when exiting fullscreen, because the
@@ -8101,14 +8081,6 @@ var OzPlayer = (function()
                         //silence the textTracks change event
                         ontrackchange.silence();
 
-                        /*** OLD ***//***
-                        //set all the native textTrack mode flags to "disabled"
-                        etc.each(player.video.textTracks, function(track)
-                        {
-                            track.mode = 'disabled';
-                        });
-                        ***/
-
                         //set all the native textTrack mode flags in every instance to "disabled"
                         //nb. logically we should only have to do this for the current player instance
                         //however for some reason, enabling captions or switching language using the
@@ -8126,41 +8098,6 @@ var OzPlayer = (function()
                             }
                         });
                     }
-
-                    /*** OLD ***//***
-                    //then if we have captions data and native captions are supported,
-                    //update the enabled state to match any native track modes
-                    //nb. if we didn't do this then the enabled state in non-fullscreen mode
-                    //wouldn't reflect any changes made in the native fullscreen interface
-                    if(player.tracks.captions && etc.def(player.video.textTracks))
-                    {
-                        //define a flag for whether native captions are showing
-                        var showing = false;
-
-                        //then iterate through the caption tracks, and for each that has a native
-                        //textTrack object, if the textTrack mode flag is "showing" set the
-                        //showing flag to true, then set the mode to "disabled" to turn them off
-                        //(ie. so native captions only show in fullscreen mode, when custom ones can't be)
-                        etc.each(player.tracks.captions, function(track, srclang)
-                        {
-                            if(track.textTrack)
-                            {
-                                if(track.textTrack.mode == 'showing')
-                                {
-                                    showing = true;
-                                }
-                                track.textTrack.mode = 'disabled';
-                            }
-                        });
-
-                        //then if the showing flag doesn't match the captions enabled state
-                        //call the cc button command function to toggle the state and UI
-                        if(showing != player.tracks.captions.enabled)
-                        {
-                            player.controlform.cc.command();
-                        }
-                    }
-                    ***/
 
                     //if the responsive layout is enabled
                     if(player.options.responsive)
@@ -8803,26 +8740,6 @@ var OzPlayer = (function()
                     }
 
                     break;
-
-                /*** OLD ***//***
-                //the Space bar triggers play or pause unless it comes from inside the language menu
-                //* this is not generic enough to handle multiple menus; we'd need a special contains methods
-                //* that checks for containing context by attributes without reference to specific elements
-                case (e.keyCode == 32 && (!player.controlform['menu-cc'] || !etc.contains(player.controlform['menu-cc'], thetarget))) :
-
-                    //set the repeating flag
-                    player.repeating = true;
-
-                    //call the playpause button's command handler
-                    //then return null to prevent default and cancel bubble
-                    //so it doesn't natively scroll the page at the same time
-                    //and so it doesn't also fire the button's click handler
-                    //nb. we don't repeat this action because that's not intuitive
-                    //and anyway rapid playing and pausing puts a lot of strain on the browser
-                    player.controlform.playpause.command();
-                    return null;
-                ***/
-
             }
         });
 
@@ -8836,24 +8753,6 @@ var OzPlayer = (function()
             //cancel and nullify any key-repeat or repeat-delay timers
             player.__keydelay = nullifyTimer(player.__keydelay);
             player.__keyrepeat = nullifyTimer(player.__keyrepeat);
-
-            /*** OLD ***//***
-            //switch by evaluation
-            switch(true)
-            {
-                //firefox continues to fire button click events from the spacebar,
-                //even though we've overriden them, but we can prevent that with
-                //explicit prevent default and cancel bubble on the spacebar keyup
-                //nb. I guess it has a different idea about spacebar click events
-                //and the key combinations they translate to, in fact it
-                //may even be platform-specific since using space for key
-                //actuation is more of a mac convention than other platforms
-                //** test this in windows to confirm that speculation
-                case (e.keyCode == 32) :
-
-                    return null;
-            }
-            ***/
 
             //now reset the keyclick flag whatever happens
             player.keyclick = false;
@@ -12848,24 +12747,17 @@ var OzPlayer = (function()
             });
 
             //then create the thumb as a child of the track and give it the "slider" role
-            //*** OLD ***//    //including an empty-string for the aria-valuetext so that screenreaders don't
-            //*** OLD ***//    //announce the value at all, otherwise they'd read the time continuously while the
-            //*** OLD ***//    //seek slider has focus when the video is playing, so instead we have extra events
-            //*** OLD ***//    //that set the value momentarily, so that the value is only read when you tab
-            //*** OLD ***//    //to it or when you manually change the slider value, and not at any other time
-            //*** OLD ***//    //(for the seek slider, but the volume slider will set a normal permanent value)
             //also define its ID using the prefix defined in config parsed with control ID
             //and add an inner element, that can be used to improve usability by increasing
             //the size of the event target without changing the apparent size of the thumb
             theslider.thumb = etc.build('button',
             {
-                '=parent'           : theslider.track,
-                'type'              : 'button',
-                'role'              : 'slider',
-                //*** OLD ***//    'aria-valuetext'    : '',
-                'class'             : config.classes['slider-thumb'],
-                'id'                : etc.sprintf(config.ids['slider-thumb'], { id : control.id }),
-                '#dom'              : etc.build('strong')
+                '=parent'   : theslider.track,
+                'type'      : 'button',
+                'role'      : 'slider',
+                'class'     : config.classes['slider-thumb'],
+                'id'        : etc.sprintf(config.ids['slider-thumb'], { id : control.id }),
+                '#dom'      : etc.build('strong')
             });
 
             //create a "for" association from the track label to the thumb, partly for semantics,
@@ -13034,17 +12926,6 @@ var OzPlayer = (function()
             //clear the mouse-pressed flag
             theslider.__mousepressed = false;
 
-            /*** OLD ***//***
-            //then if we were sliding the seek slider, momentarily add its aria-valutext
-            //so that screenreaders will announce it now, but not continuously
-            //nb. screenreaders normally use keyboard events, but we should add a
-            //mouseup as well, just in case of emulated mouse events or some shit
-            if(theslider.__sliding && theslider.control.name == 'seek')
-            {
-                applySliderAriaText(theslider);
-            }
-            ***/
-
             //call afterSlide and return the result to control native action
             return afterSlide(e, thetarget, theslider);
         });
@@ -13164,15 +13045,6 @@ var OzPlayer = (function()
                 beforeSlide(e, thetarget, theslider);
                 doSlide(e, thetarget, theslider);
 
-                /*** OLD ***//***
-                //then if this is the seek slider, momentarily add its aria-valutext
-                //so that screenreaders will announce it now, but not continuously
-                if(theslider.control.name == 'seek')
-                {
-                    applySliderAriaText(theslider);
-                }
-                ***/
-
                 //now we need to pause to implement the key-repeat delay
                 //unless the key-repeat rate is zero, which means no delay
                 //but not if the event came from the minimize or maximize keys
@@ -13225,20 +13097,6 @@ var OzPlayer = (function()
             //clear the pressing flag
             theslider.__pressing = false;
 
-            /*** OLD ***//***
-            //if a key-repeat timer is running on this slider
-            //then we've just let go after a slider repeat
-            if(theslider.__keyrepeat)
-            {
-                //if this is the seek slider, momentarily add its aria-valutext
-                //so that screenreaders will announce it now, but not continuously
-                if(theslider.control.name == 'seek')
-                {
-                    applySliderAriaText(theslider);
-                }
-            }
-            ***/
-
             //then cancel any delay or repeat timers and nullify the references
             theslider.__keydelay = nullifyTimer(theslider.__keydelay);
             theslider.__keyrepeat = nullifyTimer(theslider.__keyrepeat);
@@ -13256,22 +13114,6 @@ var OzPlayer = (function()
         {
             if(verifySliderKey(e)) { return false; }
         });
-
-
-
-        /*** OLD ***//***
-        //~~ keyboard thumb focus event ~~//
-
-        //if this is the seek slider, bind a thumb focus event that momentarily adds its
-        //aria-valutext so that screenreaders will announce it, but not continuously
-        if(theslider.control.name == 'seek')
-        {
-            etc.listen(theslider.thumb, 'focus', function(e)
-            {
-                applySliderAriaText(theslider);
-            });
-        }
-        ***/
 
 
 
@@ -13325,17 +13167,6 @@ var OzPlayer = (function()
 
                 //now we can call doSlide to implement the thumb movement
                 doSlide(e, thetarget, theslider);
-
-                /*** OLD ***//***
-                //if this is the seek slider, momentarily add its aria-valutext
-                //so that screenreaders will announce it now, but not continuously
-                //nb. screenreaders normally use keyboard events, but we just add a
-                //mouseup as well, just in case of emulated mouse events or some shit
-                if(theslider.control.name == 'seek')
-                {
-                    applySliderAriaText(theslider);
-                }
-                ***/
 
                 //and then call afterSlide to reset the sliding flag and tooltip
                 afterSlide(e, thetarget, theslider);
@@ -13865,17 +13696,11 @@ var OzPlayer = (function()
             '1' : theslider.options[theslider.index].tooltip
         });
 
-        //*** OLD ***//    //then if this is not the seek slider,
         //define ARIA "valuetext" using the tooltip text
-        //*** OLD ***//    //nb. the seek slider only has it defined momentarily
-        //*** OLD ***//    //(see applySliderAriaText for notes about this)
-        //*** OLD ***//if(theslider.control.name != 'seek')
-        //*** OLD ***//{
-            theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
-            {
-                '1' : theslider.options[theslider.index].tooltip
-            }));
-        //*** OLD ***//}
+        theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
+        {
+            '1' : theslider.options[theslider.index].tooltip
+        }));
 
         //update the value of the underlying control
         theslider.control.value = theslider.value;
@@ -13945,62 +13770,6 @@ var OzPlayer = (function()
         //then constrain the position if necessary to keep it inside the controls form
         definitelyMoveSliderTooltip(theslider, trackdata);
     }
-
-
-    /*** OLD ***//***
-    //momentarily add the seek slider's aria-valutext
-    //so that its value is announced, but doesn't keep getting
-    //announced as the video plays and the slider still has focus
-    //nb. if we set a permanent valuetext attribute, then every time
-    //the slider was updated, the time text would be read out again
-    //nb. this will only work for screenreaders that read aria-valuetext
-    //in favour of aria-valuenow, eg. NVDA + Firefox 24 is okay, but NVDA + IE8
-    //reads the valuenow number, and NVDA + Chrome just says "slider editable blank"!
-    //*** this is reliable on button focus, but not reliable for manual slide
-    function applySliderAriaText(theslider)
-    {
-        //if we already have an ariatext timer, reset it and nullify the reference
-        if(theslider.__ariatext)
-        {
-            __.clearTimeout(theslider.__ariatext);
-            theslider.__ariatext = null;
-        }
-
-        //now define the slider's aria-valuetext using the tooltip text
-        theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
-        {
-            '1' : theslider.options[theslider.index].tooltip
-        }));
-
-
-        //*** DEV TMP
-        //var e = { type : 'add-ariatext' };
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-        //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-        //str += 'theslider = ' + theslider.id.split('-').pop() + '\ttext = "' + theslider.thumb.getAttribute('aria-valuetext') + '"<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
-        //pause for long enough to allow the reader to start reading the value
-        theslider.__ariatext = etc.delay(config['seek-text-delay'], function()
-        {
-            //reset the timer and nullify the reference
-            __.clearTimeout(theslider.__ariatext);
-            theslider.__ariatext = null;
-
-            //then reset aria-text to empty string so it doesn't get read again
-            theslider.thumb.setAttribute('aria-valuetext', '');
-
-
-            //*** DEV TMP
-            //var e = { type : 'remove-ariatext' };
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-            //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-            //str += 'theslider = ' + theslider.id.split('-').pop() + '\ttext = "' + theslider.thumb.getAttribute('aria-valuetext') + '"<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-        });
-    }
-    ***/
 
 
     //dispatch an API event, by looking through the slider's callbacks dictionary
@@ -14098,15 +13867,6 @@ var OzPlayer = (function()
         return timer;
     }
 
-
-    /*** OLD ***//***
-    //verify that a relevant key was pressed so we can implement arrow-key sliding
-    //nb. we exclude the up and down arrows so we can bind them separately for volume controls
-    function verifySliderKey(e)
-    {
-        return ((e.keyCode >= 33 && e.keyCode <= 37) || e.keyCode == 39);
-    }
-    ***/
 
     //verify that a relevant key was pressed so we can implement arrow-key sliding
     function verifySliderKey(e)
