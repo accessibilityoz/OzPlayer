@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.0] => player core
+ OzPlayer [3.1] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -1254,20 +1254,13 @@ var OzPlayer = (function()
         'tooltip-show-delay'      : 400,
         'tooltip-hide-delay'      : 2500,
 
-        //aria valuetext persistence time for the seek slider (milliseconds)
-        //nb. this is used to add and remove the seek slider's aria-valuetext
-        //so that it's only announced on focus and manual change, not continously
-        //(see applySliderAriaText for more notes about this)
-        'seek-text-delay'         : 1000,
-
-
         //programatic element IDs
         ids :
         {
             //media wrapper (video or plugin wrapper) ID template,
             //which is parsed with the player instance ID if the element
-            //doesn't already have an ID, so that we can use it to
-            //make an aria-controls assignment on the controls form
+            //doesn't already have an ID, so that we can use it
+            //to create a fragment-ID action for the form
             'video'                   : '%id-ozplayer-video',
 
             //custom slider instance ID template,
@@ -2360,12 +2353,12 @@ var OzPlayer = (function()
                 player.video.style.display = 'none';
             }
 
+            //remove the video controls
+            player.video.removeAttribute('controls');
+
             /*** DEV TMP COMMENTED OUT ***//***
 
             ***/
-
-            //remove the video controls
-            player.video.removeAttribute('controls');
 
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
@@ -5757,8 +5750,7 @@ var OzPlayer = (function()
 
         //if the wrapper doesn't have an ID, then assign one now
         //using the wrapper ID template parsed with the instance ID
-        //nb. this is needed to define aria-controls on the controls form
-        //and to create a fragment-ID action for the form, so it has one
+        //nb. this is needed to create a fragment-ID action for the form
         if(!player.wrapper.id)
         {
             player.wrapper.id = etc.sprintf(config.ids['video'],
@@ -5822,12 +5814,6 @@ var OzPlayer = (function()
         //is important, because it determines the reading order, both
         //for assistive technologies, and when viewing without CSS
 
-        //add the application role to unify keyboard interaction in screenreaders
-        etc.render(player.container,
-        {
-            'role' : 'application'
-        });
-
         //if this is not an audio-only player
         //create a custom poster overlay to shore-up the
         //native poster, and to provide an iconic click-to-play
@@ -5848,18 +5834,24 @@ var OzPlayer = (function()
         //else it matches the cue id of the currently displayed caption
         //and is defined as an attribute rather than a property
         //so it can also be used in CSS attribute selectors
-        //nb. I did consider adding aria-live, but then why would a
-        //screenreader user want captions? and since time-based
-        //updates would be intrusive and potentially mis-timed anyway
-        //I think it's better overall if it's not a live region
-        //it's the transcript that really matters for this group of users
+        //also make this a polite aria-live region, so that the
+        //captions are announced by screenreaders but do not interrupt
+        //any interface or interaction speech; this will allow
+        //screenreader users to get the benefit of captions
+        //(e.g. for translations or non-native english speakers)
+        //although some users might not want them since they can
+        //hear the audio anyway, but they can always turn them off
+        //whereas not making them live would exclude them from these users
         player.captions = etc.build('div',
         {
-            '=parent'    : player.container,
-            'class'      : config.classes['captions']
-                         + ' '
-                         + config.classes['state-disabled'],
-            'data-cue'   : ''
+            '=parent'       : player.container,
+            'class'         : config.classes['captions']
+                            + ' '
+                            + config.classes['state-disabled'],
+            'data-cue'      : '',
+            'aria-live'     : 'polite',
+            'aria-atomic'   : 'true',
+            'aria-relevant' : 'additions text'
         });
 
 
@@ -6010,9 +6002,7 @@ var OzPlayer = (function()
 
         //create the controls form inside the container
         //including an offleft legend for assistive meta-data
-        //and an aria-controls attribute that points to the
-        //media wrapper ID (ie. this form controls the media object)
-        //and also an action that points to the same media wrapper ID
+        //including an action that points to the media wrapper ID
         //(which is better semantics than using javascript:void(null))
         //so then we need an onsubmit event to block native submission and bubbling
         //which is all we need as long as the form has no submit button
@@ -6020,10 +6010,14 @@ var OzPlayer = (function()
         //but now the specified width is something other browsers rely on
         //nb. the form has no padding, margin or borders, so that
         //we can size it without any added box-model complications
+        //nb. originally this had aria-controls pointing to the media wrapper ID
+        //however aria-controls is not well implemented among screenreaders
+        //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
+        //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
+        //which then always resulted in the message "Failed to move to controlled element"
         player.controlform = etc.build('form',
         {
             'class'         : config.classes['controls'],
-            'aria-controls' : player.wrapper.id,
             'action'        : '#' + player.wrapper.id,
             'onsubmit'        : function(){ return null },
             '#style'        :
@@ -6112,10 +6106,6 @@ var OzPlayer = (function()
 
         //create a span-wrapped play/pause button inside the controls fieldset
         //with its state set to "off" and the button disabled by default
-        //** nb. I'd quite it like it if this could also be the "submit" button
-        //** just for the semantics of having a submit action, but then whenever
-        //** you press Enter from another input, the button's click event fires
-        //** (eg. from a text input where the range input is not supported)
         //nb. the open-bracket must be on the same line for function name compression
         addControlButton(
             player,
@@ -6124,14 +6114,8 @@ var OzPlayer = (function()
             'off',
             'off',
             {
-                //add a mouseup focuser for the benefit of webkit
-                //which otherwise doesn't focus the buttons when you click them
-                'onmouseup' : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                 //then define an abstraction for the button's command handler
                 //so we can call it programatically (eg. from the global key handler)
-                //nb. but bceause of that we won't always have an event
-                //so for all intents and purposes, we'll never have one
                 '.command'  : function()
                 {
                     //*** DEV TMP
@@ -6364,10 +6348,6 @@ var OzPlayer = (function()
                 statekey,
                 labelkey,
                 {
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup' : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //create an abstraction for loading and displaying the captions
                     //specified by the current caption track captions-selected flag
                     //and updating the transcript specified by transcript-selected flag
@@ -6997,16 +6977,6 @@ var OzPlayer = (function()
                 onstate,
                 onstate,
                 {
-                    //if we have audio links data then set the button role to "link"
-                    //so that screenreaders will indicate the difference in function
-                    //otherwise set it to null so that the attribute isn't defined at all
-                    //(for consistency with others which need no role since they're implicit buttons)
-                    'role'      : (player.audiolinks ? 'link' : null),
-
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup' : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //then define an abstraction for the button's command handler
                     '.command'  : function()
                     {
@@ -7152,12 +7122,8 @@ var OzPlayer = (function()
                 (player.media.muted ? 'off' : 'on'),
                 (player.media.muted ? 'off' : 'on'),
                 {
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup'            : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //then define an abstraction for the button's command handler
-                    '.command'            : function()
+                    '.command'  : function()
                     {
                         //reset the keyclick flag
                         player.keyclick = false;
@@ -7226,15 +7192,12 @@ var OzPlayer = (function()
             //and we'd have to arse about converting with ((round(10 / 11) * value) / 10)
             //which would mean that the volume you set might not be exactly what you get
             //nb. also add a single space after button, just to create basic spacing
-            //nb. also set aria-hidden=false to try to counteract lack of display on the
-            //mute and volume fields when responsive layout has applied the smallscreen class
             etc.build('span',
             {
                 '=parent'           : player.controlform.firstChild,
                 'class'             : config.classes['field-wrapper']
                                     + ' '
                                     + config.classes['field-volume'],
-                'aria-hidden'       : 'false',
                 '#dom'              : (player.controlform.volume = etc.build('input',
                 {
                     'type'          : slidertype,
@@ -7363,17 +7326,13 @@ var OzPlayer = (function()
                 'off',
                 'off',
                 {
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the buttons when you click them
-                    'onmouseup'            : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
                     //copy the screentype key
-                    '.screentype'        : screentype,
+                    '.screentype'   : screentype,
 
                     //create properties we can use for recording the
                     //video width and height before resizing into fullscreen
-                    '.videowidth'        : 0,
-                    '.videoheight'        : 0,
+                    '.videowidth'   : 0,
+                    '.videoheight'  : 0,
 
                     //then define an abstraction for the screenchange event
                     //nb. we would actually get smoother results if we resized the
@@ -7381,7 +7340,7 @@ var OzPlayer = (function()
                     //because we can't guarantee that it's happened until the event fires
                     //(eg. it won't fire if user permissions have already blocked fullscreen)
                     //indeed the overall process is pretty inelegant, but it does the job!
-                    '.screenchange'        : function(e, thetarget)
+                    '.screenchange' : function(e, thetarget)
                     {
                         //if this is not the designated fullscreen player, just ignore the event
                         if(screenplayer != player) { return; }
@@ -7742,7 +7701,7 @@ var OzPlayer = (function()
                     },
 
                     //then define an abstraction for the button's command handler
-                    '.command'            : function(e)
+                    '.command'      : function(e)
                     {
                         //*** DEV TMP
                         //etc.get('#info').innerHTML = ('fullscreen->command(' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
@@ -8005,18 +7964,6 @@ var OzPlayer = (function()
                                         : 'disabled';
                             });
 
-                            /*** OLD *//***
-                            etc.each(player.tracks.captions, function(track, srclang)
-                            {
-                                if(track.textTrack)
-                                {
-                                    track.textTrack.mode =
-                                        (player.tracks.captions.enabled && srclang == player.tracks.captions.selected.captions)
-                                            ? 'showing' : 'disabled';
-                                }
-                            });
-                            ***/
-
                             //bind a temporary change event to the textTracks object to handle native language changes
                             //so we can update the custom captions automatically for when you exit fullscreen again
                             //nb. we can't just check for mode differences when exiting fullscreen, because the
@@ -8134,14 +8081,6 @@ var OzPlayer = (function()
                         //silence the textTracks change event
                         ontrackchange.silence();
 
-                        /*** OLD ***//***
-                        //set all the native textTrack mode flags to "disabled"
-                        etc.each(player.video.textTracks, function(track)
-                        {
-                            track.mode = 'disabled';
-                        });
-                        ***/
-
                         //set all the native textTrack mode flags in every instance to "disabled"
                         //nb. logically we should only have to do this for the current player instance
                         //however for some reason, enabling captions or switching language using the
@@ -8159,41 +8098,6 @@ var OzPlayer = (function()
                             }
                         });
                     }
-
-                    /*** OLD ***//***
-                    //then if we have captions data and native captions are supported,
-                    //update the enabled state to match any native track modes
-                    //nb. if we didn't do this then the enabled state in non-fullscreen mode
-                    //wouldn't reflect any changes made in the native fullscreen interface
-                    if(player.tracks.captions && etc.def(player.video.textTracks))
-                    {
-                        //define a flag for whether native captions are showing
-                        var showing = false;
-
-                        //then iterate through the caption tracks, and for each that has a native
-                        //textTrack object, if the textTrack mode flag is "showing" set the
-                        //showing flag to true, then set the mode to "disabled" to turn them off
-                        //(ie. so native captions only show in fullscreen mode, when custom ones can't be)
-                        etc.each(player.tracks.captions, function(track, srclang)
-                        {
-                            if(track.textTrack)
-                            {
-                                if(track.textTrack.mode == 'showing')
-                                {
-                                    showing = true;
-                                }
-                                track.textTrack.mode = 'disabled';
-                            }
-                        });
-
-                        //then if the showing flag doesn't match the captions enabled state
-                        //call the cc button command function to toggle the state and UI
-                        if(showing != player.tracks.captions.enabled)
-                        {
-                            player.controlform.cc.command();
-                        }
-                    }
-                    ***/
 
                     //if the responsive layout is enabled
                     if(player.options.responsive)
@@ -8515,6 +8419,7 @@ var OzPlayer = (function()
 
 
         //if the player offset width is already less than the smallscreen threshold
+        //(or the control form width if this is the audio-only player)
         //nb. now that we have the layout variations we need to handle smallscreen
         //we can do so by default even if we don't have a responsive container
         //nb. we need the wrapper offset width so it doesn't include the player borders
@@ -8522,7 +8427,7 @@ var OzPlayer = (function()
         //** what about the default width and height we sent to mediaelement for flash?
         //** it doesn't seem to matter now, but when we implement ways around the
         //** flash-of-too-large problem, that may well be one of the things we need to change
-        if(player.wrapper.offsetWidth < config['default-width'])
+        if((player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) < config['default-width'])
         {
             //*** DEV TMP
             //_.title = player.wrapper.nodeName + ' [!] ' + player.wrapper.offsetWidth;
@@ -8836,24 +8741,6 @@ var OzPlayer = (function()
                     }
 
                     break;
-
-                //the Space bar triggers play or pause unless it comes from inside the language menu
-                //* this is not generic enough to handle multiple menus; we'd need a special contains methods
-                //* that checks for containing context by attributes without reference to specific elements
-                case (e.keyCode == 32 && (!player.controlform['menu-cc'] || !etc.contains(player.controlform['menu-cc'], thetarget))) :
-
-                    //set the repeating flag
-                    player.repeating = true;
-
-                    //call the playpause button's command handler
-                    //then return null to prevent default and cancel bubble
-                    //so it doesn't natively scroll the page at the same time
-                    //and so it doesn't also fire the button's click handler
-                    //nb. we don't repeat this action because that's not intuitive
-                    //and anyway rapid playing and pausing puts a lot of strain on the browser
-                    player.controlform.playpause.command();
-                    return null;
-
             }
         });
 
@@ -8867,22 +8754,6 @@ var OzPlayer = (function()
             //cancel and nullify any key-repeat or repeat-delay timers
             player.__keydelay = nullifyTimer(player.__keydelay);
             player.__keyrepeat = nullifyTimer(player.__keyrepeat);
-
-            //switch by evaluation
-            switch(true)
-            {
-                //firefox continues to fire button click events from the spacebar,
-                //even though we've overriden them, but we can prevent that with
-                //explicit prevent default and cancel bubble on the spacebar keyup
-                //nb. I guess it has a different idea about spacebar click events
-                //and the key combinations they translate to, in fact it
-                //may even be platform-specific since using space for key
-                //actuation is more of a mac convention than other platforms
-                //** test this in windows to confirm that speculation
-                case (e.keyCode == 32) :
-
-                    return null;
-            }
 
             //now reset the keyclick flag whatever happens
             player.keyclick = false;
@@ -10305,24 +10176,43 @@ var OzPlayer = (function()
         //plus the disabled attribute if the button is disabled by default
         //applying the default text and aria-label from lang
         //with a wrapper around the text so we can hide it for the icon view
-        //nb. set aria-hidden=false on the wrapper to try to counteract its lack of display
-        //since we can't use off-left positioning on an element that can take the focus
-        //although it's most likely to be the aria-label that screenreaders actually read
         var dom =
         {
-            'type'              : 'button',
-            'name'              : key,
-            'class'             : config.classes['field-state-' + statekey],
-            'disabled'          : (!enabled ? 'disabled' : null),
-            'aria-label'        : getLang(player, 'button-' + key + '-' + labelkey),
-            '#dom'              : etc.build('strong',
+            'type'          : 'button',
+            'name'          : key,
+            'class'         : config.classes['field-state-' + statekey],
+            'disabled'      : (!enabled ? 'disabled' : null),
+            'aria-label'    : getLang(player, 'button-' + key + '-' + labelkey),
+            '#dom'          : etc.build('strong',
             {
-                'aria-hidden'   : 'false',
-                '#text'         : getLang(player, 'text-' + key + '-' + labelkey)
+                '#text'     : getLang(player, 'text-' + key + '-' + labelkey)
             }),
+
+            //add aria-pressed so that screenreaders announce this as a toggle button
+            //(which also fixes JAWS+Firefox not announcing changes in aria-label)
+            //unless this is the AD button and we have audio links data, in which
+            //case it shouldn't have aria-pressed because it's a link not a button
+            'aria-pressed'  : (key === 'ad' && player.audiolinks ? null : statekey == 'on' ? 'true' : 'false'),
+
             //also define a state flag, which is more efficient
-            //to refer to than checking the button's class each time
-            '.state'            : statekey
+            //to refer to than checking the button's attributes each time
+            '.state'        : statekey,
+
+            //if this is the AD button and we have audio links data then set the role to "link"
+            //so that screenreaders will describe it as a link to match its function
+            //otherwise add the button role to fix an issue with iOS10/VO not conveying
+            //the aria-pressed state (https://bugs.webkit.org/show_bug.cgi?id=162269)
+            'role'          : (key === 'ad' && player.audiolinks ? 'link' : 'button'),
+
+            //add a mouseup focuser for the benefit of older webkit
+            //which otherwise may not focus the buttons when you click them
+            'onmouseup'     : function(e, thetarget)
+            {
+                if(!thetarget.disabled)
+                {
+                    thetarget.focus();
+                }
+            }
         };
 
         //now iterate through the button props and add each one to the dictionary
@@ -10337,7 +10227,7 @@ var OzPlayer = (function()
         //plus the disabled state class if the button is disabled by default
         //defining a name so we can refer to it in the control form collection
         //but also explicitly creating that reference just to be on the safe side
-        //nb. also add a single space after button, just to create basic spacing
+        //nb. also add a single space after the button, just to create basic spacing
         //for viewing the page without CSS, which won't otherwise be seen
         //nb. also set aria-hidden=false to try to counteract lack of display on the
         //mute and volume fields when responsive layout has applied the smallscreen class
@@ -11385,7 +11275,7 @@ var OzPlayer = (function()
     //update the state of a control by name (eg. "playpause") and state (eg. "on")
     //nb. if the input state is an array then the first value is the state
     //property and the second is the state class, which is so that a button
-    //can have multiple state classes [while still only having one state]
+    //can have multiple state classes while still only having one state
     //eg. the mute button can be "on high" or "on low" (or "off high" or "off low")
     function updateControlState(player, name, state)
     {
@@ -11405,9 +11295,15 @@ var OzPlayer = (function()
         etc.render(player.controlform[name],
         {
             '.state'    : state,
-            'class'        : config.classes['field-state-' + state]
+            'class'     : config.classes['field-state-' + state]
                         + (!klass ? '' : (' ' + config.classes['field-state-' + klass]))
         });
+
+        //if the button has aria-pressed, update it to match the state
+        if(player.controlform[name].getAttribute('aria-pressed') !== null)
+        {
+            player.controlform[name].setAttribute('aria-pressed', state == 'on' ? 'true' : 'false');
+        }
 
         //update the aria-label unless the control is disabled, and the element's inner text
         //including re-applying the slider widths if images are disabled and it's necessary
@@ -12852,24 +12748,17 @@ var OzPlayer = (function()
             });
 
             //then create the thumb as a child of the track and give it the "slider" role
-            //including an empty-string for the aria-valuetext so that screenreaders don't
-            //announce the value at all, otherwise they'd read the time continuously while the
-            //seek slider has focus when the video is playing, so instead we have extra events
-            //that set the value momentarily, so that the value is only read when you tab
-            //to it or when you manually change the slider value, and not at any other time
-            //(for the seek slider, but the volume slider will set a normal permanent value)
             //also define its ID using the prefix defined in config parsed with control ID
             //and add an inner element, that can be used to improve usability by increasing
             //the size of the event target without changing the apparent size of the thumb
             theslider.thumb = etc.build('button',
             {
-                '=parent'           : theslider.track,
-                'type'              : 'button',
-                'role'              : 'slider',
-                'aria-valuetext'    : '',
-                'class'             : config.classes['slider-thumb'],
-                'id'                : etc.sprintf(config.ids['slider-thumb'], { id : control.id }),
-                '#dom'              : etc.build('strong')
+                '=parent'   : theslider.track,
+                'type'      : 'button',
+                'role'      : 'slider',
+                'class'     : config.classes['slider-thumb'],
+                'id'        : etc.sprintf(config.ids['slider-thumb'], { id : control.id }),
+                '#dom'      : etc.build('strong')
             });
 
             //create a "for" association from the track label to the thumb, partly for semantics,
@@ -12922,7 +12811,7 @@ var OzPlayer = (function()
         {
             'aria-valuemin'     : theslider.options[0].value,
             'aria-valuemax'     : theslider.options[theslider.options.length - 1].value,
-            'aria-orientation'     : 'horizontal'
+            'aria-orientation'  : 'horizontal'
         });
 
         //if the range max is zero then this slider has been initialized
@@ -13037,15 +12926,6 @@ var OzPlayer = (function()
         {
             //clear the mouse-pressed flag
             theslider.__mousepressed = false;
-
-            //then if we were sliding the seek slider, momentarily add its aria-valutext
-            //so that screenreaders will announce it now, but not continuously
-            //nb. screenreaders normally use keyboard events, but we should add a
-            //mouseup as well, just in case of emulated mouse events or some shit
-            if(theslider.__sliding && theslider.control.name == 'seek')
-            {
-                applySliderAriaText(theslider);
-            }
 
             //call afterSlide and return the result to control native action
             return afterSlide(e, thetarget, theslider);
@@ -13166,13 +13046,6 @@ var OzPlayer = (function()
                 beforeSlide(e, thetarget, theslider);
                 doSlide(e, thetarget, theslider);
 
-                //then if this is the seek slider, momentarily add its aria-valutext
-                //so that screenreaders will announce it now, but not continuously
-                if(theslider.control.name == 'seek')
-                {
-                    applySliderAriaText(theslider);
-                }
-
                 //now we need to pause to implement the key-repeat delay
                 //unless the key-repeat rate is zero, which means no delay
                 //but not if the event came from the minimize or maximize keys
@@ -13225,18 +13098,6 @@ var OzPlayer = (function()
             //clear the pressing flag
             theslider.__pressing = false;
 
-            //if a key-repeat timer is running on this slider
-            //then we've just let go after a slider repeat
-            if(theslider.__keyrepeat)
-            {
-                //if this is the seek slider, momentarily add its aria-valutext
-                //so that screenreaders will announce it now, but not continuously
-                if(theslider.control.name == 'seek')
-                {
-                    applySliderAriaText(theslider);
-                }
-            }
-
             //then cancel any delay or repeat timers and nullify the references
             theslider.__keydelay = nullifyTimer(theslider.__keydelay);
             theslider.__keyrepeat = nullifyTimer(theslider.__keyrepeat);
@@ -13254,20 +13115,6 @@ var OzPlayer = (function()
         {
             if(verifySliderKey(e)) { return false; }
         });
-
-
-
-        //~~ keyboard thumb focus event ~~//
-
-        //if this is the seek slider, bind a thumb focus event that momentarily adds its
-        //aria-valutext so that screenreaders will announce it, but not continuously
-        if(theslider.control.name == 'seek')
-        {
-            etc.listen(theslider.thumb, 'focus', function(e)
-            {
-                applySliderAriaText(theslider);
-            });
-        }
 
 
 
@@ -13321,15 +13168,6 @@ var OzPlayer = (function()
 
                 //now we can call doSlide to implement the thumb movement
                 doSlide(e, thetarget, theslider);
-
-                //if this is the seek slider, momentarily add its aria-valutext
-                //so that screenreaders will announce it now, but not continuously
-                //nb. screenreaders normally use keyboard events, but we just add a
-                //mouseup as well, just in case of emulated mouse events or some shit
-                if(theslider.control.name == 'seek')
-                {
-                    applySliderAriaText(theslider);
-                }
 
                 //and then call afterSlide to reset the sliding flag and tooltip
                 afterSlide(e, thetarget, theslider);
@@ -13859,17 +13697,11 @@ var OzPlayer = (function()
             '1' : theslider.options[theslider.index].tooltip
         });
 
-        //then if this is not the seek slider,
         //define ARIA "valuetext" using the tooltip text
-        //nb. the seek slider only has it defined momentarily
-        //(see applySliderAriaText for notes about this)
-        if(theslider.control.name != 'seek')
+        theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
         {
-            theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
-            {
-                '1' : theslider.options[theslider.index].tooltip
-            }));
-        }
+            '1' : theslider.options[theslider.index].tooltip
+        }));
 
         //update the value of the underlying control
         theslider.control.value = theslider.value;
@@ -13938,60 +13770,6 @@ var OzPlayer = (function()
         //apply a left position to the tooltip so it's centered-over the thumb,
         //then constrain the position if necessary to keep it inside the controls form
         definitelyMoveSliderTooltip(theslider, trackdata);
-    }
-
-
-    //momentarily add the seek slider's aria-valutext
-    //so that its value is announced, but doesn't keep getting
-    //announced as the video plays and the slider still has focus
-    //nb. if we set a permanent valuetext attribute, then every time
-    //the slider was updated, the time text would be read out again
-    //nb. this will only work for screenreaders that read aria-valuetext
-    //in favour of aria-valuenow, eg. NVDA + Firefox 24 is okay, but NVDA + IE8
-    //reads the valuenow number, and NVDA + Chrome just says "slider editable blank"!
-    //*** this is reliable on button focus, but not reliable for manual slide
-    function applySliderAriaText(theslider)
-    {
-        //if we already have an ariatext timer, reset it and nullify the reference
-        if(theslider.__ariatext)
-        {
-            __.clearTimeout(theslider.__ariatext);
-            theslider.__ariatext = null;
-        }
-
-        //now define the slider's aria-valuetext using the tooltip text
-        theslider.thumb.setAttribute('aria-valuetext', etc.sprintf(config.lang['slider-' + theslider.control.name],
-        {
-            '1' : theslider.options[theslider.index].tooltip
-        }));
-
-
-        //*** DEV TMP
-        //var e = { type : 'add-ariatext' };
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-        //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-        //str += 'theslider = ' + theslider.id.split('-').pop() + '\ttext = "' + theslider.thumb.getAttribute('aria-valuetext') + '"<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
-        //pause for long enough to allow the reader to start reading the value
-        theslider.__ariatext = etc.delay(config['seek-text-delay'], function()
-        {
-            //reset the timer and nullify the reference
-            __.clearTimeout(theslider.__ariatext);
-            theslider.__ariatext = null;
-
-            //then reset aria-text to empty string so it doesn't get read again
-            theslider.thumb.setAttribute('aria-valuetext', '');
-
-
-            //*** DEV TMP
-            //var e = { type : 'remove-ariatext' };
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-            //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-            //str += 'theslider = ' + theslider.id.split('-').pop() + '\ttext = "' + theslider.thumb.getAttribute('aria-valuetext') + '"<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-        });
     }
 
 
@@ -14090,15 +13868,6 @@ var OzPlayer = (function()
         return timer;
     }
 
-
-    /*** OLD ***//***
-    //verify that a relevant key was pressed so we can implement arrow-key sliding
-    //nb. we exclude the up and down arrows so we can bind them separately for volume controls
-    function verifySliderKey(e)
-    {
-        return ((e.keyCode >= 33 && e.keyCode <= 37) || e.keyCode == 39);
-    }
-    ***/
 
     //verify that a relevant key was pressed so we can implement arrow-key sliding
     function verifySliderKey(e)
@@ -14446,9 +14215,11 @@ var OzPlayer = (function()
         isnative = typeof(expander.open) == 'boolean',
         isexpanded = expander.getAttribute('open') !== null;
 
-        //define aria-controls on the trigger to point to the transcript content ID
-        //so that assistive technologies know which element it controls
-        trigger.setAttribute('aria-controls', player.transcript.id);
+        //nb. originally this had aria-controls pointing to the transcript content ID
+        //however aria-controls is not well implemented among screenreaders
+        //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
+        //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
+        //which then always resulted in the message "Failed to move to controlled element"
 
         //set tabindex on the trigger so it's keyboard accessible
         //nb. set this using the property name to avoid browser differences
@@ -14457,8 +14228,7 @@ var OzPlayer = (function()
         //set aria-expanded on the trigger and content element according to isexpanded
         //so that its initial state matches that specified by the open attribute
         //nb. originally aria-expanded was defined only the content element
-        //however since we're using aria-controls on the trigger
-        //it turns out that aria-expanded should also be on the trigger
+        //however  it turns out that aria-expanded should be on the trigger
         //http://www.marcozehe.de/2010/02/10/easy-aria-tip-5-aria-expanded-and-aria-controls/
         //and with that change, the expanded or collapsed state is correctly announced in NVDA and Jaws 16
         //however is that to specification, or is it a quirk in their implementations?

@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.0] => interface core
+ OzPlayer [3.1] => interface core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 
@@ -1803,24 +1803,9 @@
     color:#fff !important;
 
     /* edge bordering and shadow effects */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:0 -1px 0 #202020, inset 0 1px 0 #404040, inset -1px 0 1px #303030, inset 1px 0 1px #303030 !important;
-    -webkit-box-shadow:0 -1px 0 #202020, inset 0 1px 0 #404040, inset -1px 0 1px #303030, inset 1px 0 1px #303030 !important;
-    box-shadow:0 -1px 0 #202020, inset 0 1px 0 #404040, inset -1px 0 1px #303030, inset 1px 0 1px #303030 !important;
-    */
     -moz-box-shadow:0 -1px 0 #202020 !important;
     -webkit-box-shadow:0 -1px 0 #202020 !important;
     box-shadow:0 -1px 0 #202020 !important;
-
-    /* vertical gradient effect */
-    /*** DEV MAYBE OLD ***//*
-    background:-moz-linear-gradient(top, #303030, #101010) !important;
-    background:-ms-linear-gradient(top, #303030, #101010) !important;
-    background:-o-linear-gradient(top, #303030, #101010) !important;
-    background:-webkit-gradient(linear, left top, left bottom, color-stop(0%, #303030), color-stop(100%, #101010)) !important;
-    background:-webkit-linear-gradient(top, #303030, #101010) !important;
-    background:linear-gradient(top, #303030, #101010) !important;
-    */
 
 
     /*** DEV TMP ***//*
@@ -1844,11 +1829,6 @@
 .oz-large .oz-controls fieldset
 {
     /* large edge effects */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:0 -2px 0 #202020, inset 0 2px 0 #404040, inset -2px 0 2px #303030, inset 2px 0 2px #303030 !important;
-    -webkit-box-shadow:0 -2px 0 #202020, inset 0 2px 0 #404040, inset -2px 0 2px #303030, inset 2px 0 2px #303030 !important;
-    box-shadow:0 -2px 0 #202020, inset 0 2px 0 #404040, inset -2px 0 2px #303030, inset 2px 0 2px #303030 !important;
-    */
     -moz-box-shadow:0 -2px 0 #202020 !important;
     -webkit-box-shadow:0 -2px 0 #202020 !important;
     box-shadow:0 -2px 0 #202020 !important;
@@ -1895,50 +1875,11 @@
     /* nb. this prevents some kind of weird displacement in safari */
     vertical-align:top !important;
 
-    /* right-edge bordering and shadow effect */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:inset -1px 0 0 0 #202020, 1px 0 0 0 #303030 !important;
-    -webit-box-shadow:inset -1px 0 0 0 #202020, 1px 0 0 0 #303030 !important;
-    box-shadow:inset -1px 0 0 0 #202020, 1px 0 0 0 #303030 !important;
-    */
-
 
     /*** DEV TMP ***//*
     box-shadow:inset -1px 0 0 0 rgba(32,32,32,0.88), 1px 0 0 0 rgba(48,48,48,0.88) !important;
     background:cyan !important;
     box-shadow:inset 0 0 0 2px darkcyan !important; */
-}
-.oz-controls .oz-last-field,
-.oz-controls .oz-mute
-{
-    /* remove the edge effect from the last field
-       and also from the mute field so it looks like part of volume */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:none !important;
-    -webkit-box-shadow:none !important;
-    box-shadow:none !important;
-    */
-}
-
-/* large field wrappers */
-.oz-large .oz-controls .oz-field
-{
-    /* large right-edge effect */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:inset -2px 0 0 0 #202020, 2px 0 0 0 #303030 !important;
-    -webkit-box-shadow:inset -2px 0 0 0 #202020, 2px 0 0 0 #303030 !important;
-    box-shadow:inset -2px 0 0 0 #202020, 2px 0 0 0 #303030 !important;
-    */
-}
-.oz-large .oz-controls .oz-last-field,
-.oz-large .oz-controls .oz-mute
-{
-    /* remove the large edge effect from the last field and mute field */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:none !important;
-    -webkit-box-shadow:none !important;
-    box-shadow:none !important;
-    */
 }
 
 /* smallscreen => mute and volume field wrappers */
@@ -2061,6 +2002,12 @@
        mac-focusring isn't clipped outside its bounds, but don't specify
        any other outline properties, or we'll lose the focusring entirely */
     outline-offset:-5px !important;
+}
+
+/* controls => button used as a link (for AD linking behaviour) */
+.oz-controls .oz-field button[role="link"]
+{
+    cursor: pointer !important;
 }
 
 
@@ -2524,19 +2471,7 @@
     border:none !important;
 
     /* track background with legacy fallback */
-    /*** DEV MAYBE OLD ***//*
-    background:#616161 !important;
-    background:rgba(255,255,255,0.3) !important;
-    */
     background:#515151 !important;
-
-    /* recess effect */
-    /*** DEV MAYBE OLD ***//*
-    background:rgba(255,255,255,0.22) !important;
-    -moz-box-shadow:inset 0 1px 1px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.2) !important;
-    -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.2) !important;
-    box-shadow:inset 0 1px 1px rgba(0,0,0,0.5), inset 0 -1px 1px rgba(255,255,255,0.2) !important;
-    */
 }
 .oz-slider-track .oz-timerange
 {
@@ -2597,13 +2532,6 @@
     /* large track height and offset */
     height:12px !important;
     margin:26px 32px !important;
-
-    /* large recess effect */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:inset 0 2px 2px rgba(0,0,0,0.6), inset 0 -2px 2px rgba(255,255,255,0.2) !important;
-    -webkit-box-shadow:inset 0 2px 2px rgba(0,0,0,0.6), inset 0 -2px 2px rgba(255,255,255,0.2) !important;
-    box-shadow:inset 0 2px 2px rgba(0,0,0,0.6), inset 0 -2px 2px rgba(255,255,255,0.2) !important;
-    */
 }
 .oz-large .oz-controls .oz-slider .oz-slider-track .oz-timerange
 {
@@ -2720,8 +2648,6 @@
     background:#fff !important;
 
     /* shadow effects */
-    /*** DEV MAYBE OLD ***//*
-    */
     -moz-box-shadow:0 0 0 1px #303030, 0 0 0 2px #fff, 0 1px 2px 2px #000 !important;
     -webkit-box-shadow:0 0 0 1px #303030, 0 0 0 2px #fff, 0 1px 2px 2px #000 !important;
     box-shadow:0 0 0 1px #303030, 0 0 0 2px #fff, 0 1px 2px 2px #000 !important;
@@ -2750,8 +2676,6 @@
     background:#898989 !important;
 
     /* disabled shadow effects */
-    /*** DEV MAYBE OLD ***//*
-    */
     -moz-box-shadow:0 0 0 1px #303030, 0 0 0 2px #898989, 0 1px 2px 2px #000 !important;
     -webkit-box-shadow:0 0 0 1px #303030, 0 0 0 2px #898989, 0 1px 2px 2px #000 !important;
     box-shadow:0 0 0 1px #303030, 0 0 0 2px #898989, 0 1px 2px 2px #000 !important;
@@ -2769,8 +2693,6 @@
     border-radius:14px !important;
 
     /* large shadow effects */
-    /*** DEV MAYBE OLD ***//*
-    */
     -moz-box-shadow:0 0 0 2px #303030, 0 0 0 4px #fff, 0 2px 4px 4px #000 !important;
     -webkit-box-shadow:0 0 0 2px #303030, 0 0 0 4px #fff, 0 2px 4px 4px #000 !important;
     box-shadow:0 0 0 2px #303030, 0 0 0 4px #fff, 0 2px 4px 4px #000 !important;
@@ -2791,8 +2713,6 @@
 .ozplayer.oz-large .oz-controls .oz-slider.oz-disabled .oz-slider-thumb strong
 {
     /* large disabled shadow effects */
-    /*** DEV MAYBE OLD ***//*
-    */
     -moz-box-shadow:0 0 0 2px #303030, 0 0 0 4px #898989, 0 2px 4px 4px #000 !important;
     -webkit-box-shadow:0 0 0 2px #303030, 0 0 0 4px #898989, 0 2px 4px 4px #000 !important;
     box-shadow:0 0 0 2px #303030, 0 0 0 4px #898989, 0 2px 4px 4px #000 !important;
@@ -2855,11 +2775,6 @@
     text-indent:0 !important;
     letter-spacing:0 !important;
 
-    /* tooltip text-shadow effect */
-    /*** DEV MAYBE OLD ***//*
-    text-shadow:0 0.1em 0.1em rgba(0,0,0,0.5) !important;
-    */
-
     /* tooltip colors */
     background:#292929 !important;
     color:#fff !important;
@@ -2868,11 +2783,6 @@
        nb. the radius is in em so it scales for large controls
        and it doesn't ultimately matter what it computes to
        (ie. it doesn't need the precision of eg. range indicators) */
-    /*** DEV MAYBE OLD ***//*
-    -moz-box-shadow:inset 0 0 0.1em 0.05em #191919, 0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
-    -webkit-box-shadow:inset 0 0 0.1em 0.05em #191919, 0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
-    box-shadow:inset 0 0 0.1em 0.05em #191919, 0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
-    */
     -moz-box-shadow:0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
     -webkit-box-shadow:0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;
     box-shadow:0 0.1em 0.35em 0.05em rgba(0,0,0,0.65) !important;

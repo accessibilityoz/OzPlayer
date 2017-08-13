@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.0] => sample transcript styles
+ OzPlayer [3.1] => sample transcript styles
  ------------------------------------------------------------------------------
 *******************************************************************************/
 
@@ -37,6 +37,8 @@
 
     border:2px solid #101010;
 
+    /* n.b. these are the default colors for the trigger
+       highlight colors are defined in the skin stylesheet */
     background:#202020;
     color:#fff;
 
