@@ -37,6 +37,8 @@
 
     border:2px solid #101010;
 
+    /* n.b. these are the default colors for the trigger
+       highlight colors are defined in the skin stylesheet */
     background:#202020;
     color:#fff;
 
