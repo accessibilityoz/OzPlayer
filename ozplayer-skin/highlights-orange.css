@@ -101,11 +101,13 @@
 .oz-no-images .oz-logo-bug:active small,
 .ozplayer .oz-skip-links li a:hover,
 .ozplayer .oz-skip-links li a:focus,
-.ozplayer .oz-skip-links li a:active
+.ozplayer .oz-skip-links li a:active,
+.ozplayer-expander summary:hover,
+.ozplayer-expander summary:focus,
+.ozplayer-expander summary:active
 {
     background-color:#f60 !important;
     color:#000 !important;
-    text-shadow:0 0.1em 0.1em rgba(0,0,0,0.15), 0 -0.1em 0 rgba(255,255,255,0.15) !important;
 }
 .oz-controls .oz-field.oz-disabled button
 {
