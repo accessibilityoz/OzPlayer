@@ -86,6 +86,7 @@ table.matrix tbody td[data-header]::before
 
     text-align:left;
     text-shadow:none;
+    font-weight:normal;
 
     background:#ffd;
     color:#000;
