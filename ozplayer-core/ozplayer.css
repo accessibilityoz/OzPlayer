@@ -1526,14 +1526,12 @@
     display:none !important;
 }
 
-/* captions => standard and alternating text colors */
-.ozplayer .oz-captions p,
-.ozplayer .oz-captions p *,
-.ozplayer .oz-captions p:nth-child(2n+2) + p *
+/* captions => default and alternate-voice text colors */
+.ozplayer .oz-captions p *
 {
     color:#fff !important;
 }
-.ozplayer .oz-captions p + p *
+.ozplayer .oz-captions p.oz-voice-alt *
 {
     color:#ff0 !important;
 }

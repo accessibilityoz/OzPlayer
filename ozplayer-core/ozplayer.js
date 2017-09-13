@@ -1354,6 +1354,9 @@ var OzPlayer = (function()
             //captions container
             'captions'                : 'oz-captions',
 
+            //captions container => alternate voice colour
+            'captions-voice-alt'      : 'oz-voice-alt',
+
             //captions container => spacing blocks
             'captions-spacing'        : 'oz-captions-spacing',
 
@@ -2358,8 +2361,6 @@ var OzPlayer = (function()
 
             /*** DEV TMP COMMENTED OUT ***//***
 
-            ***/
-
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
             //nb. I hesitate to do this, but going into full screen using the native
@@ -2380,6 +2381,8 @@ var OzPlayer = (function()
                     return null;
                 }
             });
+
+            ***/
 
             //nb. we also do the same thing to block any native dblclick action
             //which is implemented later in the script (see "global mouse shortcuts")
@@ -4897,20 +4900,16 @@ var OzPlayer = (function()
     //into the HTML for a single caption or transcript entry
     function getCueHTML(cue, speaker)
     {
-        //begin compiling an HTML string, using blockquote
-        //for a "captions" kind cue, or a plain div for anything else
-        //specifying the cue id in a "data-cue" attribute
-        //and specifying the cue lang in a "lang" attribute
-        //nb. we can't just use "id" because the cue id might be
-        //purely numeric, but HTML IDs can't start with a number
-        //also because we'd get duplication with the transcript
-        var html = '<'
-                    + (cue.kind == 'captions' ? 'blockquote' : 'div')
-                    + ' lang="' + cue.lang
-                    + '" data-cue="' + cue.id
-                    + '">';
+        //define an array for storing the individual paragraph lines
+        //and a separate array for storing the voice name for each line
+        //nb. we need to build an array rather than just compiling the final
+        //html string as we go along (like we did before) because we'll need
+        //to evaluate the final collection to work out when voice changes occur
+        var
+        lines = [],
+        voices = [];
 
-        //now split the cue text by trimmed line-breaks and iterate through the resulting array
+        //split the cue text by trimmed line-breaks and iterate through the resulting array
         //nb. usually this will only be a single member, but it can be two or more
         etc.each(cue.text.split(/\s*^\s*/m), function(line, i)
         {
@@ -4923,7 +4922,16 @@ var OzPlayer = (function()
                 //and are voice tags that span multiple lines allowed?
                 content = content.replace(/<\/v>/g, '');
 
-                //if the speaker argument is true and we have a voice tag
+                //if we have a voice name, parse any whitespace from the value
+                if(voice)
+                {
+                    voice = etc.trim(voice);
+                }
+
+                //add the voice name or null to the voices array
+                voices.push(voice || null);
+
+                //if the speaker argument is true and we have a voice name
                 //then parse the string of any leading dash, since dashes
                 //are commonly used to indicate different speakers in a
                 //single cue, but we don't need them if we have a a voice citation
@@ -4940,8 +4948,8 @@ var OzPlayer = (function()
                 //nb. we need two elements here so we can have a wrapping block
                 //to put each caption cue line on its own line, but also an inline element
                 //so it can have a background color which will only apply to the line boxes
-                //nnb. but the transcript doesn't need that, it's just for dialog semantics
-                return '<p' + (voice ? (' data-voice="' + (voice = etc.trim(voice)) + '"') : '') + '>'
+                //nnb. although the transcript doesn't need that, it's just for dialog semantics
+                return '<p' + (voice ? (' data-voice="' + voice + '"') : '') + '>'
                         + (speaker && voice ? etc.sprintf('<cite>%voice</cite>:\u0020', { voice : voice }) : '')
                         + (cue.kind == 'captions' ? '<q>' : '')
                         + content
@@ -4961,11 +4969,43 @@ var OzPlayer = (function()
                 return '<span lang="' + etc.trim(value) + '">';
             });
 
-            //then add this line to the overall string
-            html += line;
+            //then add this line to the array
+            lines.push(line);
         });
 
-        //finally add the closing tag, and return the HTML string
+        //begin compiling an HTML string, using blockquote
+        //for a "captions" kind cue, or a plain div for anything else
+        //specifying the cue id in a "data-cue" attribute
+        //and specifying the cue lang in a "lang" attribute
+        //nb. we can't just use "id" because the cue id might be
+        //purely numeric, but HTML IDs can't start with a number
+        //also because we'd get duplication with the transcript
+        var html = '<'
+                    + (cue.kind == 'captions' ? 'blockquote' : 'div')
+                    + ' lang="' + cue.lang
+                    + '" data-cue="' + cue.id
+                    + '">';
+
+        //iterate through the lines and add the voice-alt class
+        //each time we encounter a change of voice within the caption
+        //unless the previous line already had the voice-alt class
+        var voicealt = false;
+        etc.each(lines, function(line, i)
+        {
+            if(i > 0 && voices[i] != voices[i - 1])
+            {
+                voicealt = !voicealt;
+            }
+            if(voicealt)
+            {
+                lines[i] = line.replace('<p', '<p class="' + config.classes['captions-voice-alt'] + '"');
+            }
+        });
+
+        //join and add the individual lines
+        html += lines.join('');
+
+        //finally add the closing tag and return the findal HTML string
         return html + '</' + (cue.kind == 'captions' ? 'blockquote' : 'div')  + '>';
     }
 
