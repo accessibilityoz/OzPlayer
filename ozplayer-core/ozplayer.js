@@ -2359,7 +2359,7 @@ var OzPlayer = (function()
             //remove the video controls
             player.video.removeAttribute('controls');
 
-            /*** DEV TMP COMMENTED OUT ***//***
+            /*** DEV VERY TMP COMMENTED OUT ***//***
 
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
@@ -14264,6 +14264,9 @@ var OzPlayer = (function()
         //set tabindex on the trigger so it's keyboard accessible
         //nb. set this using the property name to avoid browser differences
         trigger.tabIndex = 0;
+
+        //set the button role so that screenreaders announce it as such
+        trigger.setAttribute('role', 'button');
 
         //set aria-expanded on the trigger and content element according to isexpanded
         //so that its initial state matches that specified by the open attribute
