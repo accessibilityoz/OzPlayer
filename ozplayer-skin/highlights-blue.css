@@ -114,7 +114,11 @@
     background-color:transparent !important;
     color:#fff !important;
 }
-
+.oz-logo-bug:hover,
+.oz-logo-bug:focus
+{
+    border-color:#06f !important;
+}
 
 
 

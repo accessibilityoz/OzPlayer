@@ -178,7 +178,9 @@
     margin:0 !important;
     padding:0 !important;
 
-    border:none !important;
+    /* nb. use a transparent border so we can change its colour
+       (in the skin stylesheet) to implement a clear hover/focus indication */
+    border:2px solid transparent !important;
     -moz-border-radius:2px !important;
     -webkit-border-radius:2px !important;
     border-radius:2px !important;
