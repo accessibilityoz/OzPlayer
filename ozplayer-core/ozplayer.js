@@ -14281,6 +14281,9 @@ var OzPlayer = (function()
         trigger.tabIndex = 0;
 
         //set the button role so that screenreaders announce it as such
+        //this also ensures that the default expanded state is announced on
+        //initial focus (rather than only after it's been changed, as without it)
+        //and adds the trigger to the screenreader's quick forms collection
         trigger.setAttribute('role', 'button');
 
         //set aria-expanded on the trigger and content element according to isexpanded
@@ -14300,12 +14303,18 @@ var OzPlayer = (function()
 
         //then if this is not a native implementation, create a twisty inside the trigger
         //with a text-glyph according to isexpanded, and save its reference as a trigger property
+        //nb. add aria-hidden to the twisty so that screenreaders don't announce it
+        //although this only actually works in JAWS+IE: JAWS+FF still announces it
+        //and NVDA+FF and NVDA+IE never announced it in the first place
+        //nnb. this would work in JAWS+FF if the trigger didn't have the button role
+        //but we need that role on the trigger for the reasons explained above
         if(!isnative)
         {
             trigger.__twisty = etc.build('span',
             {
-                '=before' : trigger.firstChild,
-                '#text'   : getLang(player, 'expander-' + (isexpanded ? 'open' : 'closed'))
+                '=before'       : trigger.firstChild,
+                'aria-hidden'   : 'true',
+                '#text'         : getLang(player, 'expander-' + (isexpanded ? 'open' : 'closed'))
             });
         }
 
