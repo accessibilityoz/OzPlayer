@@ -6029,7 +6029,6 @@ var OzPlayer = (function()
         if(player.audio) { doAudioLogging(player); } */
 
 
-
         //~~ controls ~~//
 
         //*** DEV TMP DELAY SO LOAD IS BEFORE FORM ADDITION
@@ -6100,9 +6099,25 @@ var OzPlayer = (function()
         //nb. we don't do this for android or ipad because they don't have the same behavior
         //they embed the video for playback in the page, like a normal desktop browser
         //we also don't do this for the audio-only player, which always has custom controls
+        //nb. we have to insert this before the captions, not append after it,
+        //on order to fix a weird bug that occurs in JAWS: whereby using
+        //the quick form key "f" while the video is playing moves between
+        //the form controls in an apparently random order, rather than sequentially
+        //which doesn't occur when the video is not playing, and turned out to
+        //be triggered by changes in the captions: it doesn't happen when
+        //captions are switched off, or when they're overriden so that every
+        //caption value is the same, and it does still happen when the live
+        //region is removed from it, so it must be related to the continual
+        //changes in the DOM; however if we move the captions container here
+        //then the problem also no longer occurs, so it must be further be
+        //related to changes in the DOM that occur before the current context.
+        //nnb. although this is not the ideal DOM structure, since the captions
+        //are visually before the controls but structurally come after them
+        //however I think that's a small price to pay for fixing this bug
         if(!(defs.agent.iphone || defs.agent.winphone) || player.isaudio)
         {
-            player.controlform = player.container.appendChild(player.controlform);
+            //OLD//player.controlform = player.container.appendChild(player.controlform);
+            player.controlform = player.container.insertBefore(player.controlform, player.captions);
         }
 
         //else if this is one of those phones [and we're not appending the control form]
