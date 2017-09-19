@@ -3870,12 +3870,18 @@ var OzPlayer = (function()
             return false;
         }
 
-        //if the currentTime is the same as the previous event, reutrn false
+        //if the time is greater than zero and the same as the previous event, return false
         //nb. this caters for low bandwidth situations where the video is frozen
         //due to loading even though the time is inside a loaded range
         //which is a particular problem with AD since the AD would continue
         //to play as normal, but also generally useful for better load indication
-        if(media.previousTime === time)
+        //nb. we don't do this if the time is zero because in chrome we had a
+        //situation where the first progress event would have fired before this
+        //with the initial first few seconds, then subsequent monitoring events
+        //could fire again before another progress or timeupdate event has fired
+        //resulting in a second event with a zero time that triggered the loading
+        //indicator, even though we didn't actually need it to display at that point
+        if(media.previousTime === time && time > 0)
         {
             return false;
         }
@@ -4333,7 +4339,7 @@ var OzPlayer = (function()
             }
 
             /*** DEV LOG ***//*
-            else
+            else if($this.logs.audio)
             {
                 audiolog([
                     ['AUDIO-SYNC-OK', 18],
