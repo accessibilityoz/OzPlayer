@@ -1428,8 +1428,8 @@ var OzPlayer = (function()
             //indexed by button name and state key (eg. "playpause" and "on")
             "button-playpause-off"    : "Play",
             "button-playpause-on"     : "Pause",
-            "button-mute-off"         : "Unmute",
-            "button-mute-on"          : "Mute",
+            "button-mute-off"         : "Mute",
+            "button-mute-on"          : "Unmute",
             "button-cc-off"           : "Captions are off",
             "button-cc-on"            : "Captions are on",
             "button-cc-lang"          : "Captions are\ %1",
@@ -1446,8 +1446,8 @@ var OzPlayer = (function()
             //controls => fallback text (eg. for styled no-images)
             "text-playpause-off"      : "Play",
             "text-playpause-on"       : "Pause",
-            "text-mute-off"           : "Unmute",
-            "text-mute-on"            : "Mute",
+            "text-mute-off"           : "Mute",
+            "text-mute-on"            : "Unmute",
             "text-cc-off"             : "CC\ (off)",
             "text-cc-on"              : "CC\ (on)",
             "text-cc-lang"            : "CC\ (%1)",
@@ -7180,8 +7180,8 @@ var OzPlayer = (function()
                 player,
                 'mute',
                 true,
-                (player.media.muted ? 'off' : 'on'),
-                (player.media.muted ? 'off' : 'on'),
+                (player.media.muted ? 'on' : 'off'),
+                (player.media.muted ? 'on' : 'off'),
                 {
                     //then define an abstraction for the button's command handler
                     '.command'  : function()
@@ -7206,7 +7206,7 @@ var OzPlayer = (function()
                         //high/low state corresponding with the current volume
                         updateControlState(player, 'mute',
                         [
-                            (player.media.muted ? 'off' : 'on'),
+                            (player.media.muted ? 'on' : 'off'),
                             (player.media.volume < 0.5 ? 'low' : 'high')
                         ]);
 
@@ -7215,7 +7215,7 @@ var OzPlayer = (function()
                         //integer in the volume slider's index range (0 - 10)
                         //nb. we set it to zero for muted because that's a common convention
                         //which is so you can un-mute by increasing the volume from zero
-                        //(ie. so you can go from muted to quiet with being loud in-between)
+                        //(ie. so you can go from muted to quiet without being loud in-between)
                         //nb. this will also update the value in the underlying input
                         dispatchMediaSliderEvent(player.controlform.volume, player.media.muted ? 0 : Math.round(player.media.volume * 10));
                     }
@@ -8988,7 +8988,7 @@ var OzPlayer = (function()
                     {
                         updateControlState(player, 'mute',
                         [
-                            (player.media.muted ? 'off' : 'on'),
+                            (player.media.muted ? 'on' : 'off'),
                             (player.media.volume < 0.5 ? 'low' : 'high')
                         ]);
                     }
@@ -9067,7 +9067,7 @@ var OzPlayer = (function()
                 {
                     updateControlState(player, 'mute',
                     [
-                        (player.media.muted ? 'off' : 'on'),
+                        (player.media.muted ? 'on' : 'off'),
                         (player.media.volume < 0.5 ? 'low' : 'high')
                     ]);
                 }
@@ -11657,8 +11657,7 @@ var OzPlayer = (function()
     }
 
     //set a new media volume and update all the relevant controls and states
-    //nb. this abstraction is called directly by the volume slider's
-    //index event, and indirectly by the global volume change keystrokes
+    //nb. this abstraction is called directly by the volume slider's index event
     function updateVolume(player, from, to, theslider)
     {
         //return false for failure if the fakevolume flag is already true
@@ -11690,7 +11689,7 @@ var OzPlayer = (function()
         //so that any failure is accurately reflected in the button state
         updateControlState(player, 'mute',
         [
-            (player.media.muted ? 'off' : 'on'),
+            (player.media.muted ? 'on' : 'off'),
             (player.media.volume < 0.5 ? 'low' : 'high')
         ]);
 
