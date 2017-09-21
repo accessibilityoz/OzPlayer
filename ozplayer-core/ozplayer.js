@@ -1556,6 +1556,7 @@ var OzPlayer = (function()
             //responsive video dimensions
             'option-bad-responsive'   : 'The "data-responsive" element for #%id does not exist.',
             'option-wrong-responsive' : 'The "data-responsive" element for #%id must be outside the p\layer.',
+            'option-bad-responsive-mode': 'The "data-responsive-mode" attribute for #%id must have the value "min",\ "max" or "initial".',
 
             //media wrapper failure warning
             'wrapper-failure'         : 'OzPlayer failed to initialize the med\ia.',
@@ -2567,9 +2568,10 @@ var OzPlayer = (function()
         //nb. we have to do these separately so we don't look for them in input options
         var attrs =
         {
-            transcript    : null,
-            responsive    : null,
-            controls      : 'row'
+            'transcript'      : null,
+            'responsive'      : null,
+            'responsive-mode' : 'initial',
+            'controls'        : 'row'
         };
         etc.each(attrs, function(option, key)
         {
@@ -2664,7 +2666,20 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and break if the controls value is not "row" or "stack"
+                    //show a console error and break if the responsive-mode value is not valid
+                    case 'responsive-mode' :
+
+                        if(!(option == 'max' || option == 'initial' || option == 'min'))
+                        {
+                            return etc.console(etc.sprintf(config.lang['option-bad-responsive-mode'],
+                            {
+                                id : player.instance.id
+
+                            }), 'error');
+                        }
+                        break;
+
+                    //show a console error and break if the controls value is not valid
                     case 'controls' :
 
                         if(!(option == 'row' || option == 'stack'))
@@ -10718,28 +10733,44 @@ var OzPlayer = (function()
         {
             //define a new responsive width from the current wrapper width
             //plus the negative responsive difference we just calculated
-            //constraining its minimum to the absolute smallscreen min-width
-            //and its maximum to the default player width we defined during init
-            //var responsivewidth = (responsivewidth = player.wrapper.offsetWidth + player.responsivedata.responsivedifference)
+            //constraining the value as applicable to the responsive mode
+            //but always constraining the minimum to the absolute min-width
+            //unless the mode is "min" [and we've already constrained to the minimum]
+            //nb. if the default width is less than the absolute min-width when mode=min
+            //then the playerwidth will have already been constrained by the min-width and
+            //min-height defined in the core player CSS (which limits its initial rendered width
+            //and therefore constrains the value of playerwidth), so we don't need to worry about that
             //nb. use controlform width for audio-only since it has no wrapper width
-            var responsivewidth = (responsivewidth = (player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) + player.responsivedata.responsivedifference)
-                                    < config['smallscreen-minwidth']
-                                    ? config['smallscreen-minwidth']
-                                    : responsivewidth > player.responsivedata.playerwidth
-                                    ? player.responsivedata.playerwidth
-                                    : responsivewidth;
+            var responsivewidth = (player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) + player.responsivedata.responsivedifference;
+            if(player.options['responsive-mode'] == 'min')
+            {
+                if(responsivewidth < player.responsivedata.playerwidth)
+                {
+                    responsivewidth = player.responsivedata.playerwidth;
+                }
+            }
+            else if(responsivewidth < config['smallscreen-minwidth'])
+            {
+                responsivewidth = config['smallscreen-minwidth'];
+            }
+            if(player.options['responsive-mode'] == 'max' && responsivewidth > player.responsivedata.playerwidth)
+            {
+                responsivewidth = player.responsivedata.playerwidth;
+            }
+
 
             /*** DEV TMP ***//***
-            console.warn(''
+            console.warn('\n'
                 + 'default width     = ' + player.responsivedata.playerwidth + '\n'
                 + 'default aspect    = ' + player.responsivedata.playeraspect + '\n'
                 + '\n'
-                + 'monitored width  = ' + player.responsive.offsetWidth + '\n'
-                + 'container width  = ' + player.container.offsetWidth + '\n'
-                + 'difference       = ' + player.responsivedata.responsivedifference + '\n'
+                + 'monitored width   = ' + player.responsive.offsetWidth + '\n'
+                + 'container width   = ' + player.container.offsetWidth + '\n'
+                + 'difference        = ' + player.responsivedata.responsivedifference + '\n'
                 + '\n'
-                + 'responsive width = ' + responsivewidth + '\n'
-                + 'smallscreen      = ' + (responsivewidth < config['default-width']) + '\n'
+                + 'responsive width  = ' + responsivewidth + '\n'
+                + 'responsive height = ' + (responsivewidth * player.responsivedata.playeraspect) + '\n'
+                + 'smallscreen       = ' + (responsivewidth < config['default-width']) + '\n'
                 + '\n');
             ***/
 
@@ -10747,23 +10778,6 @@ var OzPlayer = (function()
             //so that we avoid repeatedly re-applying the same responsive width
             if(responsivewidth != player.responsivedata.responsivewidth)
             {
-                //*** DEV TMP
-                //_.title = player.wrapper.nodeName + ' [~] ' + responsivewidth;
-
-                //*** DEV TMP
-                //etc.get('#info').innerHTML = ('<br>'
-                //    //+ 'default width     = ' + player.responsivedata.playerwidth + '<br>'
-                //    //+ 'default aspect    = ' + player.responsivedata.playeraspect + '<br>'
-                //    //+ '<br>'
-                //    + 'monitored width  = ' + player.responsive.offsetWidth + '<br>'
-                //    + 'container width  = ' + player.container.offsetWidth + '<br>'
-                //    + 'difference       = ' + player.responsivedata.responsivedifference + '<br>'
-                //    + '<br>'
-                //    + 'responsive width = ' + responsivewidth + '<br>'
-                //    + 'smallscreen      = ' + (responsivewidth < config['default-width']) + '<br>'
-                //    + '<br>')
-                //    + etc.get('#info').innerHTML;
-
                 //update the stored responsive width with this responsive width
                 //then if it's less than the smallscreen threshold
                 if((player.responsivedata.responsivewidth = responsivewidth) < config['default-width'])
