@@ -218,10 +218,9 @@
 </figure>
 
                 <p>
-                    OzPlayer will then shrink itself to fit that content column,
-                    whenever the column is smaller (similar to the behaviour
-                    of image max-width). This is measured during page load,
-                    and whenever the window size or orientation changes.
+                    OzPlayer will then resize itself to fit that content column.
+                    This is measured during page load, and whenever the window
+                    size or orientation changes.
                 </p>
 
                 <figure class="note">
@@ -229,20 +228,10 @@
                         <em>
                             In order for this to work, the content column itself
                             <strong>must</strong> be flexible to window size.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
                             Likewise, any element between that column and the player
                             (such as the wrapping <code>FIGURE</code> element)
-                            must also be flexible. If you have a transcript,
-                            that should also be flexible.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
-                            Resizing will occur even if OzPlayer is not inside the
-                            specified column.
+                            must also be flexible. If you have a transcript within
+                            the same container then that should also be flexible.
                         </em>
                     </p>
                 </figure>
@@ -341,6 +330,10 @@
                             <code>400</code> &#x00d7; <code>225</code>.
                             The absolute minimum size you can specify is
                             <code>240</code> &#x00d7; <code>135</code>.
+                            If you're using responsive design, then the
+                            recommendation is to take a mobile-first approach,
+                            and set the default width and height to match your
+                            smallest layout.
                         </em>
                     </p>
                     <p>

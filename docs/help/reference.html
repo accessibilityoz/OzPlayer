@@ -163,9 +163,58 @@
                             <p>
                                 If this attribute is specified, and points to a
                                 flexible container, then OzPlayer will continually
-                                resize itself to be no larger than the container
-                                (down to a minimum of <code>240</code> pixels).
+                                resize itself to match the internal width of the
+                                container (down to an absolute minimum of
+                                <code>240</code> pixels).
                             </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="container-data-responsive-mode">
+                        <summary><code>"data-responsive-mode"</code> <small>(optional)</small></summary>
+                        <div>
+
+                            <p>
+                                The responsive sizing mode, which can
+                                be <code>"min"</code>, <code>"max"</code> or
+                                <code>"initial"</code>.
+                            </p>
+                            <p>
+                                If it has the value <code>"min"</code> then the
+                                default video width will also be the minimum width,
+                                when resizing to fit a responsive container.
+                            </p>
+                            <p>
+                                If it has the value <code>"max"</code> then the
+                                default video width will also be the maximum width.
+                            </p>
+                            <p>
+                                If it has the value <code>"initial"</code> then
+                                there won't be any minimum or maximum width
+                                constraints (apart from the absolute minimum
+                                of <code>240</code> pixels).
+                            </p>
+                            <p>
+                                If this attribute is not defined, the mode
+                                defaults to <code>"initial"</code>.
+                            </p>
+
+                            <figure class="note">
+                                <p>
+                                    <em>
+                                        This feature was added in OzPlayer 3.2
+                                        to accompany a change in responsive
+                                        behaviour. Earlier versions always
+                                        applied a maximum width constraint,
+                                        and therefore backward compatibility
+                                        can be achieved using the value
+                                        <code>"max"</code>.
+                                    </em>
+                                </p>
+                            </figure>
 
                         </div>
                     </details>
@@ -184,7 +233,7 @@
                                 If it has the value <code>"stack"</code>
                                 then the controls will be superimposed
                                 over the bottom of the video, with a timer
-                                that automatically hides them after 4
+                                that automatically hides them after a few
                                 seconds of user inactivity.
                             </p>
                             <p>
@@ -1148,6 +1197,24 @@
                                     If this attribute is not defined, the
                                     width defaults to <code>400</code>.
                                 </p>
+
+                                <figure class="note">
+                                    <p>
+                                        <em>
+                                            Unlike the
+                                            <a href="#video">video element</a>,
+                                            the audio element does not natively
+                                            support <code>width</code> and
+                                            <code>height</code>, therefore the
+                                            <code>data-width</code> you specify
+                                            here will only apply when scripting
+                                            is available. But if you also define
+                                            a CSS <code>width</code> then this
+                                            will apply when scripting is not
+                                            available.
+                                        </em>
+                                    </p>
+                                </figure>
 
                             </div>
                         </details>
