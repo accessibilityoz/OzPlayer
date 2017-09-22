@@ -1529,6 +1529,7 @@ var OzPlayer = (function()
             //constructor errors
             'constructor-no-id'       : 'Please specify a p\layer ID.',
             'constructor-bad-id'      : 'There is no p\layer with the ID "%id".',
+            'constructor-dupe-id'     : 'A p\layer with the ID "%id" has already been initialised.',
             'constructor-bad-class'   : 'The p\layer with the ID "%id" does not have the class "%name".',
             'constructor-no-media'    : 'The p\layer with the ID "%id" has no media element.',
             'constructor-not-new'     : 'The OzPlayer.Video function must be called with the "new" keyword.',
@@ -2243,6 +2244,13 @@ var OzPlayer = (function()
                 name    : config.classes['container']
 
             }), 'error');
+        }
+
+        //[else] if we already have a player with this ID
+        //show a console error and return false for failure
+        if(etc.def(players[id]))
+        {
+            return etc.console(etc.sprintf(config.lang['constructor-dupe-id'], { id : id }), 'error');
         }
 
 
