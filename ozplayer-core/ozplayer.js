@@ -1962,9 +1962,15 @@ var OzPlayer = (function()
 
             //then if local storage is supported, look for a value with the specified key
             //and that will either return the value, or null if there is no such value
+            //nb. we need to use exception handling to cater for older versions of firefox
+            //in which localStorage is technically supported but getItem sometimes throws an error
             if(etc.def(__.localStorage))
             {
-                return __.localStorage.getItem(basekey);
+                try
+                {
+                    return __.localStorage.getItem(basekey);
+                }
+                catch(ex) { return null; }
             }
 
             //[else] if cookies are supported, look for a value with the specified key
