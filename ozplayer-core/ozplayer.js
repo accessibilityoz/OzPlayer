@@ -6340,8 +6340,6 @@ var OzPlayer = (function()
         //nb. when the max is zero the slider thumb and this input will be disabled
         //and the thumb will be hidden with opacity (so it's invisible but accessible)
         //nb. also add a single space after button, just to create basic spacing
-        //nb. also set aria-hidden=false to try to counteract lack of display on the
-        //mute and volume fields when responsive layout has applied the smallscreen class
         etc.build('span',
         {
             '=parent'           : player.controlform.firstChild,
@@ -6350,7 +6348,6 @@ var OzPlayer = (function()
                                 + config.classes['field-seek']
                                 + ' '
                                 + config.classes['state-disabled'],
-            'aria-hidden'       : 'false',
             '#dom'              : (player.controlform.seek = etc.build('input',
             {
                 'type'          : slidertype,
@@ -6384,8 +6381,6 @@ var OzPlayer = (function()
         //(ie. so the volume button and input are on a line of their own)
         //nb. it would be better to do this with fieldsets, but that's too much
         //complication, as it's much simpler if the controls all have the same parent
-        //** but when we have more time it would be good to re-visit this
-        //** to split the controls into fieldset groups, each with its own legend
         etc.build('br', { '=parent' : player.controlform.firstChild });
 
 
@@ -8349,6 +8344,16 @@ var OzPlayer = (function()
             //make any difference to anything, so just silently handle it
             try
             {
+                //remove the poster overlay if it's [still] present
+                //nb. this can happen if preload=auto and you move the slider before first playback
+                if(player.poster)
+                {
+                    player.poster = etc.remove(player.poster);
+                }
+
+                //also remove the video's poster attribute if it has one
+                player.video.removeAttribute('poster');
+
                 //if the selected index is the highest slider index
                 if(data.to == data.theslider.options.length - 1)
                 {
@@ -8899,7 +8904,7 @@ var OzPlayer = (function()
             //video frame with no controls, making it impossible to play or pause again
             //(which happens either from that icon or just from pressing "done")
             //there's no conflict with native controls because they're hidden from iphone
-            //(which is better since they'd be really tiny on an iphone in landscape)
+            //(which is better since they'd be really tiny on an iphone in portrait)
             if(player.controlform && !defs.agent.iphone)
             {
                 player.video.removeAttribute('controls');
@@ -9332,9 +9337,9 @@ var OzPlayer = (function()
         //evaluating duration and currentTime, because it's possible to press
         //play and then pause again before even the metadata has loaded
         //nnb. but we can't just silence() this event after firing, because
-        //*** erm, it sometimes fires more than once despite these conditions
-        //*** in circumstances I can't remember but which turned out to be necessary
-        //*** or something, I can't exactly remember, maybe it's just superstition!
+        //... erm ... it sometimes fires more than once despite these conditions
+        //in circumstances I can't remember but which turned out to be necessary
+        //or something, I can't exactly remember, maybe it's just superstition!
         etc.listen(player.media, 'play', function(e)
         {
             //check that the media hasn't already started
@@ -9478,7 +9483,14 @@ var OzPlayer = (function()
                     //(which means it hasn't been udpated since it was created)
                     //refresh the seek controls's data, now that we know the duration
                     //(which will update the control and then refresh the custom slider)
-                    if(sliders[player.controlform.seek.id].range.max == 0)
+                    //UNLESS the playpause button is still disabled; this can happen
+                    //if preload=auto and you move the slider before first playback
+                    //however several browser/OS combinations don't allow playback
+                    //until other conditions have been met, and so we shouldn't allow
+                    //seeking before then since it would be useless (you would seek
+                    //further ahead, but the video won't necessarily show, and then
+                    //when you do press play it would start from zero anyway)
+                    if(sliders[player.controlform.seek.id].range.max == 0 && !player.controlform['playpause'].disabled)
                     {
                         refreshSeekData(player);
                     }
@@ -10319,8 +10331,6 @@ var OzPlayer = (function()
         //but also explicitly creating that reference just to be on the safe side
         //nb. also add a single space after the button, just to create basic spacing
         //for viewing the page without CSS, which won't otherwise be seen
-        //nb. also set aria-hidden=false to try to counteract lack of display on the
-        //mute and volume fields when responsive layout has applied the smallscreen class
         etc.build('span',
         {
             '=parent'       : player.controlform.firstChild,
@@ -10329,7 +10339,6 @@ var OzPlayer = (function()
                             + config.classes['field-' + key]
                             + ' '
                             + (!enabled ? config.classes['state-disabled'] : ''),
-            'aria-hidden'   : 'false',
             '#dom'          : (player.controlform[key] = etc.build('button', dom)),
             '#text'         : ' '
         });
