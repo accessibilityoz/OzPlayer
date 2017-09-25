@@ -35,10 +35,11 @@ foreach($config as $key => $value)
 $functions = array
 (
 
-    'def','each','build','listen',
-    'trim','sprintf','addClass','console','remove','delay',
+    'def','each','build','listen','trim','sprintf',
+    'addClass','console','delay','getLang','get',
 
-    'get','updateControlState','updateControlText','updateControlDisabled',
+    'updateControlState','remove',
+    'updateControlText','updateControlDisabled',
     'updateControlMenuDisabled',
     'maybeHideSliderTooltip','pauseMedia','updateSliderStretch',
     'removeClass','hasClass','render','contains','dispatchMediaSliderEvent',
@@ -46,7 +47,6 @@ $functions = array
     'setMediaVolume','playMedia','setMediaTime','bufferMedia','abortMedia',
     'audioSynchronise','getTracksData','getTrackVTT','parseTrackVTT',
     'getTimeCaption','getCueHTML','addTranscriptHTML',
-    'getLang',
     'addMediaInterface','addControlButton','addControlClick','addControlMenu',
     'addSkipLinks','removeHelpDialog','addLogoBug',
     'startAutoHiding','unprimeAutoHiding','primeAutoHiding',
