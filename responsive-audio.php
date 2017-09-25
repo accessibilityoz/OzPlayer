@@ -76,6 +76,9 @@
         /*** DEV (example container styles) ***/
         #container
         {
+            min-width:244px;
+            max-width:644px;
+
             box-shadow:0 0 0 5px navy;
 
 
@@ -105,13 +108,6 @@
         figure
         {
             margin-top:1em;
-        }
-
-
-        /*** DEV (fallback <audio> width when viewing without JS) ***/
-        #demo audio
-        {
-            width:640px;
         }
 
 
@@ -204,10 +200,24 @@
         id="demo" class="ozplayer"
         data-transcript="demo-transcript"
         data-responsive="container"
+        data-responsive-mode="initial"
         >
-        <audio
-            data-volume="1"
+
+        <!--
+            data-width="1280"
+            data-width="960"
+            data-width="800"
             data-width="640"
+            data-width="480"
+            data-width="400"
+            data-width="320"
+            data-width="272"
+            data-width="240"
+        -->
+
+        <audio
+            data-width="270"
+            style="width:270px"
             preload="none"
             controls="controls"
             >

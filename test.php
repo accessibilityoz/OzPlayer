@@ -325,26 +325,6 @@
             width:360px !important;
         } */
 
-        /*** DEV LOG (responsive figure) ***//*
-        figure
-        {
-            display:inline-block !important;
-            width:40% !important;
-            margin:0 !important;
-        } */
-
-        /*** DEV LOG (responsive transcript) ***//*
-        .ozplayer-expander
-        {
-            width:auto !important;
-            min-width:244px !important;
-            max-width:644px !important;
-        }
-        .ozplayer-transcript
-        {
-            width:auto !important;
-        } */
-
         /*** DEV LOG (log styles) ***//*
         .log
         {
@@ -502,7 +482,29 @@
     <!-- *** / DEV WORDPRESS STYLESHEET *** -->
 
 
-    <!-- *** DEV VERY TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
+    <!-- *** DEV VERY TMP ON/OFF STATE STYLES --><!--
+    <style>
+    .oz-controls .oz-field button.oz-on
+    {
+        box-shadow:inset 0 0 0 2px limegreen !important;
+    }
+    .oz-controls .oz-field button.oz-off
+    {
+        box-shadow:inset 0 0 0 2px red !important;
+    }
+    .oz-controls .oz-field button[aria-pressed="true"]
+    {
+        outline:2px dashed limegreen !important;
+    }
+    .oz-controls .oz-field button[aria-pressed="false"]
+    {
+        outline:2px dashed red !important;
+    }
+    </style>
+    -->
+
+
+    <!-- *** DEV TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
     <!--
     <style>
     .oz-controls .oz-menuitem[aria-disabled="true"]
@@ -608,9 +610,8 @@
             width="240" height="135"
         -->
         <video
-            data-volume="0.25"
-            width="640" height="360"
             preload="none"
+            width="640" height="360"
             controls="controls"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
@@ -787,7 +788,7 @@
         <audio data-default="default" preload="none" data-on="test.php?audio=on" data-off="test.php?audio=off">
         <audio preload="none">
         -->
-        <audio data-volume="1" data-default="default" preload="none">
+        <audio data-default="default" preload="none">
 
 <?php if(isset($_GET['video']) && ($_GET['video'] == 'youtube' || $_GET['video'] == 'ozplayer')) : ?>
 
@@ -1006,9 +1007,11 @@
         }
         function remote(src)
         {
-            return qualify(src).replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
-            + '?nocache=' + new Date().getTime()
-            + '';
+            return qualify(src)
+                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
+                    .replace('OzPlayer/media/', 'media/')
+                + '?nocache=' + new Date().getTime()
+                + '';
         }
         var sources = document.getElementsByTagName('source');
         for(var i = 0; i < sources.length; i ++)
@@ -1070,8 +1073,8 @@
             audiolog.parentNode.removeChild(audiolog);
         }
     })();
-    </script>
-    --><!-- *** DEV LOG *** -->
+    </script> -->
+    <!-- *** DEV LOG *** -->
 
 
 
@@ -1163,6 +1166,10 @@
             }
             if(lightsheet)
             {
+                /***
+                lighthref = lighthref.replace('-pink', '-green');
+                ***/
+
                 if(window.opera)
                 {
                     //lighthref = lighthref.replace('-pink', '-red');
@@ -1189,6 +1196,7 @@
                     lighthref = lighthref.replace('-pink', '-green');
                     //lighthref = lighthref.replace('-pink', '-yellow');
                 }
+
                 lightsheet.href = lighthref;
             }
         }

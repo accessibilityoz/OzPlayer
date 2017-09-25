@@ -76,6 +76,13 @@
         /*** DEV (example container styles) ***/
         #container
         {
+            /***
+            ***/
+            min-width:244px;
+            max-width:804px;
+
+            margin:7px;
+
             box-shadow:0 0 0 5px navy;
 
 
@@ -107,7 +114,6 @@
         .ozplayer-transcript
         {
             width:auto !important;
-            max-width:760px !important;
         }
 
 
@@ -191,6 +197,7 @@
         id="demo" class="ozplayer"
         data-transcript="demo-transcript"
         data-responsive="container"
+        data-responsive-mode="initial"
         data-controls="stack"
         >
 
@@ -202,11 +209,12 @@
             width="480" height="270"
             width="400" height="225"
             width="320" height="180"
+            width="272" height="153"
             width="240" height="135"
         -->
 
         <video
-            width="800" height="450"
+            width="272" height="153"
             poster="./media/posters/HorribleHistories.jpg"
             preload="none"
             controls="controls"

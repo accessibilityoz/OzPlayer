@@ -184,7 +184,6 @@
         data-transcript="demo-transcript"
         >
         <audio
-            data-volume="1"
             data-width="480"
             preload="none"
             controls="controls"
