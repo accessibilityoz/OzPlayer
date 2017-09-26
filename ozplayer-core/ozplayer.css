@@ -1572,7 +1572,8 @@
     font-size:40px !important;
 }
 
-/* captions => caption cue line */
+/* captions => caption speaker and cue line */
+.ozplayer .oz-captions p cite,
 .ozplayer .oz-captions p q
 {
     /* nb. keep this inline so you can add a background color

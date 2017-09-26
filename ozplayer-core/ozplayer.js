@@ -4948,9 +4948,18 @@ var OzPlayer = (function()
         //nb. usually this will only be a single member, but it can be two or more
         etc.each(cue.text.split(/\s*^\s*/m), function(line, i)
         {
-            //parse this line to extract any voice and convert the cue text to markup
-            line = line.replace(/^(?:<v(?:\s+([^>]+))?>)?(.*)$/mig, function(all, voice, content)
+            //parse this line to extract any voice information, and to convert the cue text to markup
+            line = line.replace(/^(?:<v(?:(\.important)?\s+([^>]+))?>)?(.*)$/mig, function(all, important, voice, content)
             {
+                //if the speaker argument is false but the important flag was
+                //present on the <v> element, then enable the speaker argument
+                //nb. this can be used to denote that a speaker name should be shown
+                //in a caption, where they're usually only shown in the transcript
+                if(!speaker && important)
+                {
+                    speaker = true;
+                }
+
                 //remove any closing </v> tags from the line content
                 //nb. this is an over-simplification as it doesn't allow for lines
                 //where the voice is only part of the line, e.g. "<v>foo</v> bar"
@@ -4985,7 +4994,7 @@ var OzPlayer = (function()
                 //so it can have a background color which will only apply to the line boxes
                 //nnb. although the transcript doesn't need that, it's just for dialog semantics
                 return '<p' + (voice ? (' data-voice="' + voice + '"') : '') + '>'
-                        + (speaker && voice ? etc.sprintf('<cite>%voice</cite>:\u0020', { voice : voice }) : '')
+                        + (speaker && voice ? etc.sprintf('<cite>%voice:</cite>\x20', { voice : voice }) : '')
                         + (cue.kind == 'captions' ? '<q>' : '')
                         + content
                         + (cue.kind == 'captions' ? '</q>' : '')
