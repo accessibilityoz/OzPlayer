@@ -10,14 +10,14 @@ Copyright (c) 2009 BBC Worldwide
 
     CUE-1
 00:00:00.000 --> 00:00:02.301
-<v 	Hostess  >Oh, Lionel. Glad you could make it.
-<v 	Hostess  >Can I get you a drink?
+<v.first 	Hostess  >Oh, Lionel. Glad you could make it.
+<v.second.drink 	Hostess  >Can I get you a drink?
 
 
 		CUE-2
 00:00:02.300 --> 00:00:04.642
-<v  Lionel	>- Yeah something soft &#x2014; I'm driving.</v>
-<v	Hostess	>- Okay.</v>
+<v.important.drink  Lionel	>- Yeah something soft &#x2014; I'm driving.</v>
+<v.important	Hostess	>- Okay.</v>
 
 
 CUE-S
@@ -36,7 +36,7 @@ This line is an invalid cue
 
    CUE-4		and some junk
 00:00:09.620 --> 00:00:14.320
-<v Lionel>Still, I managed it. I mean, parking's not exactly <b><c.brain>brain surgery</c></b> is it?
+<v Lionel>Still, I managed it. I mean, parking's not exactly <b><c.brain.surgery.more.classes>brain surgery</c></b> is it?
 
 
 NOTE
@@ -54,7 +54,7 @@ CUE 5
 <v Female Guest>Why's that, are you a doctor?
 
 00:00:20.340 --> 00:00:22.970
-<v Lionel>Careful. Not a doctor. I'm a <b>brain surgeon</b>.
+<v.job Lionel>Careful. Not a doctor. I'm a <b><c.brain.surgeon>brain surgeon</c></b>.
 
 9
 00:00:22.970 --> 00:00:25.160
@@ -80,11 +80,11 @@ CUE-10
 
 CUE-11
 00:00:26.970 --> 00:00:30.150
-<v Lionel>“What's the difference between a doctor and a brain surgeon?
+<v Lionel>“What's the difference between a doctor and a <c.brain.surgeon>brain surgeon</c>?
 
 CUE-12
 00:00:30.150 --> 00:00:35.370
-<v Lionel>“One's, not exactly <c.brain>brain surgery</c>, the other, <b>is <c.brain>brain surgery</c></b>”
+<v Lionel>“One's, not exactly <c.brain.surgery>brain surgery</c>, the other, <b>is <c.brain.surgery>brain surgery</c></b>”
 
 CUE-13
 00:00:35.370 --> 00:00:37.370
@@ -92,13 +92,13 @@ CUE-13
 
 CUE-14
 00:00:37.370 --> 00:00:43.360
-<v Lionel>- So er, what do you guys do?
-<v Male Guest>- I'm an accountant
-<v Lionel>- <i>(patronising tone)</i> Oh that's good. Yeah.
+<v.important Lionel>- So er, what do you guys do?
+<v.job.important Male Guest>- I'm an <c.accountant>accountant</c>
+<v.important Lionel>- <i>(patronising tone)</i> Oh that's good. Yeah.
 
 CUE-16
 00:00:43.360 --> 00:00:47.720
-<v Lionel>I could do with an accountant. Filling in those tax forms can get really confusing, can't it?
+<v Lionel>I could do with an <c.accountant>accountant</c>. Filling in those tax forms can get really confusing, can't it?
 
 CUE-17
 00:00:48.490 --> 00:00:49.800
@@ -106,16 +106,16 @@ CUE-17
 
 CUE-18
 00:00:49.930 --> 00:00:52.500
-<v Lionel>It's not exactly <c.brain>brain surgery</c> is it?
+<v Lionel>It's not exactly <c.brain.surgery>brain surgery</c> is it?
 
 CUE-19
 00:00:53.290 --> 00:00:58.340
-<v Lionel>I mean, <c.brain>brain surgery</c>, believe me, is very <b>complex</b>
+<v Lionel>I mean, <c.brain.surgery>brain surgery</c>, believe me, is very <b>complex</b>
 
 CUE-20
 00:00:58.340 --> 00:01:01.150
-<v Lionel>- Are you an accountant too?
-<v Female Guest>- Er no, I work for a charity.
+<v.accountant.important Lionel>- Are you an <c.accountant>accountant</c> too?
+<v.important.job.charity Female Guest>- Er no, I work for a <c.charity>charity</c>.
 
 
 00:01:01.150 --> 00:01:03.130
@@ -136,17 +136,17 @@ CUE-24
 
 CUE-25
 00:01:14.710 --> 00:01:17.880
-<v Lionel><i>(with a grimace)</i> It's not exactly <b><c.brain>brain surgery</c></b> is it?
+<v Lionel><i>(with a grimace)</i> It's not exactly <b><c.brain.surgery>brain surgery</c></b> is it?
 
 CUE-26
 00:01:17.880 --> 00:01:20.890
-<v Lionel>Which, as a brain surgeon, is what I do.
+<v Lionel>Which, as a <c.brain.surgeon>brain surgeon</c>, is what I do.
 
 00:01:20.890 --> 00:01:22.500
 <v Hostess>Lionel, here's your drink.
 
 00:01:22.500 --> 00:01:24.800
-<v Hostess>Lionel's a brain surgeon you know?
+<v Hostess>Lionel's a <c.brain.surgeon>brain surgeon</c> you know?
 
 00:01:24.800 --> 00:01:26.700
 <v Female Guest><i>(slightly weary tone)</i> Yeah, he mentioned it.
@@ -161,14 +161,14 @@ CUE-31
 
 CUE-32
 00:01:32.000 --> 00:01:38.760
-<v Hostess>- (to herself) I'll take this food round.
-<v Hostess>- Have you met Lionel?
-<v Jeff>- Er, no. Hello Lionel.
-<v Lionel>- So Jeff, how do you earn a crust?
+<v.important.important Hostess>- (to herself) I'll take this food round.
+<v Hostess>Have you met Lionel?
+<v.important.important Jeff>- Er, no. Hello Lionel.
+<v.important.important Lionel>- So Jeff, how do you earn a crust?
 
 CUE-36
 00:01:38.760 --> 00:01:42.090
-<v Jeff>Well I'm a scientist. I work mainly with rockets.
+<v.job Jeff>Well I'm a scientist. I work mainly with rockets.
 
 CUE-37
 00:01:43.090 --> 00:01:45.300
@@ -180,11 +180,11 @@ CUE-38
 
 CUE-39
 00:01:46.330 --> 00:01:50.200
-<v Lionel>Well, I don't mean to boast, but er, I'm a brain surgeon.
+<v.job Lionel>Well, I don't mean to boast, but er, I'm a <c.brain.surgeon>brain surgeon</c>.
 
 CUE-40
 00:01:51.400 --> 00:01:52.800
-<v Jeff>Brain surgery?
+<v Jeff><c.brain.surgery>Brain surgery?</c>
 
 CUE-41
 00:01:56.500 --> 00:01:59.210
