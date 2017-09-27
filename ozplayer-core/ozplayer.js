@@ -4949,7 +4949,7 @@ var OzPlayer = (function()
         etc.each(cue.text.split(/\s*^\s*/m), function(line, i)
         {
             //parse this line to extract any voice information, and to convert the cue text to markup
-            line = line.replace(/^(?:<v(?:((?:\.[\w]+)*)\s+([^>]+))?>)?(.*)$/mig, function(all, voiceclass, voice, content)
+            line = line.replace(/^(?:<v(?:((?:\.[-\w]+)*)\s+([^>]+))?>)?(.*)$/mig, function(all, voiceclass, voice, content)
             {
                 //if we have any voiceclass data, split it into individual values
                 //otherwise create an empty array so we can test it universally

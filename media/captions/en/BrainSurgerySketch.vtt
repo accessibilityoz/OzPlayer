@@ -10,8 +10,8 @@ Copyright (c) 2009 BBC Worldwide
 
     CUE-1
 00:00:00.000 --> 00:00:02.301
-<v.first 	Hostess  >Oh, Lionel. Glad you could make it.
-<v.second.drink 	Hostess  >Can I get you a drink?
+<v.first-line 	Hostess  >Oh, Lionel. Glad you could make it.
+<v.second-line.drink 	Hostess  >Can I get you a drink?
 
 
 		CUE-2
