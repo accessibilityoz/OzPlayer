@@ -1354,9 +1354,6 @@ var OzPlayer = (function()
             //captions container
             'captions'                : 'oz-captions',
 
-            //captions container => alternate voice colour
-            'captions-voice-alt'      : 'oz-voice-alt',
-
             //captions container => spacing blocks
             'captions-spacing'        : 'oz-captions-spacing',
 
@@ -4935,6 +4932,9 @@ var OzPlayer = (function()
     //into the HTML for a single caption or transcript entry
     function getCueHTML(cue, speaker)
     {
+        //*** DEV TMP
+        //speaker = false;
+
         //define an array for storing the individual paragraph lines
         //and a separate array for storing the voice name for each line
         //nb. we need to build an array rather than just compiling the final
@@ -4949,52 +4949,73 @@ var OzPlayer = (function()
         etc.each(cue.text.split(/\s*^\s*/m), function(line, i)
         {
             //parse this line to extract any voice information, and to convert the cue text to markup
-            line = line.replace(/^(?:<v(?:(\.important)?\s+([^>]+))?>)?(.*)$/mig, function(all, important, voice, content)
+            line = line.replace(/^(?:<v(?:((?:\.[\w]+)*)\s+([^>]+))?>)?(.*)$/mig, function(all, voiceclass, voice, content)
             {
+                //if we have any voiceclass data, split it into individual values
+                //otherwise create an empty array so we can test it universally
+                //nb. the voiceclass argument might be undefined OR empty string
+                //so we have to test with coercion rather than etc.def(voiceclass)
+                //otherwise we could create an array with a single empty string member
+                voiceclass = voiceclass ? voiceclass.substr(1).split('.') : [];
+
+                /*** DEV TMP ***//***
+                console.group();
+                console.log(all);
+                console.log(voiceclass);
+                console.log(voice);
+                console.log(content);
+                console.groupEnd(); ***/
+
                 //if the speaker argument is false but the important flag was
-                //present on the <v> element, then enable the speaker argument
+                //present on the <v> element, then enable the showspeaker flag
                 //nb. this can be used to denote that a speaker name should be shown
                 //in a caption, where they're usually only shown in the transcript
-                if(!speaker && important)
+                //nnb. we need a separate var from the input speaker argument
+                //since its value might change between iterations of this loop
+                //nb. don't remove the important flag from the voiceclass array
+                //so that it also gets output as a class on the captions <p> element
+                //just in case it's useful to authors as a secondary styling hook
+                var showspeaker = speaker;
+                if(!showspeaker && etc.find(voiceclass, 'important') > -1)
                 {
-                    speaker = true;
+                    showspeaker = true;
                 }
 
                 //remove any closing </v> tags from the line content
                 //nb. this is an over-simplification as it doesn't allow for lines
                 //where the voice is only part of the line, e.g. "<v>foo</v> bar"
-                //and are voice tags that span multiple lines allowed?
+                //** and are voice tags that span multiple lines allowed?
                 content = content.replace(/<\/v>/g, '');
 
-                //if we have a voice name, parse any whitespace from the value
-                if(voice)
-                {
-                    voice = etc.trim(voice);
-                }
+                //add the whitepsace-trimmed voice name or null to the voices array
+                //while copying the trimmed version back to the local argument
+                //nb. if voice is undefined then trim will just return undefined
+                voices.push((voice = etc.trim(voice)) || null);
 
-                //add the voice name or null to the voices array
-                voices.push(voice || null);
-
-                //if the speaker argument is true and we have a voice name
+                //if the showspeaker flag is true and we have a voice name
                 //then parse the string of any leading dash, since dashes
                 //are commonly used to indicate different speakers in a
                 //single cue, but we don't need them if we have a a voice citation
-                if(speaker && voice)
+                if(showspeaker && voice)
                 {
                     content = content.replace(/^[-]\s*/, '');
                 }
 
                 //then compile the line by defining a <p>, then a <q> pair for "captions" kind
                 //cues which includes a [data-voice] attribute on the <p> if we have a voice,
-                //and also including a leading speaker citation if the speaker argument is true
+                //as well as the <p> including any classes defined on the <v> element itself
+                //and also including a leading speaker citation if the showspeaker argument is true
                 //ie. so we'll get either <p data-voice="foo"><q> or just <p><q>
-                //or if speaker is true then we'll get <p data-voice="foo">{SPEAKER}<q>
+                //or if showspeaker is true then we'll get <p data-voice="foo">{SPEAKER}<q>
                 //nb. we need two elements here so we can have a wrapping block
                 //to put each caption cue line on its own line, but also an inline element
                 //so it can have a background color which will only apply to the line boxes
                 //nnb. although the transcript doesn't need that, it's just for dialog semantics
-                return '<p' + (voice ? (' data-voice="' + voice + '"') : '') + '>'
-                        + (speaker && voice ? etc.sprintf('<cite>%voice:</cite>\x20', { voice : voice }) : '')
+                return '<p'
+                        + (voice ? (' data-voice="' + voice + '"') : '')
+                        + (voiceclass.length > 0 ? (' class="' + voiceclass.join(' ') + '"') : '')
+                        + '>'
+                        + (showspeaker && voice ? etc.sprintf('<cite>%voice:</cite>\x20', { voice : voice }) : '')
                         + (cue.kind == 'captions' ? '<q>' : '')
                         + content
                         + (cue.kind == 'captions' ? '</q>' : '')
@@ -5002,9 +5023,10 @@ var OzPlayer = (function()
             });
 
             //extract any <c.foo> tags and convert them to <span class="foo">
+            //replacing any dots with spaces to allow for multiple classes
             line = line.replace(/<\/c>/g, '</span>').replace(/<c\.([^>]+)>/ig, function(all, value)
             {
-                return '<span class="' + value + '">';
+                return '<span class="' + value.replace(/\./g, ' ') + '">';
             });
 
             //extract any <lang foo> tags and convert them to <span lang="foo">
@@ -5012,6 +5034,9 @@ var OzPlayer = (function()
             {
                 return '<span lang="' + etc.trim(value) + '">';
             });
+
+            //*** DEV TMP
+            //console.log(line);
 
             //then add this line to the array
             lines.push(line);
@@ -5030,9 +5055,9 @@ var OzPlayer = (function()
                     + '" data-cue="' + cue.id
                     + '">';
 
-        //iterate through the lines and add the voice-alt class
+        //iterate through the lines and add the data-voice-alt attribute
         //each time we encounter a change of voice within the caption
-        //unless the previous line already had the voice-alt class
+        //unless the previous line already had the data-voice-alt attribute
         var voicealt = false;
         etc.each(lines, function(line, i)
         {
@@ -5042,9 +5067,12 @@ var OzPlayer = (function()
             }
             if(voicealt)
             {
-                lines[i] = line.replace('<p', '<p class="' + config.classes['captions-voice-alt'] + '"');
+                lines[i] = line.replace('<p', '<p data-voice-alt="true"');
             }
         });
+
+        //*** DEV TMP
+        //console.log(lines.join('\n'));
 
         //join and add the individual lines
         html += lines.join('');
