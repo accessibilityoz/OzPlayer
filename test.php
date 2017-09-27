@@ -173,47 +173,73 @@
 
 
         /* sample cue, voice and class styles *//*
-        #demo-transcript [data-cue="9"]
+        #demo-transcript
         {
-            color:#090;
+            height:30em;
         }
-        #demo-transcript [data-voice="Rattus"]
+        #demo-transcript [data-cue="9"] *
         {
-            color:#900;
+            color:#909 !important;
         }
-        #demo-transcript [data-voice="Alfred Nobel"] cite
+        #demo-transcript [data-voice="Lionel"] *
         {
-            color:#099;
-        }
-        #demo-transcript p:not([data-voice])
-        {
-            color:#909;
+            font-family:serif !important;
         }
         #demo-transcript [data-cue="9"] mark
         {
-            color:#f60;
+            background-color:#fec !important;
+        }
+        #demo-transcript [data-cue="9"] mark *
+        {
+            color:#f60 !important;
+        }
+        #demo-transcript p.job
+        {
+            text-decoration:overline;
+        }
+        #demo-transcript p[data-voice-alt="true"] q
+        {
+            background:cyan;
         }
         #demo-transcript span.brain
         {
             font-variant:small-caps;
         }
+        #demo-transcript span.surgeon
+        {
+            color:crimson;
+        }
+        #demo-transcript span.surgery
+        {
+            color:green;
+        }
+        #demo-transcript span.accountant
+        {
+            color:blue;
+        }
+        #demo-transcript span.charity
+        {
+            color:darkorange;
+        }
         #demo-transcript span.rocket
         {
             text-transform:uppercase;
+            font-family:cursive;
+            color:darkcyan;
         }
         #demo-transcript span[lang]
         {
             font-family:"american typewriter", courier, monospace;
-        }
-        #demo-transcript
-        {
-            height:20em;
         } */
 
 
 
 
-        /* sample caption styling */
+        /* sample caption styling *//*
+        .ozplayer .oz-captions p.job
+        {
+            text-decoration:line-through !important;
+        }
         .ozplayer .oz-captions p .uppercase
         {
             text-transform:uppercase !important;
@@ -221,7 +247,7 @@
         .ozplayer .oz-captions p .monospace
         {
             font-family:monospace !important;
-        }
+        } */
 
 
 

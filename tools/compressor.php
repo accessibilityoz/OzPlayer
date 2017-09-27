@@ -143,7 +143,7 @@ $variables = array
     'xhome','xpost','xresponse','xstatus',
     'languages','isocode','defaultTrack','defaultTranscript',
     'ontrackchange','basevolume','currentvolume',
-    'lines','voices','voicealt',
+    'lines','voices','voicealt','voiceclass',
 
 
     //nb. this must be defined as a var because it's called using apply()
