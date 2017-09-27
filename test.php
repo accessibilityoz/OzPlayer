@@ -252,6 +252,31 @@
 
 
 
+        /* sample caption voice colours *//*
+        #demo .oz-captions [data-voice="Hostess"] *
+        {
+            color:#ff0 !important;
+        }
+        #demo .oz-captions [data-voice="Lionel"] *
+        {
+            color:#fff !important;
+        }
+        #demo .oz-captions [data-voice="Female Guest"] *
+        {
+            color:#3f3 !important;
+        }
+        #demo .oz-captions [data-voice="Male Guest"] *
+        {
+            color:#f6f !important;
+        }
+        #demo .oz-captions [data-voice="Jeff"] *
+        {
+            color:#0ff !important;
+        } */
+
+
+
+
         /*** EXPERIMENTAL demo transcript => alternate layout
              nb. this still affects opera in fullscreen mode ***//***
         @media screen and (min-width:1200px)
