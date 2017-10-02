@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.1] => player core
+ OzPlayer [3.2] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -1425,8 +1425,8 @@ var OzPlayer = (function()
             //indexed by button name and state key (eg. "playpause" and "on")
             "button-playpause-off"    : "Play",
             "button-playpause-on"     : "Pause",
-            "button-mute-off"         : "Unmute",
-            "button-mute-on"          : "Mute",
+            "button-mute-off"         : "Mute",
+            "button-mute-on"          : "Unmute",
             "button-cc-off"           : "Captions are off",
             "button-cc-on"            : "Captions are on",
             "button-cc-lang"          : "Captions are\ %1",
@@ -1443,8 +1443,8 @@ var OzPlayer = (function()
             //controls => fallback text (eg. for styled no-images)
             "text-playpause-off"      : "Play",
             "text-playpause-on"       : "Pause",
-            "text-mute-off"           : "Unmute",
-            "text-mute-on"            : "Mute",
+            "text-mute-off"           : "Mute",
+            "text-mute-on"            : "Unmute",
             "text-cc-off"             : "CC\ (off)",
             "text-cc-on"              : "CC\ (on)",
             "text-cc-lang"            : "CC\ (%1)",
@@ -1526,6 +1526,7 @@ var OzPlayer = (function()
             //constructor errors
             'constructor-no-id'       : 'Please specify a p\layer ID.',
             'constructor-bad-id'      : 'There is no p\layer with the ID "%id".',
+            'constructor-dupe-id'     : 'A p\layer with the ID "%id" has already been initialised.',
             'constructor-bad-class'   : 'The p\layer with the ID "%id" does not have the class "%name".',
             'constructor-no-media'    : 'The p\layer with the ID "%id" has no media element.',
             'constructor-not-new'     : 'The OzPlayer.Video function must be called with the "new" keyword.',
@@ -1553,6 +1554,7 @@ var OzPlayer = (function()
             //responsive video dimensions
             'option-bad-responsive'   : 'The "data-responsive" element for #%id does not exist.',
             'option-wrong-responsive' : 'The "data-responsive" element for #%id must be outside the p\layer.',
+            'option-bad-responsive-mode': 'The "data-responsive-mode" attribute for #%id must have the value "min",\ "max" or "initial".',
 
             //media wrapper failure warning
             'wrapper-failure'         : 'OzPlayer failed to initialize the med\ia.',
@@ -1958,9 +1960,15 @@ var OzPlayer = (function()
 
             //then if local storage is supported, look for a value with the specified key
             //and that will either return the value, or null if there is no such value
+            //nb. we need to use exception handling to cater for older versions of firefox
+            //in which localStorage is technically supported but getItem sometimes throws an error
             if(etc.def(__.localStorage))
             {
-                return __.localStorage.getItem(basekey);
+                try
+                {
+                    return __.localStorage.getItem(basekey);
+                }
+                catch(ex) { return null; }
             }
 
             //[else] if cookies are supported, look for a value with the specified key
@@ -2233,6 +2241,13 @@ var OzPlayer = (function()
                 name    : config.classes['container']
 
             }), 'error');
+        }
+
+        //[else] if we already have a player with this ID
+        //show a console error and return false for failure
+        if(etc.def(players[id]))
+        {
+            return etc.console(etc.sprintf(config.lang['constructor-dupe-id'], { id : id }), 'error');
         }
 
 
@@ -2564,9 +2579,10 @@ var OzPlayer = (function()
         //nb. we have to do these separately so we don't look for them in input options
         var attrs =
         {
-            transcript    : null,
-            responsive    : null,
-            controls      : 'row'
+            'transcript'      : null,
+            'responsive'      : null,
+            'responsive-mode' : 'initial',
+            'controls'        : 'row'
         };
         etc.each(attrs, function(option, key)
         {
@@ -2661,7 +2677,20 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and break if the controls value is not "row" or "stack"
+                    //show a console error and break if the responsive-mode value is not valid
+                    case 'responsive-mode' :
+
+                        if(!(option == 'max' || option == 'initial' || option == 'min'))
+                        {
+                            return etc.console(etc.sprintf(config.lang['option-bad-responsive-mode'],
+                            {
+                                id : player.instance.id
+
+                            }), 'error');
+                        }
+                        break;
+
+                    //show a console error and break if the controls value is not valid
                     case 'controls' :
 
                         if(!(option == 'row' || option == 'stack'))
@@ -3867,12 +3896,18 @@ var OzPlayer = (function()
             return false;
         }
 
-        //if the currentTime is the same as the previous event, reutrn false
+        //if the time is greater than zero and the same as the previous event, return false
         //nb. this caters for low bandwidth situations where the video is frozen
         //due to loading even though the time is inside a loaded range
         //which is a particular problem with AD since the AD would continue
         //to play as normal, but also generally useful for better load indication
-        if(media.previousTime === time)
+        //nb. we don't do this if the time is zero because in chrome we had a
+        //situation where the first progress event would have fired before this
+        //with the initial first few seconds, then subsequent monitoring events
+        //could fire again before another progress or timeupdate event has fired
+        //resulting in a second event with a zero time that triggered the loading
+        //indicator, even though we didn't actually need it to display at that point
+        if(media.previousTime === time && time > 0)
         {
             return false;
         }
@@ -4330,7 +4365,7 @@ var OzPlayer = (function()
             }
 
             /*** DEV LOG ***//*
-            else
+            else if($this.logs.audio)
             {
                 audiolog([
                     ['AUDIO-SYNC-OK', 18],
@@ -4897,6 +4932,116 @@ var OzPlayer = (function()
     //into the HTML for a single caption or transcript entry
     function getCueHTML(cue, speaker)
     {
+        //*** DEV TMP
+        //speaker = false;
+
+        //define an array for storing the individual paragraph lines
+        //and a separate array for storing the voice name for each line
+        //nb. we need to build an array rather than just compiling the final
+        //html string as we go along (like we did before) because we'll need
+        //to evaluate the final collection to work out when voice changes occur
+        var
+        lines = [],
+        voices = [];
+
+        //split the cue text by trimmed line-breaks and iterate through the resulting array
+        //nb. usually this will only be a single member, but it can be two or more
+        etc.each(cue.text.split(/\s*^\s*/m), function(line, i)
+        {
+            //parse this line to extract any voice information, and to convert the cue text to markup
+            line = line.replace(/^(?:<v(?:((?:\.[-\w]+)*)\s+([^>]+))?>)?(.*)$/mig, function(all, voiceclass, voice, content)
+            {
+                //if we have any voiceclass data, split it into individual values
+                //otherwise create an empty array so we can test it universally
+                //nb. the voiceclass argument might be undefined OR empty string
+                //so we have to test with coercion rather than etc.def(voiceclass)
+                //otherwise we could create an array with a single empty string member
+                voiceclass = voiceclass ? voiceclass.substr(1).split('.') : [];
+
+                /*** DEV TMP ***//***
+                console.group();
+                console.log(all);
+                console.log(voiceclass);
+                console.log(voice);
+                console.log(content);
+                console.groupEnd(); ***/
+
+                //if the speaker argument is false but the important flag was
+                //present on the <v> element, then enable the showspeaker flag
+                //nb. this can be used to denote that a speaker name should be shown
+                //in a caption, where they're usually only shown in the transcript
+                //nnb. we need a separate var from the input speaker argument
+                //since its value might change between iterations of this loop
+                //nb. don't remove the important flag from the voiceclass array
+                //so that it also gets output as a class on the captions <p> element
+                //just in case it's useful to authors as a secondary styling hook
+                var showspeaker = speaker;
+                if(!showspeaker && etc.find(voiceclass, 'important') > -1)
+                {
+                    showspeaker = true;
+                }
+
+                //remove any closing </v> tags from the line content
+                //nb. this is an over-simplification as it doesn't allow for lines
+                //where the voice is only part of the line, e.g. "<v>foo</v> bar"
+                //** and are voice tags that span multiple lines allowed?
+                content = content.replace(/<\/v>/g, '');
+
+                //add the whitepsace-trimmed voice name or null to the voices array
+                //while copying the trimmed version back to the local argument
+                //nb. if voice is undefined then trim will just return undefined
+                voices.push((voice = etc.trim(voice)) || null);
+
+                //if the showspeaker flag is true and we have a voice name
+                //then parse the string of any leading dash, since dashes
+                //are commonly used to indicate different speakers in a
+                //single cue, but we don't need them if we have a a voice citation
+                if(showspeaker && voice)
+                {
+                    content = content.replace(/^[-]\s*/, '');
+                }
+
+                //then compile the line by defining a <p>, then a <q> pair for "captions" kind
+                //cues which includes a [data-voice] attribute on the <p> if we have a voice,
+                //as well as the <p> including any classes defined on the <v> element itself
+                //and also including a leading speaker citation if the showspeaker argument is true
+                //ie. so we'll get either <p data-voice="foo"><q> or just <p><q>
+                //or if showspeaker is true then we'll get <p data-voice="foo">{SPEAKER}<q>
+                //nb. we need two elements here so we can have a wrapping block
+                //to put each caption cue line on its own line, but also an inline element
+                //so it can have a background color which will only apply to the line boxes
+                //nnb. although the transcript doesn't need that, it's just for dialog semantics
+                return '<p'
+                        + (voice ? (' data-voice="' + voice + '"') : '')
+                        + (voiceclass.length > 0 ? (' class="' + voiceclass.join(' ') + '"') : '')
+                        + '>'
+                        + (showspeaker && voice ? etc.sprintf('<cite>%voice:</cite>\x20', { voice : voice }) : '')
+                        + (cue.kind == 'captions' ? '<q>' : '')
+                        + content
+                        + (cue.kind == 'captions' ? '</q>' : '')
+                        + '</p>';
+            });
+
+            //extract any <c.foo> tags and convert them to <span class="foo">
+            //replacing any dots with spaces to allow for multiple classes
+            line = line.replace(/<\/c>/g, '</span>').replace(/<c\.([\.-\w]+)>/ig, function(all, value)
+            {
+                return '<span class="' + value.replace(/\./g, ' ') + '">';
+            });
+
+            //extract any <lang foo> tags and convert them to <span lang="foo">
+            line = line.replace(/<\/lang>/g, '</span>').replace(/<lang([^>]+)>/ig, function(all, value)
+            {
+                return '<span lang="' + etc.trim(value) + '">';
+            });
+
+            //*** DEV TMP
+            //console.log(line);
+
+            //then add this line to the array
+            lines.push(line);
+        });
+
         //begin compiling an HTML string, using blockquote
         //for a "captions" kind cue, or a plain div for anything else
         //specifying the cue id in a "data-cue" attribute
@@ -4910,62 +5055,29 @@ var OzPlayer = (function()
                     + '" data-cue="' + cue.id
                     + '">';
 
-        //now split the cue text by trimmed line-breaks and iterate through the resulting array
-        //nb. usually this will only be a single member, but it can be two or more
-        etc.each(cue.text.split(/\s*^\s*/m), function(line, i)
+        //iterate through the lines and add the data-voice-alt attribute
+        //each time we encounter a change of voice within the caption
+        //unless the previous line already had the data-voice-alt attribute
+        var voicealt = false;
+        etc.each(lines, function(line, i)
         {
-            //parse this line to extract any voice and convert the cue text to markup
-            line = line.replace(/^(?:<v(?:\s+([^>]+))?>)?(.*)$/mig, function(all, voice, content)
+            if(i > 0 && voices[i] != voices[i - 1])
             {
-                //remove any closing </v> tags from the line content
-                //nb. this is an over-simplification as it doesn't allow for lines
-                //where the voice is only part of the line, e.g. "<v>foo</v> bar"
-                //and are voice tags that span multiple lines allowed?
-                content = content.replace(/<\/v>/g, '');
-
-                //if the speaker argument is true and we have a voice tag
-                //then parse the string of any leading dash, since dashes
-                //are commonly used to indicate different speakers in a
-                //single cue, but we don't need them if we have a a voice citation
-                if(speaker && voice)
-                {
-                    content = content.replace(/^[-]\s*/, '');
-                }
-
-                //then compile the line by defining a <p>, then a <q> pair for "captions" kind
-                //cues which includes a [data-voice] attribute on the <p> if we have a voice,
-                //and also including a leading speaker citation if the speaker argument is true
-                //ie. so we'll get either <p data-voice="foo"><q> or just <p><q>
-                //or if speaker is true then we'll get <p data-voice="foo">{SPEAKER}<q>
-                //nb. we need two elements here so we can have a wrapping block
-                //to put each caption cue line on its own line, but also an inline element
-                //so it can have a background color which will only apply to the line boxes
-                //nnb. but the transcript doesn't need that, it's just for dialog semantics
-                return '<p' + (voice ? (' data-voice="' + (voice = etc.trim(voice)) + '"') : '') + '>'
-                        + (speaker && voice ? etc.sprintf('<cite>%voice</cite>:\u0020', { voice : voice }) : '')
-                        + (cue.kind == 'captions' ? '<q>' : '')
-                        + content
-                        + (cue.kind == 'captions' ? '</q>' : '')
-                        + '</p>';
-            });
-
-            //extract any <c.foo> tags and convert them to <span class="foo">
-            line = line.replace(/<\/c>/g, '</span>').replace(/<c\.([^>]+)>/ig, function(all, value)
+                voicealt = !voicealt;
+            }
+            if(voicealt)
             {
-                return '<span class="' + value + '">';
-            });
-
-            //extract any <lang foo> tags and convert them to <span lang="foo">
-            line = line.replace(/<\/lang>/g, '</span>').replace(/<lang([^>]+)>/ig, function(all, value)
-            {
-                return '<span lang="' + etc.trim(value) + '">';
-            });
-
-            //then add this line to the overall string
-            html += line;
+                lines[i] = line.replace('<p', '<p data-voice-alt="true"');
+            }
         });
 
-        //finally add the closing tag, and return the HTML string
+        //*** DEV TMP
+        //console.log(lines.join('\n'));
+
+        //join and add the individual lines
+        html += lines.join('');
+
+        //finally add the closing tag and return the findal HTML string
         return html + '</' + (cue.kind == 'captions' ? 'blockquote' : 'div')  + '>';
     }
 
@@ -5989,7 +6101,6 @@ var OzPlayer = (function()
         if(player.audio) { doAudioLogging(player); } */
 
 
-
         //~~ controls ~~//
 
         //*** DEV TMP DELAY SO LOAD IS BEFORE FORM ADDITION
@@ -6060,9 +6171,24 @@ var OzPlayer = (function()
         //nb. we don't do this for android or ipad because they don't have the same behavior
         //they embed the video for playback in the page, like a normal desktop browser
         //we also don't do this for the audio-only player, which always has custom controls
+        //nb. we have to insert this before the captions, not append after it,
+        //on order to fix a weird bug that occurs in JAWS: whereby using
+        //the quick form key "f" while the video is playing moves between
+        //the form controls in an apparently random order, rather than sequentially
+        //which doesn't occur when the video is not playing, and turned out to
+        //be triggered by changes in the captions: it doesn't happen when
+        //captions are switched off, or when they're overriden so that every
+        //caption value is the same, and it does still happen when the live
+        //region is removed from it, so it must be related to the continual
+        //changes in the DOM; however if we move the captions container here
+        //then the problem also no longer occurs, so it must be further be
+        //related to changes in the DOM that occur before the current context.
+        //nnb. although this is not the ideal DOM structure, since the captions
+        //are visually before the controls but structurally come after them
+        //however I think that's a small price to pay for fixing this bug
         if(!(defs.agent.iphone || defs.agent.winphone) || player.isaudio)
         {
-            player.controlform = player.container.appendChild(player.controlform);
+            player.controlform = player.container.insertBefore(player.controlform, player.captions);
         }
 
         //else if this is one of those phones [and we're not appending the control form]
@@ -6250,8 +6376,6 @@ var OzPlayer = (function()
         //nb. when the max is zero the slider thumb and this input will be disabled
         //and the thumb will be hidden with opacity (so it's invisible but accessible)
         //nb. also add a single space after button, just to create basic spacing
-        //nb. also set aria-hidden=false to try to counteract lack of display on the
-        //mute and volume fields when responsive layout has applied the smallscreen class
         etc.build('span',
         {
             '=parent'           : player.controlform.firstChild,
@@ -6260,7 +6384,6 @@ var OzPlayer = (function()
                                 + config.classes['field-seek']
                                 + ' '
                                 + config.classes['state-disabled'],
-            'aria-hidden'       : 'false',
             '#dom'              : (player.controlform.seek = etc.build('input',
             {
                 'type'          : slidertype,
@@ -6294,8 +6417,6 @@ var OzPlayer = (function()
         //(ie. so the volume button and input are on a line of their own)
         //nb. it would be better to do this with fieldsets, but that's too much
         //complication, as it's much simpler if the controls all have the same parent
-        //** but when we have more time it would be good to re-visit this
-        //** to split the controls into fieldset groups, each with its own legend
         etc.build('br', { '=parent' : player.controlform.firstChild });
 
 
@@ -7119,8 +7240,8 @@ var OzPlayer = (function()
                 player,
                 'mute',
                 true,
-                (player.media.muted ? 'off' : 'on'),
-                (player.media.muted ? 'off' : 'on'),
+                (player.media.muted ? 'on' : 'off'),
+                (player.media.muted ? 'on' : 'off'),
                 {
                     //then define an abstraction for the button's command handler
                     '.command'  : function()
@@ -7145,7 +7266,7 @@ var OzPlayer = (function()
                         //high/low state corresponding with the current volume
                         updateControlState(player, 'mute',
                         [
-                            (player.media.muted ? 'off' : 'on'),
+                            (player.media.muted ? 'on' : 'off'),
                             (player.media.volume < 0.5 ? 'low' : 'high')
                         ]);
 
@@ -7154,7 +7275,7 @@ var OzPlayer = (function()
                         //integer in the volume slider's index range (0 - 10)
                         //nb. we set it to zero for muted because that's a common convention
                         //which is so you can un-mute by increasing the volume from zero
-                        //(ie. so you can go from muted to quiet with being loud in-between)
+                        //(ie. so you can go from muted to quiet without being loud in-between)
                         //nb. this will also update the value in the underlying input
                         dispatchMediaSliderEvent(player.controlform.volume, player.media.muted ? 0 : Math.round(player.media.volume * 10));
                     }
@@ -8259,6 +8380,16 @@ var OzPlayer = (function()
             //make any difference to anything, so just silently handle it
             try
             {
+                //remove the poster overlay if it's [still] present
+                //nb. this can happen if preload=auto and you move the slider before first playback
+                if(player.poster)
+                {
+                    player.poster = etc.remove(player.poster);
+                }
+
+                //also remove the video's poster attribute if it has one
+                player.video.removeAttribute('poster');
+
                 //if the selected index is the highest slider index
                 if(data.to == data.theslider.options.length - 1)
                 {
@@ -8809,7 +8940,7 @@ var OzPlayer = (function()
             //video frame with no controls, making it impossible to play or pause again
             //(which happens either from that icon or just from pressing "done")
             //there's no conflict with native controls because they're hidden from iphone
-            //(which is better since they'd be really tiny on an iphone in landscape)
+            //(which is better since they'd be really tiny on an iphone in portrait)
             if(player.controlform && !defs.agent.iphone)
             {
                 player.video.removeAttribute('controls');
@@ -8927,7 +9058,7 @@ var OzPlayer = (function()
                     {
                         updateControlState(player, 'mute',
                         [
-                            (player.media.muted ? 'off' : 'on'),
+                            (player.media.muted ? 'on' : 'off'),
                             (player.media.volume < 0.5 ? 'low' : 'high')
                         ]);
                     }
@@ -9006,7 +9137,7 @@ var OzPlayer = (function()
                 {
                     updateControlState(player, 'mute',
                     [
-                        (player.media.muted ? 'off' : 'on'),
+                        (player.media.muted ? 'on' : 'off'),
                         (player.media.volume < 0.5 ? 'low' : 'high')
                     ]);
                 }
@@ -9242,9 +9373,9 @@ var OzPlayer = (function()
         //evaluating duration and currentTime, because it's possible to press
         //play and then pause again before even the metadata has loaded
         //nnb. but we can't just silence() this event after firing, because
-        //*** erm, it sometimes fires more than once despite these conditions
-        //*** in circumstances I can't remember but which turned out to be necessary
-        //*** or something, I can't exactly remember, maybe it's just superstition!
+        //... erm ... it sometimes fires more than once despite these conditions
+        //in circumstances I can't remember but which turned out to be necessary
+        //or something, I can't exactly remember, maybe it's just superstition!
         etc.listen(player.media, 'play', function(e)
         {
             //check that the media hasn't already started
@@ -9388,7 +9519,14 @@ var OzPlayer = (function()
                     //(which means it hasn't been udpated since it was created)
                     //refresh the seek controls's data, now that we know the duration
                     //(which will update the control and then refresh the custom slider)
-                    if(sliders[player.controlform.seek.id].range.max == 0)
+                    //UNLESS the playpause button is still disabled; this can happen
+                    //if preload=auto and you move the slider before first playback
+                    //however several browser/OS combinations don't allow playback
+                    //until other conditions have been met, and so we shouldn't allow
+                    //seeking before then since it would be useless (you would seek
+                    //further ahead, but the video won't necessarily show, and then
+                    //when you do press play it would start from zero anyway)
+                    if(sliders[player.controlform.seek.id].range.max == 0 && !player.controlform['playpause'].disabled)
                     {
                         refreshSeekData(player);
                     }
@@ -10229,8 +10367,6 @@ var OzPlayer = (function()
         //but also explicitly creating that reference just to be on the safe side
         //nb. also add a single space after the button, just to create basic spacing
         //for viewing the page without CSS, which won't otherwise be seen
-        //nb. also set aria-hidden=false to try to counteract lack of display on the
-        //mute and volume fields when responsive layout has applied the smallscreen class
         etc.build('span',
         {
             '=parent'       : player.controlform.firstChild,
@@ -10239,7 +10375,6 @@ var OzPlayer = (function()
                             + config.classes['field-' + key]
                             + ' '
                             + (!enabled ? config.classes['state-disabled'] : ''),
-            'aria-hidden'   : 'false',
             '#dom'          : (player.controlform[key] = etc.build('button', dom)),
             '#text'         : ' '
         });
@@ -10657,28 +10792,44 @@ var OzPlayer = (function()
         {
             //define a new responsive width from the current wrapper width
             //plus the negative responsive difference we just calculated
-            //constraining its minimum to the absolute smallscreen min-width
-            //and its maximum to the default player width we defined during init
-            //var responsivewidth = (responsivewidth = player.wrapper.offsetWidth + player.responsivedata.responsivedifference)
+            //constraining the value as applicable to the responsive mode
+            //but always constraining the minimum to the absolute min-width
+            //unless the mode is "min" [and we've already constrained to the minimum]
+            //nb. if the default width is less than the absolute min-width when mode=min
+            //then the playerwidth will have already been constrained by the min-width and
+            //min-height defined in the core player CSS (which limits its initial rendered width
+            //and therefore constrains the value of playerwidth), so we don't need to worry about that
             //nb. use controlform width for audio-only since it has no wrapper width
-            var responsivewidth = (responsivewidth = (player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) + player.responsivedata.responsivedifference)
-                                    < config['smallscreen-minwidth']
-                                    ? config['smallscreen-minwidth']
-                                    : responsivewidth > player.responsivedata.playerwidth
-                                    ? player.responsivedata.playerwidth
-                                    : responsivewidth;
+            var responsivewidth = (player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) + player.responsivedata.responsivedifference;
+            if(player.options['responsive-mode'] == 'min')
+            {
+                if(responsivewidth < player.responsivedata.playerwidth)
+                {
+                    responsivewidth = player.responsivedata.playerwidth;
+                }
+            }
+            else if(responsivewidth < config['smallscreen-minwidth'])
+            {
+                responsivewidth = config['smallscreen-minwidth'];
+            }
+            if(player.options['responsive-mode'] == 'max' && responsivewidth > player.responsivedata.playerwidth)
+            {
+                responsivewidth = player.responsivedata.playerwidth;
+            }
+
 
             /*** DEV TMP ***//***
-            console.warn(''
+            console.warn('\n'
                 + 'default width     = ' + player.responsivedata.playerwidth + '\n'
                 + 'default aspect    = ' + player.responsivedata.playeraspect + '\n'
                 + '\n'
-                + 'monitored width  = ' + player.responsive.offsetWidth + '\n'
-                + 'container width  = ' + player.container.offsetWidth + '\n'
-                + 'difference       = ' + player.responsivedata.responsivedifference + '\n'
+                + 'monitored width   = ' + player.responsive.offsetWidth + '\n'
+                + 'container width   = ' + player.container.offsetWidth + '\n'
+                + 'difference        = ' + player.responsivedata.responsivedifference + '\n'
                 + '\n'
-                + 'responsive width = ' + responsivewidth + '\n'
-                + 'smallscreen      = ' + (responsivewidth < config['default-width']) + '\n'
+                + 'responsive width  = ' + responsivewidth + '\n'
+                + 'responsive height = ' + (responsivewidth * player.responsivedata.playeraspect) + '\n'
+                + 'smallscreen       = ' + (responsivewidth < config['default-width']) + '\n'
                 + '\n');
             ***/
 
@@ -10686,23 +10837,6 @@ var OzPlayer = (function()
             //so that we avoid repeatedly re-applying the same responsive width
             if(responsivewidth != player.responsivedata.responsivewidth)
             {
-                //*** DEV TMP
-                //_.title = player.wrapper.nodeName + ' [~] ' + responsivewidth;
-
-                //*** DEV TMP
-                //etc.get('#info').innerHTML = ('<br>'
-                //    //+ 'default width     = ' + player.responsivedata.playerwidth + '<br>'
-                //    //+ 'default aspect    = ' + player.responsivedata.playeraspect + '<br>'
-                //    //+ '<br>'
-                //    + 'monitored width  = ' + player.responsive.offsetWidth + '<br>'
-                //    + 'container width  = ' + player.container.offsetWidth + '<br>'
-                //    + 'difference       = ' + player.responsivedata.responsivedifference + '<br>'
-                //    + '<br>'
-                //    + 'responsive width = ' + responsivewidth + '<br>'
-                //    + 'smallscreen      = ' + (responsivewidth < config['default-width']) + '<br>'
-                //    + '<br>')
-                //    + etc.get('#info').innerHTML;
-
                 //update the stored responsive width with this responsive width
                 //then if it's less than the smallscreen threshold
                 if((player.responsivedata.responsivewidth = responsivewidth) < config['default-width'])
@@ -11596,8 +11730,7 @@ var OzPlayer = (function()
     }
 
     //set a new media volume and update all the relevant controls and states
-    //nb. this abstraction is called directly by the volume slider's
-    //index event, and indirectly by the global volume change keystrokes
+    //nb. this abstraction is called directly by the volume slider's index event
     function updateVolume(player, from, to, theslider)
     {
         //return false for failure if the fakevolume flag is already true
@@ -11629,7 +11762,7 @@ var OzPlayer = (function()
         //so that any failure is accurately reflected in the button state
         updateControlState(player, 'mute',
         [
-            (player.media.muted ? 'off' : 'on'),
+            (player.media.muted ? 'on' : 'off'),
             (player.media.volume < 0.5 ? 'low' : 'high')
         ]);
 
@@ -14225,6 +14358,12 @@ var OzPlayer = (function()
         //nb. set this using the property name to avoid browser differences
         trigger.tabIndex = 0;
 
+        //set the button role so that screenreaders announce it as such
+        //this also ensures that the default expanded state is announced on
+        //initial focus (rather than only after it's been changed, as without it)
+        //and adds the trigger to the screenreader's quick forms collection
+        trigger.setAttribute('role', 'button');
+
         //set aria-expanded on the trigger and content element according to isexpanded
         //so that its initial state matches that specified by the open attribute
         //nb. originally aria-expanded was defined only the content element
@@ -14242,12 +14381,18 @@ var OzPlayer = (function()
 
         //then if this is not a native implementation, create a twisty inside the trigger
         //with a text-glyph according to isexpanded, and save its reference as a trigger property
+        //nb. add aria-hidden to the twisty so that screenreaders don't announce it
+        //although this only actually works in JAWS+IE: JAWS+FF still announces it
+        //and NVDA+FF and NVDA+IE never announced it in the first place
+        //nnb. this would work in JAWS+FF if the trigger didn't have the button role
+        //but we need that role on the trigger for the reasons explained above
         if(!isnative)
         {
             trigger.__twisty = etc.build('span',
             {
-                '=before' : trigger.firstChild,
-                '#text'   : getLang(player, 'expander-' + (isexpanded ? 'open' : 'closed'))
+                '=before'       : trigger.firstChild,
+                'aria-hidden'   : 'true',
+                '#text'         : getLang(player, 'expander-' + (isexpanded ? 'open' : 'closed'))
             });
         }
 

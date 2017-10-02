@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>OzPlayer 3.2 WebVTT Reference</title>
+
+    <!-- (arbitrary canvas and text styles) -->
+    <link rel="stylesheet" type="text/css" href="help-etc.css" />
+
+    <!-- necessary code example styles -->
+    <link rel="stylesheet" type="text/css" href="help-code.css" />
+
+</head>
+<body>
+
+    <div class="container">
+
+
+
+        <h1>OzPlayer 3.2 WebVTT Reference</h1>
+
+        <p>
+            This reference describes WebVTT support in OzPlayer, and shows you
+            how to hook into cue markup to override the styling of individual
+            captions and transcript cues.
+        </p>
+
+        <nav>
+            <ol>
+                <li><a href="#introduction">Introduction to WebVTT</a></li>
+                <li>
+                    <a href="#markup">Cue Markup</a>
+                    <ol>
+                        <li><a href="#markup-voice">Voice Element</a></li>
+                        <li><a href="#markup-lang">Lang Wrapper</a></li>
+                        <li><a href="#markup-class">Class Wrapper</a></li>
+                        <li><a href="#markup-emphasis">Emphasis Wrappers</a></li>
+                    </ol>
+                </li>
+                <li>
+                    <a href="#styling">Styling Hooks</a>
+                    <ol>
+                        <li><a href="#styling-cue">Cue ID</a></li>
+                        <li><a href="#styling-voice">Voice Name</a></li>
+                        <li><a href="#styling-lang">Lang Attribute</a></li>
+                        <li><a href="#styling-class">Class Attribute</a></li>
+                        <li><a href="#styling-emphasis">Emphasis Elements</a></li>
+                    </ol>
+                </li>
+            </ol>
+        </nav>
+
+
+
+        <section tabindex="-1" id="introduction">
+
+            <h2>Introduction to WebVTT</h2>
+
+            <p>
+                The Web Video Text Tracks Format (WebVTT) is a format for
+                displaying timed text information using the <code>&lt;track&gt;</code>
+                element. WebVTT is a text-based format and must be encoded using UTF-8.
+            </p>
+
+            <p>
+                OzPlayer uses WebVTT to add captions to a video, and
+                also uses it to create a transcript for video and audio.
+            </p>
+
+            <p id="code-file-description">
+                A basic WebVTT file looks like this:
+            </p>
+
+<figure class="code" id="code-file">
+    <pre aria-describedby="code-file-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt">WEBVTT
+
+1
+00:00:05.810 --> 00:00:09.460
+Hi, my name is Gian Wild and I'm the Director of AccessibilityOz.
+
+2
+00:00:09.460 --> 00:00:14.200
+We've been operating for two years and today I would like to introduce you
+
+3
+00:00:14.200 --> 00:00:17.000
+to the world's first accessible video player, OzPlayer.</code></pre>
+</figure>
+
+            <p>
+                The file begins with the <code>WEBVTT</code> declaration followed
+                by an empty line. The individual cues are also separated by
+                empty lines.
+            </p>
+
+            <p>
+                Each cue has three main components:
+            </p>
+
+            <ol>
+                <li>
+                    The optional <strong>cue identifier</strong> (e.g. <code>1</code>);
+                    followed by a line-break.
+                </li>
+                <li>
+                    The required <strong>cue timing information</strong>, comprising
+                    the start time in <code>hh:mm:ss.uuu</code> format, then the
+                    <code>--&gt;</code> delimiter (with a space or tab either side),
+                    then the end time; followed by another line-break.
+                </li>
+                <li>
+                    The required <strong>cue content</strong> itself, comprising
+                    one or more lines of text, followed by line-breaks. You cannot
+                    have empty lines within a single cue, because an empty line
+                    denotes the end of the cue.
+                </li>
+            </ol>
+
+            <p id="code-multiline-description">
+                There is no fixed limit on the length of each line, or on the
+                number of lines contained with a single cue. For example, a
+                cue might contain multiple short lines of text spoken by
+                different people:
+            </p>
+
+<figure class="code" id="code-multiline">
+    <pre aria-describedby="code-multiline-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt">00:02:38.600 --> 00:02:45.200
+- I shall reinvent my own image.
+- What?
+- I shall use my massive fortune to establish a special prize.
+
+00:02:45.200 --> 00:02:49.080
+One that rewards positive human endeavours in the pursuit of peace.</code></pre>
+</figure>
+
+            <p>
+                General good practice is to keep each cue fairly short
+                (remember that a viewer must have time to read the cue within the
+                time it shows on screen), and to synchronise the start of each cue
+                with the speech it represents.
+            </p>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="markup">
+
+            <h2>Cue Markup</h2>
+
+            <p>
+                OzPlayer supports the following subset of WebVTT markup:
+            </p>
+
+            <ul>
+                <li><code>&lt;v&gt;</code> (voice element)</li>
+                <li><code>&lt;lang&gt;</code> (lang wrapper)</li>
+                <li><code>&lt;c&gt;</code> (class wrapper)</li>
+                <li><code>&lt;b&gt;</code>, <code>&lt;i&gt;</code> and <code>&lt;u&gt;</code> (emphasis wrappers)</li>
+            </ul>
+
+            <section tabindex="-1" id="markup-voice">
+
+                <h3>Voice Element</h3>
+
+                <p id="code-voice-description">
+                    The most useful WebVTT markup is the voice element
+                    <code>&lt;v&gt;</code>, which can be used to define the name
+                    of each speaker:
+                </p>
+
+<figure class="code" id="code-voice">
+    <pre aria-describedby="code-voice-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt"><small>00:02:38.600 --> 00:02:45.200</small>
+<b>&lt;v <u>Alfred Nobel</u>&gt;</b><small>- I shall reinvent my own image.</small>
+<b>&lt;v <u>Sophie</u>&gt;</b><small>- What?</small>
+<b>&lt;v <u>Alfred Nobel</u>&gt;</b><small>- I shall use my massive fortune to establish a special prize.</small>
+
+<small>00:02:45.200 --> 00:02:49.080</small>
+<b>&lt;v <u>Alfred Nobel</u>&gt;</b><small>One that rewards positive human endeavours in the pursuit of peace.</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The closing <code>&lt;/v&gt;</code> tag is optional.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Each line which denotes a speaker must have its own
+                            <code>&lt;v&gt;</code> tag &#x2014; OzPlayer does not
+                            support multiple lines within a single
+                            <code>&lt;v&gt;</code> element.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Furthermore, each <code>&lt;v&gt;</code> tag must be
+                            defined at the start of a line &#x2014; OzPlayer
+                            does not support <code>&lt;v&gt;</code> elements that
+                            only apply to part of a line, or multiple
+                            <code>&lt;v&gt;</code> elements within a single line.
+                        </em>
+                    </p>
+                </figure>
+
+                <p>
+                    Voice names will be shown in the transcript, but are not normally
+                    included in captions.
+                </p>
+
+                <p>
+                    However, there might be special cases where you want to display
+                    the name within a caption, for example, to clarify who's speaking
+                    when the speaker is off-screen. You could just add the name to
+                    the cue text itself, but if you do that in a cue which has also
+                    has a <code>&lt;v&gt;</code> tag, then the transcript will
+                    show the speaker's name twice.
+                </p>
+
+                <p id="code-important-description">
+                    To solve this, OzPlayer supports a special <code>.important</code>
+                    class on the <code>&lt;v&gt;</code> tag, which denotes that the
+                    name should be shown in the caption:
+                </p>
+
+<figure class="code" id="code-important">
+    <pre aria-describedby="code-important-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt"><small>00:02:38.600 --> 00:02:45.200</small>
+<small>&lt;v<b>.important</b> Alfred Nobel&gt;- I shall reinvent my own image.</small>
+<small>&lt;v<b>.important</b> Sophie&gt;- What?</small>
+<small>&lt;v<b>.important</b> Alfred Nobel&gt;- I shall use my massive fortune to establish a special prize.</small>
+
+<small>00:02:45.200 --> 00:02:49.080</small>
+<small>&lt;v Alfred Nobel&gt;One that rewards positive human endeavours in the pursuit of peace.</small></code></pre>
+</figure>
+
+                <p>
+                    This will then display the caption as e.g.
+                    <q><i>Alfred Nobel: I shall reinvent my own image.</i></q>
+                    rather than simply <q><i>I shall reinvent my own image.</i></q>
+                </p>
+
+                <p>
+                    Changes in voice within a single cue will also trigger a change
+                    in caption colour, from white to yellow or vice versa. In the
+                    example above, the middle line (<q><i>Sophie: What?</i></q>)
+                    would be shown in yellow.
+                </p>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            There's a convention in caption writing to use leading dashes
+                            to denote a change in speaker. But if voice tags are used
+                            then these dashes are not necessary, and will be removed
+                            automatically.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            However it's still a good idea to include them, for cases
+                            where JavaScript is not available and the captions are
+                            shown using native WebVTT parsing.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-lang">
+
+                <h3>Lang Wrapper</h3>
+
+                <p id="code-lang-description">
+                    The <code>&lt;lang&gt;</code> element can be used to wrap
+                    around text in a different language than the main captions
+                    language, and describes the language it contains using an
+                    ISO language code. For example, if the captions were
+                    primarily in Klingon but contained a fragment of English text:
+                </p>
+
+<figure class="code" id="code-lang">
+    <pre aria-describedby="code-lang-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt"><small>00:01:23.900 --> 00:01:34.100</small>
+<small>&lt;v T'Kuvma&gt;HeghmoHbogh rl'meH mu'meyvam jatlh jaghma'...</small>
+<small>&lt;v T'Kuvma&gt;</small><b>&lt;lang <u>en</u>&gt;</b>We come in peace<b>&lt;/lang&gt;</b></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The closing <code>&lt;/lang&gt;</code> tag is
+                            <strong>required</strong>.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Each element must be closed on the same line
+                            &#x2014; OzPlayer does not support multiple lines
+                            within a single <code>&lt;lang&gt;</code> element.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-class">
+
+                <h3>Class Wrapper</h3>
+
+                <p id="code-class-description">
+                    The <code>&lt;c&gt;</code> element can be used to wrap one
+                    or more HTML class names around a line or fragment of text:
+                </p>
+
+<figure class="code" id="code-class">
+    <pre aria-describedby="code-class-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt"><small>00:02:52.520 --> 00:02:58.280</small>
+<small>&lt;v Alfred Nobel&gt;And I, Alfred Nobel, will call this special peace prize...</small>
+
+<small>00:02:58.280 --> 00:03:00.600</small>
+<small>&lt;v Alfred Nobel&gt;</small><b>&lt;c.silly&gt;</b>Prize-A-Mite<b>&lt;/c&gt;</b><small>!</small>
+
+<small>00:03:02.560 --> 00:03:09.000</small>
+<small>&lt;v Sophie&gt;Darling, why don't you call it the </small><b>&lt;c.true&gt;</b>Nobel Peace Prize<b>&lt;/c&gt;</b><small>?</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The closing <code>&lt;/c&gt;</code> tag is
+                            <strong>required</strong>.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Each element must be closed on the same line
+                            &#x2014; OzPlayer does not support multiple lines
+                            within a single <code>&lt;c&gt;</code> element.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            OzPlayer will only parse classes containing
+                            contain letters, numbers, dash or underscore &#x2014;
+                            other character are not supported.
+                        </em>
+                    </p>
+                </figure>
+
+                <p>
+                    Multiple classes can also be defined as
+                    <code>&lt;c.first.second&gt;</code> etc.
+                </p>
+
+                <p>
+                    This is only really useful as a
+                    <a href="#styling">styling hook</a>.
+                </p>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="markup-emphasis">
+
+                <h3>Emphasis Wrappers</h3>
+
+                <p id="code-emphasis-description">
+                    The <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code> and
+                    <code>&lt;u&gt;</code> elements can be used to add emphasis
+                    to caption text, and are rendered as bold, italics and
+                    underlining, respectively:
+                </p>
+
+<figure class="code" id="code-emphasis">
+    <pre aria-describedby="code-emphasis-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt"><small>00:01:45.600 --> 00:01:46.330</small>
+<small>&lt;v Jeff&gt;What do you do?</small>
+
+<small>00:01:46.330 --> 00:01:50.200</small>
+<small>&lt;v Lionel&gt;</small><b>&lt;i&gt;</b>(Proudly)<b>&lt;/i&gt;</b><small> Well, I don't mean to boast, but I'm a brain surgeon.</small>
+
+<small>00:01:51.400 --> 00:01:52.800</small>
+<small>&lt;v Jeff&gt;Brain surgery?</small>
+
+<small>00:01:56.500 --> 00:01:59.210</small>
+<small>&lt;v Jeff&gt;Not exactly </small><b>&lt;b&gt;</b>rocket science<b>&lt;/b&gt;</b><small>, is it?</small></code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The closing tags are <strong>required</strong>.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            Each element must be closed on the same line
+                            &#x2014; OzPlayer does not support multiple lines
+                            within a single emphasis element.
+                        </em>
+                    </p>
+                </figure>
+
+            </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="styling">
+
+            <h2>Styling Hooks</h2>
+
+            <p>
+                The captions and transcript output provide a number of markup
+                hooks that can be used to override the styling of individual cues.
+            </p>
+
+            <p>
+                The markup for each cue will vary depending on whether it's a
+                regular cue or a transcript-only cue, on how many lines the cue
+                contains, on whether it has a defined voice name, and whether that
+                name is visible.
+            </p>
+
+            <p id="code-cuemarkup-description">
+                Here's a complete example of a regular cue with
+                multiple lines and visible voice names:
+            </p>
+
+<figure class="code" id="code-cuemarkup">
+    <pre aria-describedby="code-cuemarkup-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> lang=<u>"en"</u></b><b> data-cue=<u>"42"</u></b><b>&gt;</b>
+    <b>&lt;p</b><b> data-voice=<u>"Alfred Nobel"</u></b><b>&gt;</b>
+        <b>&lt;cite</b><b>&gt;</b>Alfred Nobel:<b>&lt;/cite</b><b>&gt;</b>
+        <b>&lt;q</b><b>&gt;</b>I shall reinvent my own image.<b>&lt;/q</b><b>&gt;</b>
+    <b>&lt;/p</b><b>&gt;</b>
+    <b>&lt;p</b><b> data-voice=<u>"Sophie"</u></b><b>&gt;</b>
+        <b>&lt;cite</b><b>&gt;</b>Sophie:<b>&lt;/cite</b><b>&gt;</b>
+        <b>&lt;q</b><b>&gt;</b>What?<b>&lt;/q</b><b>&gt;</b>
+    <b>&lt;/p</b><b>&gt;</b>
+    <b>&lt;p</b><b> data-voice=<u>"Alfred Nobel"</u></b><b>&gt;</b>
+        <b>&lt;cite</b><b>&gt;</b>Alfred Nobel:<b>&lt;/cite</b><b>&gt;</b>
+        <b>&lt;q</b><b>&gt;</b>I shall use my massive fortune to establish a special prize.<b>&lt;/q</b><b>&gt;</b>
+    <b>&lt;/p</b><b>&gt;</b>
+<b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+                <p id="code-cuesimplemarkup-description">
+                    For cue lines which have no visible voice name, the
+                    <code>&lt;cite&gt;</code> element will not be included;
+                    for cue lines which have no voice name defined at all, the
+                    <code>[data-voice]</code> attribute will also not be present.
+                    If the cue only has one line then it will only have one
+                    <code>&lt;p&gt;</code> element:
+                </p>
+
+<figure class="code" id="code-cuesimplemarkup">
+    <pre aria-describedby="code-cuesimplemarkup-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> lang=<u>"en"</u></b><b> data-cue=<u>"42"</u></b><b>&gt;</b>
+    <b>&lt;p</b><b>&gt;</b>
+        <b>&lt;q</b><b>&gt;</b>I shall reinvent my own image.<b>&lt;/q</b><b>&gt;</b>
+    <b>&lt;/p</b><b>&gt;</b>
+<b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+                <p id="code-cuetransmarkup-description">
+                    Transcript-only cues are essentially the same, except that
+                    they don't have a <code>&lt;q&gt;</code> element around
+                    the cue text (and usually have no voice information):
+                </p>
+
+<figure class="code" id="code-cuetransmarkup">
+    <pre aria-describedby="code-cuetransmarkup-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;div</b><b> lang=<u>"en"</u></b><b> data-cue=<u>"T-2"</u></b><b>&gt;</b>
+    <b>&lt;p</b><b>&gt;</b>Text on screen: What is web accessibility and how does it translate to online videos?<b>&lt;/p</b><b>&gt;</b>
+<b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+
+            <section tabindex="-1" id="styling-cue">
+
+                <h3>Cue ID</h3>
+
+                <p id="code-cue-description">
+                    Each whole cue can be addressed by its cue ID, using a
+                    <code>[data-cue]</code> selector:
+                </p>
+
+<figure class="code" id="code-cue">
+    <pre aria-describedby="code-cue-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="css">#player [data-cue=<u>"1"</u>]
+{
+    ...
+}</code></pre>
+</figure>
+
+                <p id="code-cuecolor-description">
+                    So for example, to override the text color of the entire cue,
+                    you could use a selector like this:
+                </p>
+
+<figure class="code" id="code-cuecolor">
+    <pre aria-describedby="code-cuecolor-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="css">#player [data-cue=<u>"1"</u>] *
+{
+    <b>color</b>: #ff0 !important;
+}</code></pre>
+</figure>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            The existing player CSS has high specificity, using
+                            <code>!important</code> on most rules to ensure that they
+                            override any inherited CSS from the page they're used on.
+                            Therefore, most of the custom rules you implement will
+                            need to use an <strong>ID selector <em>and</em>
+                            <code>!important</code></strong> in order to
+                            have enough specificity to override the player's CSS.
+                        </em>
+                    </p>
+                </figure>
+
+                <p>
+                    In the previous examples, the <code>#player</code> ID is
+                    assumed to be a container that wraps around the entire video
+                    and transcript. However this is an over-simplification &#x2014;
+                    since the visual context of the captions and transcript are
+                    quite different, it's most likely that any additional CSS
+                    you define will need to address the captions and transcript
+                    <em>separately</em>.
+                </p>
+
+                <p id="code-cueclasses-description">
+                    You could use additional <code>class</code> selectors for this:
+                </p>
+
+<figure class="code" id="code-cueclasses">
+    <pre aria-describedby="code-cueclasses-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="css">#player .ozplayer [data-cue=<u>"1"</u>] *
+{
+    <b>color</b>: #ff0 !important;
+}
+
+#player .ozplayer-transcript [data-cue=<u>"1"</u>] *
+{
+    <b>color</b>: #009 !important;
+}</code></pre>
+</figure>
+
+                <p id="code-cueids-description">
+                    But a less verbose approach is simply to address each of them
+                    by their own IDs:
+                </p>
+
+<figure class="code" id="code-cueids">
+    <pre aria-describedby="code-cueids-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="css">#demo [data-cue=<u>"1"</u>] *
+{
+    <b>color</b>: #ff0 !important;
+}
+
+#demo-transcript [data-cue=<u>"1"</u>] *
+{
+    <b>color</b>: #009 !important;
+}</code></pre>
+</figure>
+
+                <p>
+                    The value of the <code>data-cue</code> attribute is derived
+                    from the ID of each cue. If you didn't specify any IDs in
+                    the WebVTT then they will be numbered sequentially starting
+                    from <code>1</code>, otherwise the value will match whatever
+                    ID you specified.
+                </p>
+
+                <p id="code-transcue-description">
+                    However in the case of transcript-only cues, each cue ID will
+                    also be prefixed with <code>"T-"</code>, in order to
+                    differentiate them from regular cues:
+                </p>
+
+<figure class="code" id="code-transcue">
+    <pre aria-describedby="code-transcue-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="css">#demo-transcript [data-cue=<u>"1"</u>]
+{
+    <i>/* first regular cue within the transcript */</i>
+}
+
+#demo-transcript [data-cue=<u>"T-1"</u>]
+{
+    <i>/* first transcript-only cue within the transcript */</i>
+}</code></pre>
+</figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="styling-voice">
+
+                <h3>Voice Name</h3>
+
+                <p>
+                    The cue line <code>[data-voice]</code> attribute can be used
+                    to style cues according to their voice name.
+                </p>
+
+                <p id="code-voicecss-description">
+                    For example, you could define a specific colour for each
+                    speaker within the video captions:
+                </p>
+
+<figure class="code" id="code-voicecss">
+    <pre aria-describedby="code-voicecss-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="css">#demo [data-voice=<u>"Alfred Nobel"</u>] *
+{
+    <b>color</b>:#fff !important;
+}
+#demo [data-voice=<u>"Sophie"</u>] *
+{
+    <b>color</b>:#ff0 !important;
+}
+#demo [data-voice=<u>"Rattus"</u>] *
+{
+    <b>color</b>:#0ff !important;
+}</code></pre>
+</figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="styling-lang">
+
+                <h3>Lang Attribute</h3>
+
+                <p>
+                    The WebVTT <code>&lt;lang&gt;</code> element produces a
+                    <code>&lt;span&gt;</code> element with a <code>lang</code>
+                    attribute in the cue markup.
+                </p>
+
+                <p id="code-langvtt-description">
+                    So for example, this WebVTT markup:
+                </p>
+
+<figure class="code" id="code-langvtt">
+    <pre aria-describedby="code-langvtt-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="webvtt"><small>00:01:23.900 --> 00:01:34.100</small>
+<small>&lt;v T'Kuvma&gt;HeghmoHbogh rl'meH mu'meyvam jatlh jaghma'...</small>
+<small>&lt;v T'Kuvma&gt;</small><b>&lt;lang <u>en</u>&gt;</b>We come in peace<b>&lt;/lang&gt;</b></code></pre>
+</figure>
+
+                <p id="code-langmarkup-description">
+                    Would produce this cue markup:
+                </p>
+
+<figure class="code" id="code-langmarkup">
+    <pre aria-describedby="code-langmarkup-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div lang="tlh" data-cue="1"&gt;</small>
+<small>    &lt;p data-voice="T'Kuvma"&gt;</small>
+<small>        &lt;cite&gt;T'Kuvma:&lt;/cite&gt;</small>
+<small>        &lt;q&gt;HeghmoHbogh rl'meH mu'meyvam jatlh jaghma'...&lt;/q&gt;</small>
+<small>    &lt;/p&gt;</small>
+<small>    &lt;p data-voice="T'Kuvma"&gt;</small>
+<small>        &lt;cite&gt;T'Kuvma:&lt;/cite&gt;</small>
+<small>        &lt;q&gt;</small><b>&lt;span</b><b> lang=<u>"en"</u></b><b>&gt;</b>We come in peace<b>&lt;/span</b><b>&gt;</b><small>&lt;/q&gt;</small>
+<small>    &lt;/p&gt;</small>
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                <p>
+                    Changes in language can therefore be addressed using a
+                    <code>span[lang]</code> attribute selector.
+                </p>
+
+                <p id="code-langcss-description">
+                    <strong><em>However</em></strong> OzPlayer's interface also
+                    contains <code>&lt;span&gt;</code> elements with
+                    <code>lang</code> attributes, and therefore the selector
+                    you use for the captions must be more specific than that.
+                    The simplest solution is to include an additional
+                    <code>[data-cue]</code> selector:
+                </p>
+
+<figure class="code" id="code-langcss">
+    <pre aria-describedby="code-langcss-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html">#demo [data-cue] span[lang]
+{
+    ...
+}
+
+#demo [data-cue] span[lang=<u>"en"</u>]
+{
+    ...
+}</code></pre>
+</figure>
+
+                <p>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="styling-class">
+
+                <h3>Class Attribute</h3>
+
+                <p>
+                    The WebVTT <code>&lt;c&gt;</code> element produces a
+                    <code>&lt;span&gt;</code> element with a <code>class</code>
+                    attribute in the cue markup. These can therefore be addressed
+                    using a <code>span.class</code> selector.
+                </p>
+
+                <p id="code-classcss-description">
+                    <strong><em>However</em></strong> OzPlayer's interface also
+                    contains <code>&lt;span&gt;</code> elements with
+                    <code>class</code> attributes, and therefore the selector
+                    you use for the captions should be more specific than that
+                    to avoid any potential conflict. The simplest solution is to
+                    include an additional <code>[data-cue]</code> selector:
+                </p>
+
+<figure class="code" id="code-classcss">
+    <pre aria-describedby="code-classcss-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html">#demo [data-cue] span.first
+{
+    ...
+}
+
+#demo [data-cue] span.second
+{
+    ...
+}
+
+#demo [data-cue] span.first.second
+{
+    ...
+}</code></pre>
+</figure>
+
+            </section>
+
+
+
+            <section tabindex="-1" id="styling-emphasis">
+
+                <h3>Emphasis Elements</h3>
+
+                <p>
+                    The WebVTT <code>&lt;b&gt;</code>, <code>&lt;i&gt;</code> and
+                    <code>&lt;u&gt;</code> elements are output literally into the
+                    cue markup. These can therefore be addressed using
+                    descendent element selectors.
+                </p>
+
+                <p id="code-emphasiscss-description">
+                    Although no elements of these types are used within
+                    OzPlayer's interface, it's still a good idea to include
+                    an additional <code>[data-cue]</code> selector for
+                    disambiguation:
+                </p>
+
+<figure class="code" id="code-emphasiscss">
+    <pre aria-describedby="code-emphasiscss-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html">#demo [data-cue] b
+{
+    ...
+}
+
+#demo [data-cue] i
+{
+    ...
+}
+
+#demo [data-cue] u
+{
+    ...
+}</code></pre>
+</figure>
+
+            </section>
+
+        </section>
+
+
+
+        <!--
+        <section tabindex="-1" id="xxx">
+
+            <h2>xxx</h2>
+
+            <p id="code-xxx-description">
+                xxx:
+            </p>
+
+<figure class="code" id="code-xxx">
+    <pre aria-describedby="code-xxx-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html">xxx</code></pre>
+</figure>
+
+            <p>
+               xxx
+            </p>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        xxx
+                    </em>
+                </p>
+            </figure>
+
+
+
+            <section tabindex="-1" id="xxx-yyy">
+
+                <h3>yyy</h3>
+
+                <p>
+                    yyy
+                </p>
+
+            </section>
+
+        </section>
+        -->
+
+
+
+        <!-- necessary code example scripting -->
+        <script type="text/javascript" src="help-code.js"></script>
+
+
+
+    </div>
+
+</body>
+</html>

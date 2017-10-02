@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>Supported features in OzPlayer 3.1</title>
+    <title>Supported features in OzPlayer 3.2</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="support-etc.css" />
@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="support-matrix.css" />
 
     <!-- necessary responsive table styles                              (nb. max-width query is different for each page) -->
-    <link rel="stylesheet" type="text/css" href="support-responsive.css" media="only all and (max-width:58em)" />
+    <link rel="stylesheet" type="text/css" href="support-responsive.css" media="only all and (max-width:54em)" />
 
 </head>
 <body>
@@ -23,23 +23,17 @@
 
 
         <!-- browser support -->
-        <table class="support matrix" border="1"
-            role="grid" aria-readonly="true" aria-live="off" aria-atomic="true" aria-relevant="all"
-            summary="This table has a column for each supported feature, then a pair of rows for each desktop browser, indicating the browser's support for each feature.">
-            <caption data-scripting-true="when scripting is available" data-scripting-false="when scripting is not available">Supported features in OzPlayer 3.1, by desktop browser</caption>
+        <table class="support matrix" border="1" role="grid" aria-readonly="true" aria-live="off" aria-atomic="true" aria-relevant="all">
+            <caption data-scripting-true="when scripting is available" data-scripting-false="when scripting is not available">Supported features in OzPlayer 3.2, by desktop browser</caption>
             <thead role="rowgroup">
                 <tr role="row">
-                    <td colspan="2" rowspan="2"></td>
-                    <th role="columnheader" scope="col" rowspan="2">Video/Audio</th>
-                    <th role="columnheader" scope="col" rowspan="2">Captions</th>
-                    <th role="columnheader" scope="col" rowspan="2">Transcript</th>
-                    <th role="columnheader" scope="col" rowspan="2">Audio descriptions</th>
-                    <th role="columnheader" scope="col" colspan="2">Keyboard access</th>
-                    <th role="columnheader" scope="col" rowspan="2">Full-screen</th>
-                </tr>
-                <tr role="row">
-                    <th role="columnheader" scope="col">Tab to controls</th>
-                    <th role="columnheader" scope="col">Global shortcuts<span aria-hidden="true">&#x00a0;<sup><a href="#footnote-browser4" title="Space for play or pause">4</a></sup></span></th>
+                    <td colspan="2"></td>
+                    <th role="columnheader" scope="col">Video/Audio</th>
+                    <th role="columnheader" scope="col">Captions</th>
+                    <th role="columnheader" scope="col">Transcript</th>
+                    <th role="columnheader" scope="col">Audio descriptions</th>
+                    <th role="columnheader" scope="col">Keyboard access</th>
+                    <th role="columnheader" scope="col">Full-screen</th>
                 </tr>
             </thead>
             <tbody role="rowgroup">
@@ -52,8 +46,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -62,8 +55,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Keyboard shortcuts"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -75,8 +67,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -85,8 +76,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Keyboard shortcuts"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -98,8 +88,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -108,8 +97,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -121,8 +109,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -131,8 +118,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -144,8 +130,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Full-screen"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -154,8 +139,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -167,8 +151,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Full-screen"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -177,8 +160,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Full-screen"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                 </tr>
 
@@ -190,8 +172,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Full-screen"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -200,8 +181,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Keyboard shortcuts"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Full-screen"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                 </tr>
 
@@ -213,8 +193,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -223,8 +202,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -236,8 +214,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -246,8 +223,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -259,8 +235,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -269,8 +244,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Keyboard shortcuts"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -282,8 +256,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Audio descriptions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Tab to controls"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
-                    <td role="gridcell" class="supported" data-header="Keyboard shortcuts"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
+                    <td role="gridcell" class="supported" data-header="Keyboard access"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
                 <tr role="row">
@@ -292,28 +265,23 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-browser2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Tab to controls"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Keyboard shortcuts"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="unsupported" data-header="Keyboard access"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
             </tbody>
             <tfoot>
                 <tr>
-                    <td rowspan="3" colspan="2"></td>
-                    <th rowspan="2">Video/Audio</th>
-                    <th rowspan="2">Captions</th>
-                    <th rowspan="2">Transcript</th>
-                    <th rowspan="2">Audio descriptions</th>
-                    <th>Tab to controls</th>
-                    <th>Global shortcuts</th>
-                    <th rowspan="2">Full-screen</th>
+                    <td rowspan="2" colspan="2"></td>
+                    <th>Video/Audio</th>
+                    <th>Captions</th>
+                    <th>Transcript</th>
+                    <th>Audio descriptions</th>
+                    <th>Keyboard access</th>
+                    <th>Full-screen</th>
                 </tr>
                 <tr>
-                    <th colspan="2">Keyboard access</th>
-                </tr>
-                <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <p><strong>Footnotes to browser support:</strong></p>
                         <dl>
                             <dt id="footnote-browser1" tabindex="-1"><strong>1.</strong></dt>
@@ -322,8 +290,6 @@
                             <dd>If you're using the PHP transcript parser.</dd>
                             <dt id="footnote-browser3" tabindex="-1"><strong>3.</strong></dt>
                             <dd>If the user has Flash installed.</dd>
-                            <dt id="footnote-browser4" tabindex="-1"><strong>4.</strong></dt>
-                            <dd>Space for play or pause.</dd>
                         </dl>
                     </td>
                 </tr>
@@ -333,23 +299,17 @@
 
 
         <!-- mobile os support -->
-        <table class="support matrix" border="1"
-            role="grid" aria-readonly="true" aria-live="off" aria-atomic="true" aria-relevant="all"
-            summary="This table has a column for each supported feature, then a pair of rows for each mobile OS, indicating the OS's support for each feature.">
-            <caption data-scripting-true="when scripting is available" data-scripting-false="when scripting is not available">Supported features in OzPlayer 3.1, by mobile OS</caption>
+        <table class="support matrix" border="1" role="grid" aria-readonly="true" aria-live="off" aria-atomic="true" aria-relevant="all">
+            <caption data-scripting-true="when scripting is available" data-scripting-false="when scripting is not available">Supported features in OzPlayer 3.2, by mobile OS</caption>
             <thead role="rowgroup">
                 <tr role="row">
-                    <td colspan="2" rowspan="2"></td>
-                    <th role="columnheader" scope="col" rowspan="2">Video/Audio</th>
-                    <th role="columnheader" scope="col" rowspan="2">Captions</th>
-                    <th role="columnheader" scope="col" rowspan="2">Transcript</th>
-                    <th role="columnheader" scope="col" rowspan="2">Audio descriptions</th>
-                    <th role="columnheader" scope="col" colspan="2">Keyboard access</th>
-                    <th role="columnheader" scope="col" rowspan="2">Full-screen</th>
-                </tr>
-                <tr role="row">
-                    <th role="columnheader" scope="col">Tab to controls</th>
-                    <th role="columnheader" scope="col">Global shortcuts</th>
+                    <td colspan="2"></td>
+                    <th role="columnheader" scope="col">Video/Audio</th>
+                    <th role="columnheader" scope="col">Captions</th>
+                    <th role="columnheader" scope="col">Transcript</th>
+                    <th role="columnheader" scope="col">Audio descriptions</th>
+                    <th role="columnheader" scope="col">Keyboard access</th>
+                    <th role="columnheader" scope="col">Full-screen</th>
                 </tr>
             </thead>
             <tbody role="rowgroup">
@@ -362,18 +322,16 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, except for YouTube videos, but captions are only supported in Chrome or recent versions of the stock browser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile1" title="Except for YouTube videos">1</a>,<a href="#footnote-mobile6" title="But captions are only supported in Chrome or recent versions of the stock browser">6</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
                     <th role="rowheader" scope="row">No JavaScript</th>
                     <td role="gridcell" class="conditional" data-header="Video/Audio"><span><span>Yes, except for YouTube videos</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile1" title="Except for YouTube videos">1</a></sup></span></span></td>
-                    <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
+                    <td role="gridcell" class="conditional" data-header="Captions"><span><span>Yes, but only in fullscreen mode, but captions are only supported in Chrome or recent versions of the stock browser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile4" title="But only in fullscreen mode">4</a>,<a href="#footnote-mobile6" title="But captions are only supported in Chrome or recent versions of the stock browser">6</a></sup></span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, but captions are only supported in Chrome or recent versions of the stock browser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile6" title="But captions are only supported in Chrome or recent versions of the stock browser">6</a></sup></span></span></td>
                 </tr>
 
@@ -385,8 +343,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, except for YouTube videos</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile1" title="Except for YouTube videos">1</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -395,8 +352,7 @@
                     <td role="gridcell" class="conditional" data-header="Captions"><span><span>Yes, but only in fullscreen mode</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile4" title="But only in fullscreen mode">4</a></sup></span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -408,8 +364,7 @@
                     <td role="gridcell" class="conditional" data-header="Captions"><span><span>Yes, except for YouTube videos in fullscreen mode</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile7" title="Except for YouTube videos in fullscreen mode">7</a></sup></span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, but captions are not supported for YouTube videos</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile8" title="But captions are not supported for YouTube videos">8</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -418,8 +373,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -431,8 +385,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, except for YouTube videos</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile1" title="Except for YouTube videos">1</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -441,8 +394,7 @@
                     <td role="gridcell" class="conditional" data-header="Captions"><span><span>Yes, but only in fullscreen mode</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile4" title="But only in fullscreen mode">4</a></sup></span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -454,8 +406,7 @@
                     <td role="gridcell" class="conditional" data-header="Captions"><span><span>Yes, except for YouTube videos</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile1" title="Except for YouTube videos">1</a></sup></span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, but captions are not supported for YouTube videos</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile8" title="But captions are not supported for YouTube videos">8</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -464,8 +415,7 @@
                     <td role="gridcell" class="supported" data-header="Captions"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -477,8 +427,7 @@
                     <td role="gridcell" class="conditional" data-header="Captions"><span><span>Yes, except in fullscreen mode</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile3" title="Except in fullscreen mode">3</a></sup></span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, except for YouTube videos, but captions no longer appear</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile1" title="Except for YouTube videos">1</a>,<a href="#footnote-mobile5" title="But captions are not supported">5</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -487,8 +436,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -500,8 +448,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, but captions are not supported</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile5" title="But captions are not supported">5</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -510,8 +457,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
@@ -523,8 +469,7 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Transcript"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Full-screen"><span><span>Yes, but captions are not supported</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile5" title="But captions are not supported">5</a></sup></span></span></td>
                 </tr>
                 <tr role="row">
@@ -533,28 +478,23 @@
                     <td role="gridcell" class="unsupported" data-header="Captions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
                     <td role="gridcell" class="conditional" data-header="Transcript"><span><span>Yes, if you're using the PHP transcript parser</span><span aria-hidden="true">&#x2714; <sup><a href="#footnote-mobile2" title="If you're using the PHP transcript parser">2</a></sup></span></span></td>
                     <td role="gridcell" class="unsupported" data-header="Audio descriptions"><span><span>No</span><span aria-hidden="true">&#x2718;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Tab to controls"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
-                    <td role="gridcell" class="nonapplicable" data-header="Keyboard shortcuts"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
+                    <td role="gridcell" class="nonapplicable" data-header="Keyboard access"><span><span>Not applicable</span><span aria-hidden="true">&#x2013;</span></span></td>
                     <td role="gridcell" class="supported" data-header="Full-screen"><span><span>Yes</span><span aria-hidden="true">&#x2714;</span></span></td>
                 </tr>
 
             </tbody>
             <tfoot>
                 <tr>
-                    <td rowspan="3" colspan="2"></td>
-                    <th rowspan="2">Video/Audio</th>
-                    <th rowspan="2">Captions</th>
-                    <th rowspan="2">Transcript</th>
-                    <th rowspan="2">Audio descriptions</th>
-                    <th>Tab to controls</th>
-                    <th>Global shortcuts</th>
-                    <th rowspan="2">Full-screen</th>
+                    <td rowspan="2" colspan="2"></td>
+                    <th>Video/Audio</th>
+                    <th>Captions</th>
+                    <th>Transcript</th>
+                    <th>Audio descriptions</th>
+                    <th>Keyboard access</th>
+                    <th>Full-screen</th>
                 </tr>
                 <tr>
-                    <th colspan="2">Keyboard access</th>
-                </tr>
-                <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <p><strong>Footnotes to mobile OS support:</strong></p>
                         <dl>
                             <dt id="footnote-mobile1" tabindex="-1"><strong>1.</strong></dt>

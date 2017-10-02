@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.1 Setup Guide</title>
+    <title>OzPlayer 3.2 Setup Guide</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.1 Setup Guide</h1>
+        <h1>OzPlayer 3.2 Setup Guide</h1>
 
         <p>
             OzPlayer uses
@@ -113,7 +113,7 @@
 <figure class="code" id="code-markup-semantics">
     <pre aria-describedby="code-markup-semantics-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;figure</b><b>&gt;</b>
+         class="html"><b>&lt;figure</b><b> id=<u>"player"</u></b><b>&gt;</b>
 
     <b>&lt;figcaption</b><b>&gt;</b>Title of Video<b>&lt;/figcaption</b><b>&gt;</b>
 
@@ -152,7 +152,7 @@
 <figure class="code" id="code-markup-collapsing">
     <pre aria-describedby="code-markup-collapsing-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;figure&gt;</small>
+         class="html"><small>&lt;figure id="player"&gt;</small>
 
     <small>&lt;figcaption&gt;Title of Video&lt;/figcaption&gt;</small>
 
@@ -202,7 +202,7 @@
 
     <i>&lt;!-- surrounding content --&gt;</i>
 
-    <small>&lt;figure&gt;</small>
+    <small>&lt;figure id="player"&gt;</small>
 
         <small>&lt;figcaption&gt;Title of Video&lt;/figcaption&gt;</small>
 
@@ -218,10 +218,9 @@
 </figure>
 
                 <p>
-                    OzPlayer will then shrink itself to fit that content column,
-                    whenever the column is smaller (similar to the behaviour
-                    of image max-width). This is measured during page load,
-                    and whenever the window size or orientation changes.
+                    OzPlayer will then resize itself to fit that content column.
+                    This is measured during page load, and whenever the window
+                    size or orientation changes.
                 </p>
 
                 <figure class="note">
@@ -229,20 +228,10 @@
                         <em>
                             In order for this to work, the content column itself
                             <strong>must</strong> be flexible to window size.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
                             Likewise, any element between that column and the player
                             (such as the wrapping <code>FIGURE</code> element)
-                            must also be flexible. If you have a transcript,
-                            that should also be flexible.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
-                            Resizing will occur even if OzPlayer is not inside the
-                            specified column.
+                            must also be flexible. If you have a transcript within
+                            the same container then that should also be flexible.
                         </em>
                     </p>
                 </figure>
@@ -341,6 +330,10 @@
                             <code>400</code> &#x00d7; <code>225</code>.
                             The absolute minimum size you can specify is
                             <code>240</code> &#x00d7; <code>135</code>.
+                            If you're using responsive design, then the
+                            recommendation is to take a mobile-first approach,
+                            and set the default width and height to match your
+                            smallest layout.
                         </em>
                     </p>
                     <p>
@@ -649,7 +642,7 @@
 
                 <section tabindex="-1" id="markup-captions-youtube">
 
-                    <h4>Embedded YouTube Captions</h3>
+                    <h4>Embedded YouTube Captions</h4>
 
 
                     <p>
@@ -1226,6 +1219,7 @@
                         </em>
                     </p>
                     <p>
+                        <em>
                             Or it can use a short-link such as
                             <code>"http://youtu.be/12345"</code>
                             or an embeddable
@@ -1388,20 +1382,20 @@
 <figure class="code" id="code-head-versions">
     <pre aria-describedby="code-head-versions-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.1/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.2/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.1/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.2/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.1/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.2/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.1/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.2/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                 <p>
                     If you want to edit the transcript style sheet so that it
                     matches your site design, please download it from
-                    <a href="http://ozplayer.global.ssl.fastly.net/3.1/transcript.css">
-                        http://ozplayer.global.ssl.fastly.net/3.1/transcript.css</a>
+                    <a href="http://ozplayer.global.ssl.fastly.net/3.2/transcript.css">
+                        http://ozplayer.global.ssl.fastly.net/3.2/transcript.css</a>
                     and then use your local copy instead.
                 </p>
 
@@ -1515,6 +1509,16 @@
                             when you're setting it up, to look for any such errors.
                         </em>
                     </p>
+                    <p>
+                        <em>
+                            There is also an <code>OzPlayer.Audio()</code> constructor
+                            for initialising audio-only players, however this is
+                            merely an alias to <code>OzPlayer.Video()</code> &#x2014;
+                            you can use either of the constructors to initialise
+                            either type of player, and OzPlayer will determine
+                            what it is during initialisation.
+                        </em>
+                    </p>
                 </figure>
 
                 <p id="code-body-batch-description">
@@ -1548,9 +1552,9 @@
 <figure class="code" id="code-body-free">
     <pre aria-describedby="code-body-free-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.1/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.2/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
 
-<b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.1/ozplayer-lang/en.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+<b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.2/ozplayer-lang/en.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
                 <p id="code-body-subs-description">
@@ -1560,15 +1564,15 @@
 <figure class="code" id="code-body-subs">
     <pre aria-describedby="code-body-subs-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.1/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.2/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
 
-<small>&lt;script src="//ozplayer.global.ssl.fastly.net/3.1/ozplayer-lang/en.js" type="text/javascript"&gt;&lt;/script&gt;</small></code></pre>
+<small>&lt;script src="//ozplayer.global.ssl.fastly.net/3.2/ozplayer-lang/en.js" type="text/javascript"&gt;&lt;/script&gt;</small></code></pre>
 </figure>
 
                 <p>
                     If you want to edit the language script, please download it from
-                    <a href="http://ozplayer.global.ssl.fastly.net/3.1/ozplayer-lang/en.js">
-                        http://ozplayer.global.ssl.fastly.net/3.1/ozplayer-lang/en.js</a>
+                    <a href="http://ozplayer.global.ssl.fastly.net/3.2/ozplayer-lang/en.js">
+                        http://ozplayer.global.ssl.fastly.net/3.2/ozplayer-lang/en.js</a>
                     and then use your local copy instead.
                 </p>
 

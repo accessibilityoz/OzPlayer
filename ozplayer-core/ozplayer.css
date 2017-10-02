@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.1] => interface core
+ OzPlayer [3.2] => interface core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 
@@ -178,7 +178,9 @@
     margin:0 !important;
     padding:0 !important;
 
-    border:none !important;
+    /* nb. use a transparent border so we can change its colour
+       (in the skin stylesheet) to implement a clear hover/focus indication */
+    border:2px solid transparent !important;
     -moz-border-radius:2px !important;
     -webkit-border-radius:2px !important;
     border-radius:2px !important;
@@ -1526,14 +1528,12 @@
     display:none !important;
 }
 
-/* captions => standard and alternating text colors */
-.ozplayer .oz-captions p,
-.ozplayer .oz-captions p *,
-.ozplayer .oz-captions p:nth-child(2n+2) + p *
+/* captions => default and alternate-voice text colors */
+.ozplayer .oz-captions p *
 {
     color:#fff !important;
 }
-.ozplayer .oz-captions p + p *
+.ozplayer .oz-captions p[data-voice-alt="true"] *
 {
     color:#ff0 !important;
 }
@@ -1572,7 +1572,8 @@
     font-size:40px !important;
 }
 
-/* captions => caption cue line */
+/* captions => caption speaker and cue line */
+.ozplayer .oz-captions p cite,
 .ozplayer .oz-captions p q
 {
     /* nb. keep this inline so you can add a background color
@@ -2035,40 +2036,40 @@
 .oz-controls .oz-playpause button.oz-on:active
     { background-position:-32px -32px !important; }
 
-.oz-controls .oz-mute button.oz-off.oz-high,
-.oz-controls .oz-mute button.oz-off.oz-low,
-.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:hover,
-.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:hover,
-.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:focus,
-.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:focus,
-.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:active,
-.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:active
+.oz-controls .oz-mute button.oz-on.oz-high,
+.oz-controls .oz-mute button.oz-on.oz-low,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:active,
+.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:active
     { background-position:-128px 0 !important; }
-.oz-controls .oz-mute button.oz-off.oz-high:hover,
-.oz-controls .oz-mute button.oz-off.oz-low:hover,
-.oz-controls .oz-mute button.oz-off.oz-high:focus,
-.oz-controls .oz-mute button.oz-off.oz-low:focus,
-.oz-controls .oz-mute button.oz-off.oz-high:active,
-.oz-controls .oz-mute button.oz-off.oz-low:active
+.oz-controls .oz-mute button.oz-on.oz-high:hover,
+.oz-controls .oz-mute button.oz-on.oz-low:hover,
+.oz-controls .oz-mute button.oz-on.oz-high:focus,
+.oz-controls .oz-mute button.oz-on.oz-low:focus,
+.oz-controls .oz-mute button.oz-on.oz-high:active,
+.oz-controls .oz-mute button.oz-on.oz-low:active
     { background-position:-128px -32px !important; }
 
-.oz-controls .oz-mute button.oz-on.oz-high,
-.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:hover,
-.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:focus,
-.oz-controls .oz-mute.oz-disabled button.oz-on.oz-high:active
+.oz-controls .oz-mute button.oz-off.oz-high,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-high:active
     { background-position:-64px 0 !important; }
-.oz-controls .oz-mute button.oz-on.oz-high:hover,
-.oz-controls .oz-mute button.oz-on.oz-high:focus,
-.oz-controls .oz-mute button.oz-on.oz-high:active
+.oz-controls .oz-mute button.oz-off.oz-high:hover,
+.oz-controls .oz-mute button.oz-off.oz-high:focus,
+.oz-controls .oz-mute button.oz-off.oz-high:active
     { background-position:-64px -32px !important; }
-.oz-controls .oz-mute button.oz-on.oz-low,
-.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:hover,
-.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:focus,
-.oz-controls .oz-mute.oz-disabled button.oz-on.oz-low:active
+.oz-controls .oz-mute button.oz-off.oz-low,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:hover,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:focus,
+.oz-controls .oz-mute.oz-disabled button.oz-off.oz-low:active
     { background-position:-96px 0 !important; }
-.oz-controls .oz-mute button.oz-on.oz-low:hover,
-.oz-controls .oz-mute button.oz-on.oz-low:focus,
-.oz-controls .oz-mute button.oz-on.oz-low:active
+.oz-controls .oz-mute button.oz-off.oz-low:hover,
+.oz-controls .oz-mute button.oz-off.oz-low:focus,
+.oz-controls .oz-mute button.oz-off.oz-low:active
     { background-position:-96px -32px !important; }
 
 .oz-controls .oz-cc button.oz-off,
@@ -2184,40 +2185,40 @@
 .oz-large .oz-playpause button.oz-on:active
     { background-position:-64px -64px !important; }
 
-.oz-large .oz-mute button.oz-off.oz-high,
-.oz-large .oz-mute button.oz-off.oz-low,
-.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:hover,
-.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:hover,
-.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:focus,
-.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:focus,
-.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:active,
-.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:active
+.oz-large .oz-mute button.oz-on.oz-high,
+.oz-large .oz-mute button.oz-on.oz-low,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:hover,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:hover,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:focus,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:focus,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:active,
+.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:active
     { background-position:-256px 0 !important; }
-.oz-large .oz-mute button.oz-off.oz-high:hover,
-.oz-large .oz-mute button.oz-off.oz-low:hover,
-.oz-large .oz-mute button.oz-off.oz-high:focus,
-.oz-large .oz-mute button.oz-off.oz-low:focus,
-.oz-large .oz-mute button.oz-off.oz-high:active,
-.oz-large .oz-mute button.oz-off.oz-low:active
+.oz-large .oz-mute button.oz-on.oz-high:hover,
+.oz-large .oz-mute button.oz-on.oz-low:hover,
+.oz-large .oz-mute button.oz-on.oz-high:focus,
+.oz-large .oz-mute button.oz-on.oz-low:focus,
+.oz-large .oz-mute button.oz-on.oz-high:active,
+.oz-large .oz-mute button.oz-on.oz-low:active
     { background-position:-256px -64px !important; }
 
-.oz-large .oz-mute button.oz-on.oz-high,
-.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:hover,
-.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:focus,
-.oz-large .oz-mute.oz-disabled button.oz-on.oz-high:active
+.oz-large .oz-mute button.oz-off.oz-high,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:hover,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:focus,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-high:active
     { background-position:-128px 0 !important; }
-.oz-large .oz-mute button.oz-on.oz-high:hover,
-.oz-large .oz-mute button.oz-on.oz-high:focus,
-.oz-large .oz-mute button.oz-on.oz-high:active
+.oz-large .oz-mute button.oz-off.oz-high:hover,
+.oz-large .oz-mute button.oz-off.oz-high:focus,
+.oz-large .oz-mute button.oz-off.oz-high:active
     { background-position:-128px -64px !important; }
-.oz-large .oz-mute button.oz-on.oz-low,
-.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:hover,
-.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:focus,
-.oz-large .oz-mute.oz-disabled button.oz-on.oz-low:active
+.oz-large .oz-mute button.oz-off.oz-low,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:hover,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:focus,
+.oz-large .oz-mute.oz-disabled button.oz-off.oz-low:active
     { background-position:-192px 0 !important; }
-.oz-large .oz-mute button.oz-on.oz-low:hover,
-.oz-large .oz-mute button.oz-on.oz-low:focus,
-.oz-large .oz-mute button.oz-on.oz-low:active
+.oz-large .oz-mute button.oz-off.oz-low:hover,
+.oz-large .oz-mute button.oz-off.oz-low:focus,
+.oz-large .oz-mute button.oz-off.oz-low:active
     { background-position:-192px -64px !important; }
 
 .oz-large .oz-cc button.oz-off,

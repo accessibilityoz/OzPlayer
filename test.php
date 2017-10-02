@@ -173,47 +173,73 @@
 
 
         /* sample cue, voice and class styles *//*
-        #demo-transcript [data-cue="9"]
+        #demo-transcript
         {
-            color:#090;
+            height:30em;
         }
-        #demo-transcript [data-voice="Rattus"]
+        #demo-transcript [data-cue="9"] *
         {
-            color:#900;
+            color:#909 !important;
         }
-        #demo-transcript [data-voice="Alfred Nobel"] cite
+        #demo-transcript [data-voice="Lionel"] *
         {
-            color:#099;
-        }
-        #demo-transcript p:not([data-voice])
-        {
-            color:#909;
+            font-family:serif !important;
         }
         #demo-transcript [data-cue="9"] mark
         {
-            color:#f60;
+            background-color:#fec !important;
+        }
+        #demo-transcript [data-cue="9"] mark *
+        {
+            color:#f60 !important;
+        }
+        #demo-transcript p.job
+        {
+            text-decoration:overline;
+        }
+        #demo-transcript p[data-voice-alt="true"] q
+        {
+            background:cyan;
         }
         #demo-transcript span.brain
         {
             font-variant:small-caps;
         }
+        #demo-transcript span.surgeon
+        {
+            color:crimson;
+        }
+        #demo-transcript span.surgery
+        {
+            color:green;
+        }
+        #demo-transcript span.accountant
+        {
+            color:blue;
+        }
+        #demo-transcript span.charity
+        {
+            color:darkorange;
+        }
         #demo-transcript span.rocket
         {
             text-transform:uppercase;
+            font-family:cursive;
+            color:darkcyan;
         }
         #demo-transcript span[lang]
         {
             font-family:"american typewriter", courier, monospace;
-        }
-        #demo-transcript
-        {
-            height:20em;
         } */
 
 
 
 
-        /* sample caption styling */
+        /* sample caption styling *//*
+        .ozplayer .oz-captions p.job
+        {
+            text-decoration:line-through !important;
+        }
         .ozplayer .oz-captions p .uppercase
         {
             text-transform:uppercase !important;
@@ -221,7 +247,32 @@
         .ozplayer .oz-captions p .monospace
         {
             font-family:monospace !important;
+        } */
+
+
+
+
+        /* sample caption voice colours *//*
+        #demo .oz-captions [data-voice="Hostess"] *
+        {
+            color:#ff0 !important;
         }
+        #demo .oz-captions [data-voice="Lionel"] *
+        {
+            color:#fff !important;
+        }
+        #demo .oz-captions [data-voice="Female Guest"] *
+        {
+            color:#3f3 !important;
+        }
+        #demo .oz-captions [data-voice="Male Guest"] *
+        {
+            color:#f6f !important;
+        }
+        #demo .oz-captions [data-voice="Jeff"] *
+        {
+            color:#0ff !important;
+        } */
 
 
 
@@ -323,26 +374,6 @@
         .ozplayer-transcript
         {
             width:360px !important;
-        } */
-
-        /*** DEV LOG (responsive figure) ***//*
-        figure
-        {
-            display:inline-block !important;
-            width:40% !important;
-            margin:0 !important;
-        } */
-
-        /*** DEV LOG (responsive transcript) ***//*
-        .ozplayer-expander
-        {
-            width:auto !important;
-            min-width:244px !important;
-            max-width:644px !important;
-        }
-        .ozplayer-transcript
-        {
-            width:auto !important;
         } */
 
         /*** DEV LOG (log styles) ***//*
@@ -502,7 +533,29 @@
     <!-- *** / DEV WORDPRESS STYLESHEET *** -->
 
 
-    <!-- *** DEV VERY TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
+    <!-- *** DEV VERY TMP ON/OFF STATE STYLES --><!--
+    <style>
+    .oz-controls .oz-field button.oz-on
+    {
+        box-shadow:inset 0 0 0 2px limegreen !important;
+    }
+    .oz-controls .oz-field button.oz-off
+    {
+        box-shadow:inset 0 0 0 2px red !important;
+    }
+    .oz-controls .oz-field button[aria-pressed="true"]
+    {
+        outline:2px dashed limegreen !important;
+    }
+    .oz-controls .oz-field button[aria-pressed="false"]
+    {
+        outline:2px dashed red !important;
+    }
+    </style>
+    -->
+
+
+    <!-- *** DEV TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
     <!--
     <style>
     .oz-controls .oz-menuitem[aria-disabled="true"]
@@ -608,9 +661,8 @@
             width="240" height="135"
         -->
         <video
-            data-volume="0.25"
-            width="640" height="360"
             preload="none"
+            width="640" height="360"
             controls="controls"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
@@ -726,12 +778,12 @@
             <track src="./media/captions/es/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="es" label="Español" data-default-transcript="default" />
             <track src="./media/captions/fr/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="fr" label="Français" />
             <track src="./media/captions/pa/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="pa" label="ਪਜਾਬੀ ਦ" />
-            <track src="./media/captions/ke/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="ke" label="TlhIngan" />
+            <track src="./media/captions/tlh/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="tlh" label="TlhIngan" />
             <track src="./media/transcripts/en/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="en" />
             <track src="./media/transcripts/es/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="es" />
             <track src="./media/transcripts/fr/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="fr" />
             <track src="./media/transcripts/pa/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="pa" />
-            <track src="./media/transcripts/ke/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="ke" />
+            <track src="./media/transcripts/tlh/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="tlh" />
             <!--
             -->
 
@@ -787,7 +839,7 @@
         <audio data-default="default" preload="none" data-on="test.php?audio=on" data-off="test.php?audio=off">
         <audio preload="none">
         -->
-        <audio data-volume="1" data-default="default" preload="none">
+        <audio data-default="default" preload="none">
 
 <?php if(isset($_GET['video']) && ($_GET['video'] == 'youtube' || $_GET['video'] == 'ozplayer')) : ?>
 
@@ -1006,9 +1058,11 @@
         }
         function remote(src)
         {
-            return qualify(src).replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
-            + '?nocache=' + new Date().getTime()
-            + '';
+            return qualify(src)
+                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
+                    .replace('OzPlayer/media/', 'media/')
+                + '?nocache=' + new Date().getTime()
+                + '';
         }
         var sources = document.getElementsByTagName('source');
         for(var i = 0; i < sources.length; i ++)
@@ -1070,8 +1124,8 @@
             audiolog.parentNode.removeChild(audiolog);
         }
     })();
-    </script>
-    --><!-- *** DEV LOG *** -->
+    </script> -->
+    <!-- *** DEV LOG *** -->
 
 
 
@@ -1163,6 +1217,10 @@
             }
             if(lightsheet)
             {
+                /***
+                lighthref = lighthref.replace('-pink', '-green');
+                ***/
+
                 if(window.opera)
                 {
                     //lighthref = lighthref.replace('-pink', '-red');
@@ -1189,6 +1247,7 @@
                     lighthref = lighthref.replace('-pink', '-green');
                     //lighthref = lighthref.replace('-pink', '-yellow');
                 }
+
                 lightsheet.href = lighthref;
             }
         }

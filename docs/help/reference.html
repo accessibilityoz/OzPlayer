@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.1 Markup Reference</title>
+    <title>OzPlayer 3.2 Markup Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.1 Markup Reference</h1>
+        <h1>OzPlayer 3.2 Markup Reference</h1>
 
         <p>
             This is a detailed reference of every element that OzPlayer uses.
@@ -163,9 +163,58 @@
                             <p>
                                 If this attribute is specified, and points to a
                                 flexible container, then OzPlayer will continually
-                                resize itself to be no larger than the container
-                                (down to a minimum of <code>240</code> pixels).
+                                resize itself to match the internal width of the
+                                container (down to an absolute minimum of
+                                <code>240</code> pixels).
                             </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="container-data-responsive-mode">
+                        <summary><code>"data-responsive-mode"</code> <small>(optional)</small></summary>
+                        <div>
+
+                            <p>
+                                The responsive sizing mode, which can
+                                be <code>"min"</code>, <code>"max"</code> or
+                                <code>"initial"</code>.
+                            </p>
+                            <p>
+                                If it has the value <code>"min"</code> then the
+                                default video width will also be the minimum width,
+                                when resizing to fit a responsive container.
+                            </p>
+                            <p>
+                                If it has the value <code>"max"</code> then the
+                                default video width will also be the maximum width.
+                            </p>
+                            <p>
+                                If it has the value <code>"initial"</code> then
+                                there won't be any minimum or maximum width
+                                constraints (apart from the absolute minimum
+                                of <code>240</code> pixels).
+                            </p>
+                            <p>
+                                If this attribute is not defined, the mode
+                                defaults to <code>"initial"</code>.
+                            </p>
+
+                            <figure class="note">
+                                <p>
+                                    <em>
+                                        This feature was added in OzPlayer 3.2
+                                        to accompany a change in responsive
+                                        behaviour. Earlier versions always
+                                        applied a maximum width constraint,
+                                        and therefore backward compatibility
+                                        can be achieved using the value
+                                        <code>"max"</code>.
+                                    </em>
+                                </p>
+                            </figure>
 
                         </div>
                     </details>
@@ -184,7 +233,7 @@
                                 If it has the value <code>"stack"</code>
                                 then the controls will be superimposed
                                 over the bottom of the video, with a timer
-                                that automatically hides them after 4
+                                that automatically hides them after a few
                                 seconds of user inactivity.
                             </p>
                             <p>
@@ -592,7 +641,7 @@
                                                 to create a transcript.
                                             </em>
                                         </p>
-                                    </figure
+                                    </figure>
 
                                 </div>
                             </details>
@@ -631,8 +680,7 @@
          contentEditable="true" tabindex="0" spellcheck="false"
          class="html"><b>&lt;track</b><b> src=<u>"./media/en/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"en"</u></b><b> label=<u>"English"</u></b><b> default=<u>"default"</u></b><b> data-default-transcript=<u>"default"</u></b> <b>/&gt;</b>
 <b>&lt;track</b><b> src=<u>"./media/de/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"de"</u></b><b> label=<u>"Deutsch"</u></b> <b>/&gt;</b>
-<b>&lt;track</b><b> src=<u>"./media/fr/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"fr"</u></b><b> label=<u>"Français"</u></b> <b>/&gt;</b>
-</code></pre>
+<b>&lt;track</b><b> src=<u>"./media/fr/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> data-sync=<u>"0"</u></b><b> srclang=<u>"fr"</u></b><b> label=<u>"Français"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                     <ol>
@@ -1149,6 +1197,24 @@
                                     width defaults to <code>400</code>.
                                 </p>
 
+                                <figure class="note">
+                                    <p>
+                                        <em>
+                                            Unlike the
+                                            <a href="#video">video element</a>,
+                                            the audio element does not natively
+                                            support <code>width</code> and
+                                            <code>height</code>, therefore the
+                                            <code>data-width</code> you specify
+                                            here will only apply when scripting
+                                            is available. But if you also define
+                                            a CSS <code>width</code> then this
+                                            will apply when scripting is not
+                                            available.
+                                        </em>
+                                    </p>
+                                </figure>
+
                             </div>
                         </details>
                     </li>
@@ -1289,7 +1355,7 @@
                         <p>
                             <em>
                                 For best cross-browser compatibility you should
-                                include <strong>two video sources</strong>
+                                include <strong>two audio sources</strong>
                                 &#x2014; one encoded as MP3 and the other as
                                 OGG, which between them will work in every
                                 browser that OzPlayer supports. The Flash
@@ -1298,7 +1364,7 @@
                         </p>
                         <p>
                             <em>
-                                You can source the video files
+                                You can source the audio files
                                 from any external domain, for example, using a
                                 <abbr title="Content Delivery Network">CDN</abbr>.
                                 If you're using your own server, make sure it's
