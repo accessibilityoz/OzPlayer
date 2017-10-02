@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.1] => interface highlight colours => yellow + black
+ OzPlayer [3.2] => interface highlight colours => yellow + black
  ------------------------------------------------------------------------------
 *******************************************************************************/
 
@@ -114,7 +114,11 @@
     background-color:transparent !important;
     color:#fff !important;
 }
-
+.oz-logo-bug:hover,
+.oz-logo-bug:focus
+{
+    border-color:#fc0 !important;
+}
 
 
 

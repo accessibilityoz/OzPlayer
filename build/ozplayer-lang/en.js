@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.1] => interface language
+ OzPlayer [3.2] => interface language
  ------------------------------------------------------------------------------
 *******************************************************************************/
 (function(){var lang={
@@ -16,8 +16,8 @@
     //the label attribute defined on the captions language's track element
     ,"button-playpause-off"     : "Play"
     ,"button-playpause-on"      : "Pause"
-    ,"button-mute-off"          : "Unmute"
-    ,"button-mute-on"           : "Mute"
+    ,"button-mute-off"          : "Mute"
+    ,"button-mute-on"           : "Unmute"
     ,"button-cc-off"            : "Captions are off"
     ,"button-cc-on"             : "Captions are on"
     ,"button-cc-lang"           : "Captions = %1"
@@ -36,8 +36,8 @@
     //the src attribute defined on the captions language's track element
     ,"text-playpause-off"       : "Play"
     ,"text-playpause-on"        : "Pause"
-    ,"text-mute-off"            : "Unmute"
-    ,"text-mute-on"             : "Mute"
+    ,"text-mute-off"            : "Mute"
+    ,"text-mute-on"             : "Unmute"
     ,"text-cc-off"              : "CC (off)"
     ,"text-cc-on"               : "CC (on)"
     ,"text-cc-lang"             : "CC (%1)"
