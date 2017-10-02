@@ -201,6 +201,15 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
                             <code>&lt;v&gt;</code> element.
                         </em>
                     </p>
+                    <p>
+                        <em>
+                            Furthermore, each <code>&lt;v&gt;</code> tag must be
+                            defined at the start of a line &#x2014; OzPlayer
+                            does not support <code>&lt;v&gt;</code> elements that
+                            only apply to part of a line, or multiple
+                            <code>&lt;v&gt;</code> elements within a single line.
+                        </em>
+                    </p>
                 </figure>
 
                 <p>
@@ -344,6 +353,13 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
                             Each element must be closed on the same line
                             &#x2014; OzPlayer does not support multiple lines
                             within a single <code>&lt;c&gt;</code> element.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            OzPlayer will only parse classes containing
+                            contain letters, numbers, dash or underscore &#x2014;
+                            other character are not supported.
                         </em>
                     </p>
                 </figure>
