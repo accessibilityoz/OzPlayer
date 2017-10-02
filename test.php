@@ -778,12 +778,12 @@
             <track src="./media/captions/es/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="es" label="Español" data-default-transcript="default" />
             <track src="./media/captions/fr/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="fr" label="Français" />
             <track src="./media/captions/pa/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="pa" label="ਪਜਾਬੀ ਦ" />
-            <track src="./media/captions/ke/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="ke" label="TlhIngan" />
+            <track src="./media/captions/tlh/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="tlh" label="TlhIngan" />
             <track src="./media/transcripts/en/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="en" />
             <track src="./media/transcripts/es/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="es" />
             <track src="./media/transcripts/fr/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="fr" />
             <track src="./media/transcripts/pa/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="pa" />
-            <track src="./media/transcripts/ke/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="ke" />
+            <track src="./media/transcripts/tlh/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="tlh" />
             <!--
             -->
 
