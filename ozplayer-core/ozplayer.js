@@ -2371,7 +2371,9 @@ var OzPlayer = (function()
             //remove the video controls
             player.video.removeAttribute('controls');
 
-            /*** DEV VERY TMP COMMENTED OUT ***//***
+            /*** DEV TMP COMMENTED OUT ***//***
+
+            ***/
 
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
@@ -2393,8 +2395,6 @@ var OzPlayer = (function()
                     return null;
                 }
             });
-
-            ***/
 
             //nb. we also do the same thing to block any native dblclick action
             //which is implemented later in the script (see "global mouse shortcuts")
@@ -6188,7 +6188,6 @@ var OzPlayer = (function()
         //however I think that's a small price to pay for fixing this bug
         if(!(defs.agent.iphone || defs.agent.winphone) || player.isaudio)
         {
-            //OLD//player.controlform = player.container.appendChild(player.controlform);
             player.controlform = player.container.insertBefore(player.controlform, player.captions);
         }
 
