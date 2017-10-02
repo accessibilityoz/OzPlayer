@@ -113,7 +113,7 @@
 <figure class="code" id="code-markup-semantics">
     <pre aria-describedby="code-markup-semantics-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;figure</b><b>&gt;</b>
+         class="html"><b>&lt;figure</b><b> id=<u>"player"</u></b><b>&gt;</b>
 
     <b>&lt;figcaption</b><b>&gt;</b>Title of Video<b>&lt;/figcaption</b><b>&gt;</b>
 
@@ -152,7 +152,7 @@
 <figure class="code" id="code-markup-collapsing">
     <pre aria-describedby="code-markup-collapsing-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;figure&gt;</small>
+         class="html"><small>&lt;figure id="player"&gt;</small>
 
     <small>&lt;figcaption&gt;Title of Video&lt;/figcaption&gt;</small>
 
@@ -202,7 +202,7 @@
 
     <i>&lt;!-- surrounding content --&gt;</i>
 
-    <small>&lt;figure&gt;</small>
+    <small>&lt;figure id="player"&gt;</small>
 
         <small>&lt;figcaption&gt;Title of Video&lt;/figcaption&gt;</small>
 
@@ -1507,6 +1507,16 @@
                             being mis-defined &#x2014; then an error or warning message
                             will be written to the browser console. So check the console
                             when you're setting it up, to look for any such errors.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            There is also an <code>OzPlayer.Audio()</code> constructor
+                            for initialising audio-only players, however this is
+                            merely an alias to <code>OzPlayer.Video()</code> &#x2014;
+                            you can use either of the constructors to initialise
+                            either type of player, and OzPlayer will determine
+                            what it is during initialisation.
                         </em>
                     </p>
                 </figure>

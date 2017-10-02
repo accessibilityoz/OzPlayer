@@ -168,6 +168,11 @@ abbr
     cursor:default;
 }
 
+p strong code
+{
+    font-weight:bold;
+}
+
 /* highlighted notes */
 section figure.note
 {
@@ -213,6 +218,10 @@ section figure.note p:last-child
 section figure.note p em
 {
     font-style:normal;
+}
+section figure.note p em strong em
+{
+    font-style:italic;
 }
 
 /* nb. we have to re-inforce some of those styles inside the documentation lists
