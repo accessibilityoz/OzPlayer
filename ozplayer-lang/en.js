@@ -8,13 +8,10 @@
 //----------------------------------------------------------------------------//
 
 
-    //controls legend
-    "controls-legend"           : "Media Controls"
-
     //button labels and tooltips
     //n.b. the %1 token represents dynamic text:
     //the label attribute defined on the captions language's track element
-    ,"button-playpause-off"     : "Play"
+    "button-playpause-off"      : "Play"
     ,"button-playpause-on"      : "Pause"
     ,"button-mute-off"          : "Mute"
     ,"button-mute-on"           : "Unmute"

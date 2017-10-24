@@ -1418,9 +1418,6 @@ var OzPlayer = (function()
         //nb. some internal spaces and names are escaped to avoid compression
         lang :
         {
-            //controls => form legend
-            'controls-legend'         : 'Media Controls',
-
             //controls => button labels and tooltips
             //indexed by button name and state key (eg. "playpause" and "on")
             "button-playpause-off"    : "Play",
@@ -3463,6 +3460,8 @@ var OzPlayer = (function()
             keys == 'lang.keyboard-help-text'
             ||
             keys == 'lang.skip-link-shortcuts'
+            ||
+            keys == 'lang.controls-legend'
         )
         {
             return;
@@ -6152,13 +6151,7 @@ var OzPlayer = (function()
             {
                 'width'     : player.wrapper.offsetWidth + 'px'
             },
-            '#dom'          : etc.build('fieldset',
-            {
-                '#dom'      : etc.build('legend',
-                {
-                    '#text' : getLang(player, 'controls-legend')
-                })
-            })
+            '#dom'          : etc.build('fieldset')
         });
 
         //if we're using the audio-only player
