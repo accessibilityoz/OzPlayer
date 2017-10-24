@@ -2371,6 +2371,23 @@ var OzPlayer = (function()
             //remove the video controls
             player.video.removeAttribute('controls');
 
+            //in IE11 with JAWS, the native controls are still announced by JAWS
+            //when viewing the page for the first time (but not after refreshing)
+            //which may be an issue with MSAA, like maybe the native controls are still
+            //present in the accessibility API even though they're removed from the DOM
+            //not exactly sure why this is happening, but it can be fixed by cloning
+            //the current player node and replacing the original with the clone
+            //since the clone has no native controls they won't show up in the API
+            //and for safety let's do this for all versions of internet explorer
+            //nb. we have to do this before binding any events to the player
+            //since any such event listeners would not be preserved in the clone
+            if(defs.agent.ie)
+            {
+                var clone = player.video.cloneNode(true);
+                player.container.replaceChild(clone, player.video);
+                player.video = clone;
+            }
+
             /*** DEV TMP COMMENTED OUT ***//***
 
             ***/
