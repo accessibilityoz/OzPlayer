@@ -1026,7 +1026,7 @@ var OzPlayer = (function()
             {
                 ios         : /^ip(ad|hone)/i.test(p),
                 iphone      : p == 'iPhone',
-                android     : /^(android|linux arm)/i.test(p),
+                android     : /^(android|linux arm)/i.test(p) || (/android/i.test(a) && !/edge/i.test(a)),
                 windows     : p == 'Win32',
                 winphone    : /windows phone/i.test(a),
                 firefox     : !!__.InstallTrigger,
@@ -1051,6 +1051,7 @@ var OzPlayer = (function()
 
             //*** DEV TMP
             //console.log('platform = "'+p+'"\nvendor = "'+n.vendor+'"\nua = "'+a+'"');
+            //alert('platform = "'+p+'"\nvendor = "'+n.vendor+'"\nua = "'+a+'"');
             //var str = '';etc.each(u, function(v,k){ str += k+' = '+(v===true?'TRUE':v)+'\n'; });
             //console.log(str);
             //alert(str);
