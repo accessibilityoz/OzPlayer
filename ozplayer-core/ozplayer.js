@@ -2479,9 +2479,8 @@ var OzPlayer = (function()
             }
 
             //in iOS, trying to play audio at the same time stops the video from playing
-            //so let's assume the same thing for android (ie. mobile webkit generally)
             //while in Windows Phone it generates an error when we try to play the audio
-            if(defs.agent.ios || defs.agent.android || defs.agent.winphone)
+            if(defs.agent.ios || defs.agent.winphone)
             {
                 player.audiodesk = null;
             }
@@ -4540,17 +4539,17 @@ var OzPlayer = (function()
                 //so that we can show native captions in fullscreen mode
                 if(kind == 'captions' && etc.def(player.video.textTracks))
                 {
-                    //if this is anything except iOS or Android, remove the track entirely
+                    //if this is anything except iOS, remove the track entirely
                     //which fixes a problem in desktop safari 7 whereby the native captions
                     //would show as well as the custom captions, even though we disable them
-                    //but since only iOS7+ (and potentially future android) require the
-                    //native captions anyway, we can just remove them to fix that problem
-                    if(!(defs.agent.ios || defs.agent.android))
+                    //but since only iOS7+ uses the native captions anyway,
+                    //we can just remove them entirely to fix that problem
+                    if(!defs.agent.ios)
                     {
                         etc.remove(track);
                     }
 
-                    //else [if this is iOS or Android]
+                    //else [if this is iOS]
                     else
                     {
                         //save a native textTrack object reference to the dictionary
@@ -6222,7 +6221,6 @@ var OzPlayer = (function()
         //nb. this isn't necessary for the iphone since it doesn't have the
         //custom controls anyway, but it's not worth the extra condition
         //(it's also not necessary for windows phone, hence the lack of condition!)
-        //** how does this impact on android/chrome in fullscreen mode?
         if((defs.agent.ios || defs.agent.android) && player.mode == 'youtube')
         {
             player.options.controls = 'row';
@@ -7235,11 +7233,11 @@ var OzPlayer = (function()
         }
 
 
-        //changing the volume doesn't work in iOS, Android and Windows Phone, which must
+        //changing the volume doesn't work in iOS and Windows Phone, which must
         //be deliberate so that media objects can't be different from the system volume
         //(in fact its native video controls don't even have a volume control)
         //so there's no point adding the controls since they won't do anything
-        if(!(defs.agent.ios || defs.agent.android || defs.agent.winphone))
+        if(!(defs.agent.ios || defs.agent.winphone))
         {
             //create a span-wrapped mute button inside the controls fieldset
             //with its state according to the default muting, which will be
