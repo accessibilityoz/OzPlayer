@@ -6142,10 +6142,27 @@ var OzPlayer = (function()
         //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
         //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
         //which then always resulted in the message "Failed to move to controlled element"
+        //nb. we have to add role=form here to fix a nonsensical bug with JAWS, whereby
+        //the Play button wasn't being announced at all when navigating using "f"
+        //and either wasn't announced, or was announced without its toggle state,
+        //when navigating using Tab, and in both cases failed to work when actuated
+        //furthermore the time slider had a similar problem, whereby it wasn't always
+        //being announced when navigated to via Tab or the "f" key, only sometimes
+        //there's nothing in the markup of those controls that suggested a problem,
+        //and the problem has only recently manifested (between 3.1 and 3.2) yet none
+        //of the intermediate changes to the script appeared to have any relationship
+        //and all of the other buttons and controls within the form worked just fine
+        //the only tangible thing was that when moving the controls to a different place
+        //(eg. between the CC and AD buttons) the button and slider then worked fine
+        //so eventually this article gave a clue: https://tink.uk/jaws-ie-the-forms-region-bug/
+        //even though the issue in that article is unrelated, it gave a clue to a potential fix
+        //which, wouldn't you know, turned out to work and solve the problem completely!
+        //after several days of headscratching, that was quite a relief I can tell you :-)
         player.controlform = etc.build('form',
         {
             'class'         : config.classes['controls'],
             'action'        : '#' + player.wrapper.id,
+            'role'          : 'form',
             'onsubmit'        : function(){ return null },
             '#style'        :
             {
