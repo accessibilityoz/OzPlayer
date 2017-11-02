@@ -14462,16 +14462,16 @@ var OzPlayer = (function()
         {
             if(defs.agent.ios)
             {
-                etc.listen(expander, 'touchstart', function(e, target)
+                etc.listen(expander, 'touchstart', function(e, thetarget)
                 {
-                    if(!etc.contains(player.transcript, target))
+                    if(!etc.contains(player.transcript, thetarget))
                     {
                         return false;
                     }
                 });
-                etc.listen(trigger, 'touchend', function(e, target)
+                etc.listen(trigger, 'touchend', function(e, thetarget)
                 {
-                    callback(e, target);
+                    callback(e, thetarget);
                     return null;
                 });
                 return;
@@ -14493,19 +14493,19 @@ var OzPlayer = (function()
                     }
                 }
             });
-            etc.listen(node, 'keyup', function(e, target)
+            etc.listen(node, 'keyup', function(e, thetarget)
             {
                 if(keydown)
                 {
                     keydown = false;
-                    callback(e, target);
+                    callback(e, thetarget);
                 }
             });
-            etc.listen(node, 'click', function(e, target)
+            etc.listen(node, 'click', function(e, thetarget)
             {
                 if(!keydown)
                 {
-                    callback(e, target);
+                    callback(e, thetarget);
                 }
             });
         }
