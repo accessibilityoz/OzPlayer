@@ -2,7 +2,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.2] => player core
+ OzPlayer [3.3] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 class OzPlayer
@@ -143,9 +143,9 @@ class OzPlayer
     }
     private static function get_cue_html($cue)
     {
-        $html = '<'
-                . ($cue['kind'] == 'captions' ? 'blockquote' : 'div')
-                . ' lang="' . $cue['lang']
+        $html = '<div'
+                . ' data-kind="' . $cue['kind']
+                . '" lang="' . $cue['lang']
                 . '" data-cue="' . $cue['id']
                 . '">';
         foreach(preg_split('/\n/', $cue['text']) as $i => $line)
@@ -165,7 +165,7 @@ class OzPlayer
             $line = preg_replace('/<\/c>/', '</span>', preg_replace('/<c\.([^>]+)>/', '<span class="\\1">', $line));
             $html .= $line;
         }
-        return $html . '</' . ($cue['kind'] == 'captions' ? 'blockquote' : 'div')  . '>';
+        return $html . '</div>';
     }
     private static function get_error($status)
     {
