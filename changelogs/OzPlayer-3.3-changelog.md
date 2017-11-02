@@ -1,4 +1,4 @@
-# OzPlayer 3.2 Changelog
+# OzPlayer 3.3 Changelog
 
 ## New Features
 
