@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.2] => player core
+ OzPlayer [3.3] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -1026,7 +1026,7 @@ var OzPlayer = (function()
             {
                 ios         : /^ip(ad|hone)/i.test(p),
                 iphone      : p == 'iPhone',
-                android     : /^(android|linux arm)/i.test(p),
+                android     : /^(android|linux arm)/i.test(p) || (/android/i.test(a) && !/edge/i.test(a)),
                 windows     : p == 'Win32',
                 winphone    : /windows phone/i.test(a),
                 firefox     : !!__.InstallTrigger,
@@ -1051,6 +1051,7 @@ var OzPlayer = (function()
 
             //*** DEV TMP
             //console.log('platform = "'+p+'"\nvendor = "'+n.vendor+'"\nua = "'+a+'"');
+            //alert('platform = "'+p+'"\nvendor = "'+n.vendor+'"\nua = "'+a+'"');
             //var str = '';etc.each(u, function(v,k){ str += k+' = '+(v===true?'TRUE':v)+'\n'; });
             //console.log(str);
             //alert(str);
@@ -1418,9 +1419,6 @@ var OzPlayer = (function()
         //nb. some internal spaces and names are escaped to avoid compression
         lang :
         {
-            //controls => form legend
-            'controls-legend'         : 'Media Controls',
-
             //controls => button labels and tooltips
             //indexed by button name and state key (eg. "playpause" and "on")
             "button-playpause-off"    : "Play",
@@ -2371,6 +2369,23 @@ var OzPlayer = (function()
             //remove the video controls
             player.video.removeAttribute('controls');
 
+            //in IE11 with JAWS, the native controls are still announced by JAWS
+            //when viewing the page for the first time (but not after refreshing)
+            //which may be an issue with MSAA, like maybe the native controls are still
+            //present in the accessibility API even though they're removed from the DOM
+            //not exactly sure why this is happening, but it can be fixed by cloning
+            //the current player node and replacing the original with the clone
+            //since the clone has no native controls they won't show up in the API
+            //and for safety let's do this for all versions of internet explorer
+            //nb. we have to do this before binding any events to the player
+            //since any such event listeners would not be preserved in the clone
+            if(defs.agent.ie)
+            {
+                var clone = player.video.cloneNode(true);
+                player.container.replaceChild(clone, player.video);
+                player.video = clone;
+            }
+
             /*** DEV TMP COMMENTED OUT ***//***
 
             ***/
@@ -2464,9 +2479,8 @@ var OzPlayer = (function()
             }
 
             //in iOS, trying to play audio at the same time stops the video from playing
-            //so let's assume the same thing for android (ie. mobile webkit generally)
             //while in Windows Phone it generates an error when we try to play the audio
-            if(defs.agent.ios || defs.agent.android || defs.agent.winphone)
+            if(defs.agent.ios || defs.agent.winphone)
             {
                 player.audiodesk = null;
             }
@@ -3446,6 +3460,8 @@ var OzPlayer = (function()
             keys == 'lang.keyboard-help-text'
             ||
             keys == 'lang.skip-link-shortcuts'
+            ||
+            keys == 'lang.controls-legend'
         )
         {
             return;
@@ -4523,17 +4539,17 @@ var OzPlayer = (function()
                 //so that we can show native captions in fullscreen mode
                 if(kind == 'captions' && etc.def(player.video.textTracks))
                 {
-                    //if this is anything except iOS or Android, remove the track entirely
+                    //if this is anything except iOS, remove the track entirely
                     //which fixes a problem in desktop safari 7 whereby the native captions
                     //would show as well as the custom captions, even though we disable them
-                    //but since only iOS7+ (and potentially future android) require the
-                    //native captions anyway, we can just remove them to fix that problem
-                    if(!(defs.agent.ios || defs.agent.android))
+                    //but since only iOS7+ uses the native captions anyway,
+                    //we can just remove them entirely to fix that problem
+                    if(!defs.agent.ios)
                     {
                         etc.remove(track);
                     }
 
-                    //else [if this is iOS or Android]
+                    //else [if this is iOS]
                     else
                     {
                         //save a native textTrack object reference to the dictionary
@@ -5042,16 +5058,16 @@ var OzPlayer = (function()
             lines.push(line);
         });
 
-        //begin compiling an HTML string, using blockquote
-        //for a "captions" kind cue, or a plain div for anything else
-        //specifying the cue id in a "data-cue" attribute
+        //begin compiling an HTML string
+        //specifying the cue kind using a "data-kind" attribute
+        //and specifying the cue id in a "data-cue" attribute
         //and specifying the cue lang in a "lang" attribute
         //nb. we can't just use "id" because the cue id might be
         //purely numeric, but HTML IDs can't start with a number
         //also because we'd get duplication with the transcript
-        var html = '<'
-                    + (cue.kind == 'captions' ? 'blockquote' : 'div')
-                    + ' lang="' + cue.lang
+        var html = '<div'
+                    + ' data-kind="' + cue.kind
+                    + '" lang="' + cue.lang
                     + '" data-cue="' + cue.id
                     + '">';
 
@@ -5077,8 +5093,8 @@ var OzPlayer = (function()
         //join and add the individual lines
         html += lines.join('');
 
-        //finally add the closing tag and return the findal HTML string
-        return html + '</' + (cue.kind == 'captions' ? 'blockquote' : 'div')  + '>';
+        //finally add the closing tag and return the final HTML string
+        return html + '</div>';
     }
 
 
@@ -6126,22 +6142,33 @@ var OzPlayer = (function()
         //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
         //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
         //which then always resulted in the message "Failed to move to controlled element"
+        //nb. we have to add role=form here to fix a nonsensical bug with JAWS, whereby
+        //the Play button wasn't being announced at all when navigating using "f"
+        //and either wasn't announced, or was announced without its toggle state,
+        //when navigating using Tab, and in both cases failed to work when actuated
+        //furthermore the time slider had a similar problem, whereby it wasn't always
+        //being announced when navigated to via Tab or the "f" key, only sometimes
+        //there's nothing in the markup of those controls that suggested a problem,
+        //and the problem has only recently manifested (between 3.1 and 3.2) yet none
+        //of the intermediate changes to the script appeared to have any relationship
+        //and all of the other buttons and controls within the form worked just fine
+        //the only tangible thing was that when moving the controls to a different place
+        //(eg. between the CC and AD buttons) the button and slider then worked fine
+        //so eventually this article gave a clue: https://tink.uk/jaws-ie-the-forms-region-bug/
+        //even though the issue in that article is unrelated, it gave a clue to a potential fix
+        //which, wouldn't you know, turned out to work and solve the problem completely!
+        //after several days of headscratching, that was quite a relief I can tell you :-)
         player.controlform = etc.build('form',
         {
             'class'         : config.classes['controls'],
             'action'        : '#' + player.wrapper.id,
+            'role'          : 'form',
             'onsubmit'        : function(){ return null },
             '#style'        :
             {
                 'width'     : player.wrapper.offsetWidth + 'px'
             },
-            '#dom'          : etc.build('fieldset',
-            {
-                '#dom'      : etc.build('legend',
-                {
-                    '#text' : getLang(player, 'controls-legend')
-                })
-            })
+            '#dom'          : etc.build('fieldset')
         });
 
         //if we're using the audio-only player
@@ -6211,7 +6238,6 @@ var OzPlayer = (function()
         //nb. this isn't necessary for the iphone since it doesn't have the
         //custom controls anyway, but it's not worth the extra condition
         //(it's also not necessary for windows phone, hence the lack of condition!)
-        //** how does this impact on android/chrome in fullscreen mode?
         if((defs.agent.ios || defs.agent.android) && player.mode == 'youtube')
         {
             player.options.controls = 'row';
@@ -7224,11 +7250,11 @@ var OzPlayer = (function()
         }
 
 
-        //changing the volume doesn't work in iOS, Android and Windows Phone, which must
+        //changing the volume doesn't work in iOS and Windows Phone, which must
         //be deliberate so that media objects can't be different from the system volume
         //(in fact its native video controls don't even have a volume control)
         //so there's no point adding the controls since they won't do anything
-        if(!(defs.agent.ios || defs.agent.android || defs.agent.winphone))
+        if(!(defs.agent.ios || defs.agent.winphone))
         {
             //create a span-wrapped mute button inside the controls fieldset
             //with its state according to the default muting, which will be
@@ -14336,6 +14362,18 @@ var OzPlayer = (function()
             return etc.console(config.lang['expander-warning'], 'warn');
         }
 
+        /*** temporary workaround for safari freeze when touching trigger element ***//***
+        if(defs.agent.ios)
+        {
+            var sheet = document.head.appendChild(document.createElement('style')).sheet;
+            sheet.insertRule('.ozplayer-expander summary::-webkit-details-marker { display:none; }');
+            etc.listen(trigger, 'touchstart', function(e)
+            {
+                return null;
+            });
+            return;
+        }
+        ***/
 
         //[else] save player references to the expander and trigger
         player.expander = expander;
@@ -14409,8 +14447,36 @@ var OzPlayer = (function()
         //scripted states, but if we blocked it entirely then native implementations wouldn't work
         //and we can't juse ignore native implementations because we need to enhance them with ARIA
         //* nnb. though is still possible to create that conflict if you mouse click with the enter key held down!
+        //nb. the iOS code worksaround an issue whereby touching the trigger caused Safari to freeze
+        //though it's not at clear why that happens since removing all the custom markup and
+        //events didn't prevent the problem, yet the problem doesn't occur in isolation
+        //but handling the touch events directly does seem to fix the issue most of the time
+        //** however since we're effectively bypassing the native action and toggling it using
+        //** our polyfill, yet the discloure triangle is part of the native implementation,
+        //** this means that the triangle doesn't change when the transcript opens and closes
+        //** also it's possible on the iphone to trigger the native implementation directly
+        //** (seems to be, if you touch right on the edge of the summary not in the middle)
+        //** and if that happens then the transcript closes and can't be opened again
+        //** and occassionally the freeze still happens anyway
         function addCrossModalClick(node, callback)
         {
+            if(defs.agent.ios)
+            {
+                etc.listen(expander, 'touchstart', function(e, thetarget)
+                {
+                    if(!etc.contains(player.transcript, thetarget))
+                    {
+                        return false;
+                    }
+                });
+                etc.listen(trigger, 'touchend', function(e, thetarget)
+                {
+                    callback(e, thetarget);
+                    return null;
+                });
+                return;
+            }
+
             var keydown = false;
 
             etc.listen(node, 'keydown', function(e)
@@ -14427,19 +14493,19 @@ var OzPlayer = (function()
                     }
                 }
             });
-            etc.listen(node, 'keyup', function(e, target)
+            etc.listen(node, 'keyup', function(e, thetarget)
             {
                 if(keydown)
                 {
                     keydown = false;
-                    callback(e, target);
+                    callback(e, thetarget);
                 }
             });
-            etc.listen(node, 'click', function(e, target)
+            etc.listen(node, 'click', function(e, thetarget)
             {
                 if(!keydown)
                 {
-                    callback(e, target);
+                    callback(e, thetarget);
                 }
             });
         }

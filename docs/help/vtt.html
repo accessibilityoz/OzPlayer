@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.2 WebVTT Reference</title>
+    <title>OzPlayer 3.3 WebVTT Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.2 WebVTT Reference</h1>
+        <h1>OzPlayer 3.3 WebVTT Reference</h1>
 
         <p>
             This reference describes WebVTT support in OzPlayer, and shows you
@@ -450,7 +450,7 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
 <figure class="code" id="code-cuemarkup">
     <pre aria-describedby="code-cuemarkup-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;div</b><b> lang=<u>"en"</u></b><b> data-cue=<u>"42"</u></b><b>&gt;</b>
+         class="html"><b>&lt;div</b><b> data-kind=<u>"captions"</u></b><b> lang=<u>"en"</u></b><b> data-cue=<u>"42"</u></b><b>&gt;</b>
     <b>&lt;p</b><b> data-voice=<u>"Alfred Nobel"</u></b><b>&gt;</b>
         <b>&lt;cite</b><b>&gt;</b>Alfred Nobel:<b>&lt;/cite</b><b>&gt;</b>
         <b>&lt;q</b><b>&gt;</b>I shall reinvent my own image.<b>&lt;/q</b><b>&gt;</b>
@@ -478,7 +478,7 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
 <figure class="code" id="code-cuesimplemarkup">
     <pre aria-describedby="code-cuesimplemarkup-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;div</b><b> lang=<u>"en"</u></b><b> data-cue=<u>"42"</u></b><b>&gt;</b>
+         class="html"><b>&lt;div</b><b> data-kind=<u>"captions"</u></b><b> lang=<u>"en"</u></b><b> data-cue=<u>"42"</u></b><b>&gt;</b>
     <b>&lt;p</b><b>&gt;</b>
         <b>&lt;q</b><b>&gt;</b>I shall reinvent my own image.<b>&lt;/q</b><b>&gt;</b>
     <b>&lt;/p</b><b>&gt;</b>
@@ -488,13 +488,15 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
                 <p id="code-cuetransmarkup-description">
                     Transcript-only cues are essentially the same, except that
                     they don't have a <code>&lt;q&gt;</code> element around
-                    the cue text (and usually have no voice information):
+                    the cue text; they also have a different value for the
+                    identifying <code>data-kind</code> attribute, and they
+                    usually have no voice information:
                 </p>
 
 <figure class="code" id="code-cuetransmarkup">
     <pre aria-describedby="code-cuetransmarkup-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;div</b><b> lang=<u>"en"</u></b><b> data-cue=<u>"T-2"</u></b><b>&gt;</b>
+         class="html"><b>&lt;div</b><b> data-kind=<u>"transcript"</u></b><b> lang=<u>"en"</u></b><b> data-cue=<u>"T-2"</u></b><b>&gt;</b>
     <b>&lt;p</b><b>&gt;</b>Text on screen: What is web accessibility and how does it translate to online videos?<b>&lt;/p</b><b>&gt;</b>
 <b>&lt;/div</b><b>&gt;</b></code></pre>
 </figure>
@@ -689,7 +691,7 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
 <figure class="code" id="code-langmarkup">
     <pre aria-describedby="code-langmarkup-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;div lang="tlh" data-cue="1"&gt;</small>
+         class="html"><small>&lt;div data-kind="captions" lang="tlh" data-cue="1"&gt;</small>
 <small>    &lt;p data-voice="T'Kuvma"&gt;</small>
 <small>        &lt;cite&gt;T'Kuvma:&lt;/cite&gt;</small>
 <small>        &lt;q&gt;HeghmoHbogh rl'meH mu'meyvam jatlh jaghma'...&lt;/q&gt;</small>

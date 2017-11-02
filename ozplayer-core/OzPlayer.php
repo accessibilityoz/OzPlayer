@@ -2,7 +2,7 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.2] => player core
+ OzPlayer [3.3] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 class OzPlayer
@@ -335,15 +335,15 @@ class OzPlayer
     //convert the text from a single cue into the HTML for a single transcript entry
     private static function get_cue_html($cue)
     {
-        //begin compiling an HTML string, using blockquote
-        //for a "captions" kind cue, or a plain div for anything else
-        //specifying the cue id in a "data-cue" attribute
+        //begin compiling an HTML string
+        //specifying the cue kind using a "data-kind" attribute
+        //and specifying the cue id in a "data-cue" attribute
         //and specifying the cue lang in a "lang" attribute
         //nb. we can't just use "id" because the cue id might be
         //purely numeric, but HTML IDs can't start with a number
-        $html = '<'
-                . ($cue['kind'] == 'captions' ? 'blockquote' : 'div')
-                . ' lang="' . $cue['lang']
+        $html = '<div'
+                . ' data-kind="' . $cue['kind']
+                . '" lang="' . $cue['lang']
                 . '" data-cue="' . $cue['id']
                 . '">';
 
@@ -391,7 +391,7 @@ class OzPlayer
         }
 
         //finally add the closing tag, and return the HTML string
-        return $html . '</' . ($cue['kind'] == 'captions' ? 'blockquote' : 'div')  . '>';
+        return $html . '</div>';
     }
 
 

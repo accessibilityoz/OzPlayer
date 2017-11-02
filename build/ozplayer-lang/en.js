@@ -1,20 +1,17 @@
 /*******************************************************************************
  Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.2] => interface language
+ OzPlayer [3.3] => interface language
  ------------------------------------------------------------------------------
 *******************************************************************************/
 (function(){var lang={
 //----------------------------------------------------------------------------//
 
 
-    //controls legend
-    "controls-legend"           : "Media Controls"
-
     //button labels and tooltips
     //n.b. the %1 token represents dynamic text:
     //the label attribute defined on the captions language's track element
-    ,"button-playpause-off"     : "Play"
+    "button-playpause-off"      : "Play"
     ,"button-playpause-on"      : "Pause"
     ,"button-mute-off"          : "Mute"
     ,"button-mute-on"           : "Unmute"
