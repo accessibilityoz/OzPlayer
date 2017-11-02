@@ -14362,6 +14362,18 @@ var OzPlayer = (function()
             return etc.console(config.lang['expander-warning'], 'warn');
         }
 
+        /*** temporary workaround for safari freeze when touching trigger element ***//***
+        if(defs.agent.ios)
+        {
+            var sheet = document.head.appendChild(document.createElement('style')).sheet;
+            sheet.insertRule('.ozplayer-expander summary::-webkit-details-marker { display:none; }');
+            etc.listen(trigger, 'touchstart', function(e)
+            {
+                return null;
+            });
+            return;
+        }
+        ***/
 
         //[else] save player references to the expander and trigger
         player.expander = expander;
@@ -14435,8 +14447,36 @@ var OzPlayer = (function()
         //scripted states, but if we blocked it entirely then native implementations wouldn't work
         //and we can't juse ignore native implementations because we need to enhance them with ARIA
         //* nnb. though is still possible to create that conflict if you mouse click with the enter key held down!
+        //nb. the iOS code worksaround an issue whereby touching the trigger caused Safari to freeze
+        //though it's not at clear why that happens since removing all the custom markup and
+        //events didn't prevent the problem, yet the problem doesn't occur in isolation
+        //but handling the touch events directly does seem to fix the issue most of the time
+        //** however since we're effectively bypassing the native action and toggling it using
+        //** our polyfill, yet the discloure triangle is part of the native implementation,
+        //** this means that the triangle doesn't change when the transcript opens and closes
+        //** also it's possible on the iphone to trigger the native implementation directly
+        //** (seems to be, if you touch right on the edge of the summary not in the middle)
+        //** and if that happens then the transcript closes and can't be opened again
+        //** and occassionally the freeze still happens anyway
         function addCrossModalClick(node, callback)
         {
+            if(defs.agent.ios)
+            {
+                etc.listen(expander, 'touchstart', function(e, target)
+                {
+                    if(!etc.contains(player.transcript, target))
+                    {
+                        return false;
+                    }
+                });
+                etc.listen(trigger, 'touchend', function(e, target)
+                {
+                    callback(e, target);
+                    return null;
+                });
+                return;
+            }
+
             var keydown = false;
 
             etc.listen(node, 'keydown', function(e)
