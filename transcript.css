@@ -172,7 +172,7 @@
 
 
 /* transcript => single caption cue */
-.ozplayer-transcript blockquote
+.ozplayer-transcript [data-kind="captions"]
 {
     margin:0 0 0 40px;
     padding:0;
@@ -181,7 +181,7 @@
 
 
 /* transcript => single additional transcript cue */
-.ozplayer-transcript div
+.ozplayer-transcript [data-kind="transcript"]
 {
     margin:0 0 0 12px;
     padding:0;

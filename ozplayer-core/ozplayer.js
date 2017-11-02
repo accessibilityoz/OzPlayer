@@ -5058,16 +5058,16 @@ var OzPlayer = (function()
             lines.push(line);
         });
 
-        //begin compiling an HTML string, using blockquote
-        //for a "captions" kind cue, or a plain div for anything else
-        //specifying the cue id in a "data-cue" attribute
+        //begin compiling an HTML string
+        //specifying the cue kind using a "data-kind" attribute
+        //and specifying the cue id in a "data-cue" attribute
         //and specifying the cue lang in a "lang" attribute
         //nb. we can't just use "id" because the cue id might be
         //purely numeric, but HTML IDs can't start with a number
         //also because we'd get duplication with the transcript
-        var html = '<'
-                    + (cue.kind == 'captions' ? 'blockquote' : 'div')
-                    + ' lang="' + cue.lang
+        var html = '<div'
+                    + ' data-kind="' + cue.kind
+                    + '" lang="' + cue.lang
                     + '" data-cue="' + cue.id
                     + '">';
 
@@ -5093,8 +5093,8 @@ var OzPlayer = (function()
         //join and add the individual lines
         html += lines.join('');
 
-        //finally add the closing tag and return the findal HTML string
-        return html + '</' + (cue.kind == 'captions' ? 'blockquote' : 'div')  + '>';
+        //finally add the closing tag and return the final HTML string
+        return html + '</div>';
     }
 
 
