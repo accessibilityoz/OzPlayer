@@ -341,9 +341,9 @@ class OzPlayer
         //and specifying the cue lang in a "lang" attribute
         //nb. we can't just use "id" because the cue id might be
         //purely numeric, but HTML IDs can't start with a number
-        $html = '<'
-                . ($cue['kind'] == 'captions' ? 'blockquote' : 'div')
-                . ' lang="' . $cue['lang']
+        $html = '<div'
+                . ' data-kind="' . $cue['kind']
+                . '" lang="' . $cue['lang']
                 . '" data-cue="' . $cue['id']
                 . '">';
 
@@ -391,7 +391,7 @@ class OzPlayer
         }
 
         //finally add the closing tag, and return the HTML string
-        return $html . '</' . ($cue['kind'] == 'captions' ? 'blockquote' : 'div')  . '>';
+        return $html . '</div>';
     }
 
 
