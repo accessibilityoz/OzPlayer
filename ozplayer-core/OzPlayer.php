@@ -335,9 +335,9 @@ class OzPlayer
     //convert the text from a single cue into the HTML for a single transcript entry
     private static function get_cue_html($cue)
     {
-        //begin compiling an HTML string, using blockquote
-        //for a "captions" kind cue, or a plain div for anything else
-        //specifying the cue id in a "data-cue" attribute
+        //begin compiling an HTML string
+        //specifying the cue kind using a "data-kind" attribute
+        //and specifying the cue id in a "data-cue" attribute
         //and specifying the cue lang in a "lang" attribute
         //nb. we can't just use "id" because the cue id might be
         //purely numeric, but HTML IDs can't start with a number
