@@ -145,6 +145,9 @@ $variables = array
     'ontrackchange','basevolume','currentvolume',
     'lines','voices','voicealt','voiceclass',
 
+    'formwidth','controlspace',
+    'seekwidth','spacerwidth','volumewidth','volumemax',
+
 
     //nb. this must be defined as a var because it's called using apply()
     'getVideoFallback'
