@@ -54,7 +54,7 @@ $functions = array
     'addPoster','showIndicator','hideIndicator',
     'refreshSeekData',
     'adjustVolume','updateVolume',
-    'loadTracksData',
+    'loadXADTrackData','loadTracksData',
     'displayCaption','addCaptionPadding','displayTranscriptMarkers','deleteTranscriptMarkers',
     'addMediaSlider','addMediaSliderEvent',
     'buildSlider','bindSliderEvents','beforeSlide','doSlide','afterSlide','applySliderValue',
@@ -112,7 +112,8 @@ $variables = array
 
     //OLD LOADING//'fakepaused',
 
-    'enabled','thetarget','agent','screentype','timecue','command',
+    'enabled','thetarget','agent','screentype',
+    'timecue','timecommand','command','xadoffset',
     'rangestatus','autohiding','timer','tracks','index',
     'trackdata','audiodesk','skiplinks',
     'trigger','responsivedata','responsivewidth',

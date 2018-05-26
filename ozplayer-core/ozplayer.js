@@ -1003,6 +1003,57 @@ var OzPlayer = (function()
 
             return false;
         }
+
+
+
+        //*** DEV VERY TMP => stringify an object, and its child objects, arrays and values
+        //but don't stringify DOM nodes or we'll be here all night!
+        //and don't output the value of functions, just their type (unless specified)
+        //and don't include built-in constants as they're seldom relevant (unless specified)
+        ,dump : function(data, keyspace, tabsize, godeep, spreadfunc, addconst, foundobjects, depth)
+        {
+            if(!this.def(keyspace) || keyspace == 'auto') { keyspace = 20; }
+            if(!this.def(tabsize) || tabsize == 'auto') { tabsize = 10; }
+            if(!this.def(godeep) || godeep == 'auto') { godeep = true; }
+            if(!this.def(spreadfunc) || spreadfunc == 'auto') { spreadfunc = false; }
+            if(!this.def(addconst) || addconst == 'auto') { addconst = false; }
+            if(!this.def(foundobjects)) { foundobjects = []; }
+            if(!this.def(depth)) { depth = 0; }
+            var etc = this, str = '';
+            function in_array(subject, value)
+            {
+                var index = -1;
+                etc.each(subject, function(data, i)
+                {
+                    if(value === data)
+                    {
+                        index = i;
+                        return false;
+                    }
+                });
+                return index;
+            }
+            this.each(data, function(v,k)
+            {
+                if(addconst || typeof(k)!=='string' || k.toUpperCase() !== k)
+                {
+                    etc.each((depth * tabsize), function() { str += '\u00a0'; });
+                    if(typeof(k)==='string') { str += '"'+k+'"'; }
+                    else { str += '['+k+']'; }
+                    etc.each((keyspace-(k.toString().length+2)), function() { str += '\u00a0'; });
+                    if(k == 'cues') { str += '[...](' + v.length + ')'; }
+                    else if((v && typeof(v)==='object') && !etc.def(v.nodeType) && (in_array(foundobjects, v) < 0) && godeep)
+                    {
+                        foundobjects.push(v);//to prevent infinite recursion
+                        str += '\n' + etc.dump(v, keyspace, tabsize, godeep, spreadfunc, addconst, foundobjects, (depth + 1));
+                    }
+                    else if(typeof(v)==='function' && !spreadfunc) { str += 'function(){ ... }'; }
+                    else { str += (typeof(v)==='string'?'"':'') + v + (typeof(v)==='string'?'"':''); }
+                    str += '\n';
+                }
+            });
+            return str;
+        }
     },
 
 
@@ -2503,6 +2554,12 @@ var OzPlayer = (function()
             //as well an enabled flag by whether it has a data-default attribute
             //or keep it null if none of the specified audio sources are supported
             //plus a waiting flag to indicate when the audio is waiting for video loading
+            //plus an object of data with xad flags:
+            //a counter we can use to track accumulated time offset
+            //a timer reference for when xad is playing and the video is paused
+            //nb. when using xad we pause the video while the audio keeps playing
+            //which means that the video and audio time will no longer be the same
+            //so we need to account for that total difference when syncing the audio
             else if(player.audiodesk = library.getSupportedType(player.audio))
             {
                 player.audiodesk =
@@ -2510,7 +2567,12 @@ var OzPlayer = (function()
                     type          : player.audiodesk,
                     //basevolume  : library.getBaseVolume(player.audio),
                     enabled       : player.audio.getAttribute('data-default') !== null,
-                    waiting       : false
+                    waiting       : false,
+                    xad           :
+                    {
+                        offset    : 0,
+                        timer     : null
+                    }
                 };
                 if(!(player.audiodesk.src = player.audio.getAttribute('src')))
                 {
@@ -4147,7 +4209,7 @@ var OzPlayer = (function()
                 }
 
                 //*** DEV LOG (delay so our log function has an error reference)
-                //etc.delay(200, function(){
+                etc.delay(200, function(){
 
                 //nullify the player audio reference so we don't keep
                 //trying to play and pause it, or keep having to
@@ -4157,7 +4219,7 @@ var OzPlayer = (function()
                 player.audio = null;
 
                 //*** DEV LOG
-                //});
+                });
             }
         });
 
@@ -4311,7 +4373,8 @@ var OzPlayer = (function()
                 //** so we should probably also silence these events if that happens
                 if(player.audio && !player.audio.paused && player.media.paused)
                 {
-                    player.audio.pause();
+                    //*** DEV VERY TMP COMMENTED OUT
+                    //player.audio.pause();
 
                     //*** DEV TMP
                     //var e = {type:'a-'+e.type}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
@@ -4337,6 +4400,8 @@ var OzPlayer = (function()
     //and updating the audio time to match the video time
     function audioSynchronise(player)
     {
+        //*** DEV EXP add comments to explain xad.offset
+
         //check that audio has sufficiently loaded, else we'll get an error
         //eg. if the audio is slow to load, or the user has no sound output
         //but first check that it still exists just in case it's fired an error
@@ -4377,9 +4442,9 @@ var OzPlayer = (function()
             //** and is that because by the time we've set the time, the video time has changed?
             //** can we do anything about that if so, eg. time the average length of timeupdate
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
-            if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
+            if(Math.abs(player.audio.currentTime - (player.media.currentTime + player.audiodesk.xad.offset)) > config['sync-resolution'])
             {
-                /*** DEV LOG ***//*
+                /*** DEV LOG ***//* */
                 if($this.logs.audio)
                 {
                     audiolog([
@@ -4387,15 +4452,15 @@ var OzPlayer = (function()
                         [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
                         [player.audio.duration, 10],
                         [player.audio.currentTime, 0],
-                        [' =&gt; ' + player.media.currentTime, 0]
+                        [' =&gt; (' + player.media.currentTime.toFixed(2) + ' + ' + player.audiodesk.xad.offset.toFixed(2) + ' = ' + (player.media.currentTime + player.audiodesk.xad.offset).toFixed(2) + ')', 0]
                         ],
                         ['<dfn>','</dfn>']);
-                } */
+                }
 
-                player.audio.currentTime = player.media.currentTime;
+                player.audio.currentTime = player.media.currentTime + player.audiodesk.xad.offset;
             }
 
-            /*** DEV LOG ***//*
+            /*** DEV LOG ***//* */
             else if($this.logs.audio)
             {
                 audiolog([
@@ -4403,10 +4468,10 @@ var OzPlayer = (function()
                     [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
                     [player.audio.duration, 10],
                     [player.audio.currentTime, 0],
-                    [' (' + player.media.currentTime + ')', 0]
+                    [' (' + player.media.currentTime.toFixed(2) + ' + ' + player.audiodesk.xad.offset.toFixed(2) + ' = ' + (player.media.currentTime + player.audiodesk.xad.offset).toFixed(2) + ')', 0]
                     ],
                     ['<dfn>','</dfn>']);
-            } */
+            }
 
             //if the video had to wait a long time to load then it's conceivable
             //that the audio has already ended before this synchronisation occurs
@@ -4428,11 +4493,11 @@ var OzPlayer = (function()
         //define a null tracks object by default
         var tracks = null;
 
-        //if this is the audio-only player and we have no transcript
-        //just return the null object without parsing the tracks
-        //nb. since audio-only doesn't have captions, we won't need
-        //the data unless we have a transcript to display them in
-        if(player.isaudio && !player.transcript)
+        //if this is the audio-only player, and either the kind is xad or
+        //we have no transcript, just return the null object without parsing
+        //nb. the audio-only player doesn't support audio-descriptions and doesn't
+        //have captions, so we'll only need captions data if we have a transcript
+        if(player.isaudio && (kind == 'xad' || !player.transcript))
         {
             return tracks;
         }
@@ -4464,16 +4529,25 @@ var OzPlayer = (function()
         //now iterate through the collection of <track> elements
         //inside the player container, and for each of the specified kind
         //nb. if kind is "captions" it matches the kind attribute, but if kind is
-        //"transcript" it matches the data-kind attribute where kind is "metadata"
+        //"transcript" or "xad" it matches the data-kind attribute where kind is "metadata"
         etc.each(etc.get('track', player.container), function(track, key)
         {
             if
             (
                 (kind == 'captions' && track.getAttribute('kind') == kind)
                 ||
-                (kind == 'transcript'&& track.getAttribute('kind') == 'metadata' && track.getAttribute('data-kind') == kind)
+                ((kind == 'transcript' || kind == 'xad') && track.getAttribute('kind') == 'metadata' && track.getAttribute('data-kind') == kind)
             )
             {
+                //if the kind is "metadata" set an srclang attribute of "en" on the track in case
+                //another srclang has been defined, because xad metadata is always in english
+                //nb. this also means that if multiple xad tracks are defined, only the last one
+                //will be used, which is helpful since you can't have multiple xad metadata
+                if(kind == 'xad')
+                {
+                    track.setAttribute('srclang', 'en');
+                }
+
                 //add a new object to the tracks, indexed by srclang
                 //which we get from the track's "srclang" attribute, or use
                 //the user language if that's undefined, also lowercased
@@ -4499,8 +4573,9 @@ var OzPlayer = (function()
                     cues        : []
                 };
 
+                //if the kind is not xad
                 //add this key to the languages array if it's not already present
-                if(etc.find(languages, key) < 0)
+                if(kind != 'xad' && etc.find(languages, key) < 0)
                 {
                     languages.push(key);
                 }
@@ -4581,7 +4656,7 @@ var OzPlayer = (function()
                     }
                 }
 
-                //else [if the kind is transcript or we don't have
+                //else [if the kind is transcript or xad or we don't have
                 //native track support] we can just remove the track
                 //since even the native captions won't require transcript data
                 else
@@ -4701,6 +4776,9 @@ var OzPlayer = (function()
             //        );
             //}
             //catch(ex){}
+
+            //*** DEV TMP
+            //var cuedevdata = {};
 
             //create an empty cues array for storing processed cues
             //then start an asynchronous processor to iterate through the lines of VTT text
@@ -4825,12 +4903,22 @@ var OzPlayer = (function()
                         cue.startTime = 0.002;
                     }
 
+                    //if the kind is "xad" then define a duration flag with endTime
+                    //along with a flag to denote the play status of this cue
+                    //(see xadTracking function for more details about this)
+                    if(kind == 'xad')
+                    {
+                        cue.duration = cue.endTime;
+                        cue.playstatus = 0;
+                    }
+
                     //then if the end time is less than the start, make them the same
                     //which does of course mean that the cue won't appear (though wouldn't
                     //have done anyway with negative timing) but it normalizes the numbers
                     //so that any mathematical comparison will infer the correct order
                     //nb. this of course also limits the minimum endTime to 0.002
-                    if(cue.endTime < cue.startTime)
+                    //also do that if the kind is "xad" since we're not using endTime
+                    if(cue.endTime < cue.startTime || kind == 'xad')
                     {
                         cue.endTime = cue.startTime;
                     }
@@ -4877,6 +4965,9 @@ var OzPlayer = (function()
 
 
                 //*** DEV TMP
+                //cuedevdata[cue.id] = {startTime:cue.startTime,endTime:cue.endTime,duration:(etc.def(cue.duration)?cue.duration:null),text:cue.text,kind:cue.kind,lang:cue.lang};
+
+                //*** DEV TMP
                 //if(__.console) { console.log('id\t"'+cue.id+'"\n'+ 'startTime\t'+cue.startTime+'\n'+ 'endTime\t'+cue.endTime+'\n'+ 'text\t"'+cue.text+'"\n'+ ''); }
 
                 //*** DEV TMP
@@ -4907,6 +4998,9 @@ var OzPlayer = (function()
                 {
                     return onfail(415);
                 }
+
+                //*** DEV TMP
+                //if(console.table) { console.table(cuedevdata); }
 
                 //else call oncomplete with the finished cues array
                 return oncomplete(cues);
@@ -5348,7 +5442,7 @@ var OzPlayer = (function()
 
 
 
-    /*** DEV LOG ***//*
+    /*** DEV LOG ***//* */
 
     //save references to the logs and define their filter controls
     etc.each($this.logs = { video : etc.get('#videolog'), audio : etc.get('#audiolog') }, function(log, type)
@@ -5827,7 +5921,7 @@ var OzPlayer = (function()
                 });
             });
         }
-    } */
+    }
 
 
 
@@ -6004,7 +6098,8 @@ var OzPlayer = (function()
             descriptions        : null,     //text descriptions (for future use)
             youtube_captions    : null,     //youtube embedded captions
             captions            : null,     //track captions
-            transcript          : null      //track transcript data
+            transcript          : null,     //track transcript data
+            xad                 : null      //track xad metadata
         };
 
         //if this is a youtube video then check the source element for a data-captions attribute
@@ -6053,13 +6148,6 @@ var OzPlayer = (function()
         //    console.log(str);
         //}
 
-        //*** DEV TMP
-        //if(__.console) { console.log(etc.dump(player.tracks)); }
-        //if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
-        //if(__.console) { etc.delay(5000, function() { console.log(etc.dump(player.tracks)); }); }
-        //if(__.console) { etc.delay(9000, function() { console.log(etc.dump(player.tracks)); }); }
-        //etc.get('#info').innerHTML = etc.dump(player.tracks);
-
         //then if we have any captions tracks data, and either they're
         //enabled by default or the transcript container is present
         //nb. if there's transcript data but no captions data, the transcript
@@ -6072,6 +6160,25 @@ var OzPlayer = (function()
             //and show a failure message in the button title and transcript container
             loadTracksData(player, player.tracks.captions.selected.transcript);
         }
+
+
+        //if we have audio descriptions, look for xad track data
+        //then if we have any such data, try to load the data
+        if(player.audiodesk)
+        {
+            if(player.tracks.xad = getTracksData(player, 'xad'))
+            {
+                loadXADTrackData(player);
+            }
+        }
+
+
+        //*** DEV VERY TMP
+        //if(__.console) { console.log(etc.dump(player.tracks)); }
+        if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
+        //if(__.console) { etc.delay(5000, function() { console.log(etc.dump(player.tracks)); }); }
+        //if(__.console) { etc.delay(9000, function() { console.log(etc.dump(player.tracks)); }); }
+        //etc.get('#info').innerHTML = etc.dump(player.tracks);
 
 
         //create an indicator overlay which covers the entire interface
@@ -6127,9 +6234,9 @@ var OzPlayer = (function()
 
 
 
-        /*** DEV LOG ***//*
+        /*** DEV LOG ***//* */
         doVideoLogging(player);
-        if(player.audio) { doAudioLogging(player); } */
+        if(player.audio) { doAudioLogging(player); }
 
 
         //~~ controls ~~//
@@ -6531,11 +6638,11 @@ var OzPlayer = (function()
                             //reset set the waiting flag
                             player.audiodesk.waiting = false;
 
-                            /*** DEV LOG (audio wait) ***//*
+                            /*** DEV LOG (audio wait) ***//* */
                             if($this.logs.audio)
                             {
                                 audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                            } */
+                            }
 
                             //then if the audio descriptions are enabled
                             if(player.audiodesk.enabled)
@@ -7292,8 +7399,8 @@ var OzPlayer = (function()
                                 //and defining its initialisation events and "auto" preload
                                 audioConstruct(player, true);
 
-                                /*** DEV LOG ***//*
-                                if(player.audio) { doAudioLogging(player); } */
+                                /*** DEV LOG ***//* */
+                                if(player.audio) { doAudioLogging(player); }
 
                                 //then if the media is already playing,
                                 //call the play function to play the audio
@@ -8618,15 +8725,17 @@ var OzPlayer = (function()
                 //since the slider only updates a maximum of once per second
                 if(player.controlform.seek.unseeking)
                 {
-                    __.clearTimeout(player.controlform.seek.unseeking);
-                    player.controlform.seek.unseeking = null;
+                    //OLD//__.clearTimeout(player.controlform.seek.unseeking);
+                    //OLD//player.controlform.seek.unseeking = null;
+                    player.controlform.seek.unseeking = nullifyTimer(player.controlform.seek.unseeking);
                 }
                 player.controlform.seek.seeking = true;
                 player.controlform.seek.unseeking = etc.delay(config['ke\y-repeat-delay'], function()
                 {
                     player.controlform.seek.seeking = false;
-                    __.clearTimeout(player.controlform.seek.unseeking);
-                    player.controlform.seek.unseeking = null;
+                    //OLD//__.clearTimeout(player.controlform.seek.unseeking);
+                    //OLD//player.controlform.seek.unseeking = null;
+                    player.controlform.seek.unseeking = nullifyTimer(player.controlform.seek.unseeking);
 
                 });
 
@@ -9479,6 +9588,13 @@ var OzPlayer = (function()
             //because they're also muted, so we can reduce the player's work
             if(player.audio && player.audiodesk.enabled)
             {
+                //*** DEV EXP
+                //if we have extended audio descriptions, track the xad commands to match the current time
+                if(player.tracks.xad)
+                {
+                    xadTracking(player, player.media.currentTime);
+                }
+
                 //however in safari and opera syncing the audio causes momentarily loss of sound
                 //so if we synchronise continually then the descriptions will never be heard
                 //while in firefox continual synchronising causes a jittery aliased sound
@@ -9486,7 +9602,7 @@ var OzPlayer = (function()
                 //each time we sync, and then compare that saved time with the current time
                 //then only synchronise if the modulus of that division is zero and the sync and
                 //lastsync are not the same, which effectively means 1 synchronisation every x seconds
-                //(where x is the config sync-frequency value, which defaults to 10s)
+                //(where x is the config sync-frequency value, which defaults to 9s)
                 //nb. we also bolster this with additional sync calls from the play and seeked events,
                 //and from setMediaTime, and from the events that control the loading indicator,
                 //and from the audio's own loading and buffering events where applicable
@@ -9608,7 +9724,7 @@ var OzPlayer = (function()
                     //if the timer completes, abort loading and playback
                     abortMedia(player);
 
-                    /*** DEV LOG (video timeout) ***//*
+                    /*** DEV LOG (video timeout) ***//* */
                     if($this.logs.video)
                     {
                         videolog([
@@ -9618,14 +9734,14 @@ var OzPlayer = (function()
                             [player.media.currentTime, 0]
                             ],
                             ['<b><b>','</b></b>']);
-                    } */
+                    }
                 });
 
-                /*** DEV LOG (video timeout) ***//*
+                /*** DEV LOG (video timeout) ***//* */
                 if($this.logs.video)
                 {
                     videolog([['TIMEOUT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //but if we get a canplay event then we can reset the timer
                 var timeoutcanplay = etc.listen(player.media, 'canplay', function(e)
@@ -9636,15 +9752,16 @@ var OzPlayer = (function()
                     //then if the timeout is still running, reset it now
                     if(player.timeout)
                     {
-                        __.clearTimeout(player.timeout);
-                        player.timeout = null;
+                        //OLD//__.clearTimeout(player.timeout);
+                        //OLD//player.timeout = null;
+                        player.timeout = nullifyTimer(player.timeout);
                     }
 
-                    /*** DEV LOG (video timeout) ***//*
+                    /*** DEV LOG (video timeout) ***//* */
                     if($this.logs.video)
                     {
                         videolog([['TIMEOUT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
                 });
             });
         }
@@ -9824,11 +9941,11 @@ var OzPlayer = (function()
                 return true;
             }
 
-            /*** DEV LOG (show indicator) ***//*
+            /*** DEV LOG (show indicator) ***//* */
             if($this.logs.video && player.indicator.icontype === null)
             {
                 videolog([[e.type.toUpperCase(), 18],['',26],['SHOW', 0]],['<dfn>','</dfn>']);
-            } */
+            }
 
             //show the indicator while waiting
             showIndicator(player, 'loading');
@@ -9839,11 +9956,11 @@ var OzPlayer = (function()
                 //set the audio waiting flag
                 player.audiodesk.waiting = true;
 
-                /*** DEV LOG (audio wait) ***//*
+                /*** DEV LOG (audio wait) ***//* */
                 if($this.logs.audio)
                 {
                     audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //then if audio descriptions are enabled
                 if(player.audiodesk.enabled)
@@ -9862,11 +9979,11 @@ var OzPlayer = (function()
                 return true;
             }
 
-            /*** DEV LOG (hide indicator) ***//*
+            /*** DEV LOG (hide indicator) ***//* */
             if($this.logs.video && player.indicator.icontype === 'loading')
             {
                 videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-            } */
+            }
 
             //hide the indicator now playback can resume
             hideIndicator(player);
@@ -9877,11 +9994,11 @@ var OzPlayer = (function()
                 //reset the audio waiting flag
                 player.audiodesk.waiting = false;
 
-                /*** DEV LOG (audio wait) ***//*
+                /*** DEV LOG (audio wait) ***//* */
                 if($this.logs.audio)
                 {
                     audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //then if audio descriptions are enabled
                 if(player.audiodesk.enabled)
@@ -9958,11 +10075,11 @@ var OzPlayer = (function()
                 //if the indicator is not showing and the current time is not buffered
                 if(player.indicator.icontype === null && !isTimeBuffered(player.media))
                 {
-                    /*** DEV LOG (show indicator) ***//*
+                    /*** DEV LOG (show indicator) ***//* */
                     if($this.logs.video)
                     {
                         videolog([[e.type.toUpperCase(), 18],['',26],['SHOW', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //show indicator while loading
                     showIndicator(player, 'loading');
@@ -9973,11 +10090,11 @@ var OzPlayer = (function()
                         //set the audio waiting flag
                         player.audiodesk.waiting = true;
 
-                        /*** DEV LOG (audio wait) ***//*
+                        /*** DEV LOG (audio wait) ***//* */
                         if($this.logs.audio)
                         {
                             audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                        } */
+                        }
 
                         //then if audio descriptions are enabled
                         if(player.audiodesk.enabled)
@@ -9991,11 +10108,11 @@ var OzPlayer = (function()
                 //if the indicator is showing and the current time is buffered
                 if(player.indicator.icontype === 'loading' && isTimeBuffered(player.media))
                 {
-                    /*** DEV LOG (hide indicator) ***//*
+                    /*** DEV LOG (hide indicator) ***//* */
                     if($this.logs.video)
                     {
                         videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //hide indicator after loading
                     hideIndicator(player);
@@ -10006,11 +10123,11 @@ var OzPlayer = (function()
                         //reset the audio waiting flag
                         player.audiodesk.waiting = false;
 
-                        /*** DEV LOG (audio wait) ***//*
+                        /*** DEV LOG (audio wait) ***//* */
                         if($this.logs.audio)
                         {
                             audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                        } */
+                        }
 
                         //then if audio descriptions are enabled
                         if(player.audiodesk.enabled)
@@ -10035,11 +10152,11 @@ var OzPlayer = (function()
             //if the indicator is showing
             if(player.indicator.icontype === 'loading')
             {
-                /*** DEV LOG (hide indicator) ***//*
+                /*** DEV LOG (hide indicator) ***//* */
                 if($this.logs.video)
                 {
                     videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //hide indicator while paused
                 hideIndicator(player);
@@ -10050,11 +10167,11 @@ var OzPlayer = (function()
                     //reset the audio waiting flag
                     player.audiodesk.waiting = false;
 
-                    /*** DEV LOG (audio wait) ***//*
+                    /*** DEV LOG (audio wait) ***//* */
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //then if audio descriptions are enabled
                     if(player.audiodesk.enabled)
@@ -10084,11 +10201,11 @@ var OzPlayer = (function()
                     //mute the audio while we're waiting
                     player.audio.muted = true;
 
-                    /*** DEV LOG (audio wait) ***//*
+                    /*** DEV LOG (audio wait) ***//* */
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
                 }
             });
 
@@ -10111,11 +10228,11 @@ var OzPlayer = (function()
                     //reset the audio waitinf flag
                     player.audiodesk.waiting = false;
 
-                    /*** DEV LOG (audio wait) ***//*
+                    /*** DEV LOG (audio wait) ***//* */
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //if the audio is enabled
                     //nb. also check that it still exists just in case it's fired an error in between
@@ -11150,11 +11267,14 @@ var OzPlayer = (function()
                     'hiding'        : null,
                     'hidden'        : null
                 },
+                //***DEV EXP PROBABLY OLD
+                /***
                 primers :
                 {
                     'play'          : null,
                     'pause'         : null
                 },
+                ***/
                 autoshow :
                 {
                     'mousemove'     : null,
@@ -11166,6 +11286,8 @@ var OzPlayer = (function()
             };
         }
 
+        //***DEV EXP PROBABLY OLD
+        /***
         //now define a media play event, to apply the showing state
         //and define the auto-hiding and auto-showing events
         //nb. we don't want to do this until the video actually plays, so that
@@ -11181,6 +11303,23 @@ var OzPlayer = (function()
         player.autohiding.primers.pause = etc.listen(player.media, 'pause', function()
         {
             unprimeAutoHiding(player);
+        });
+        ***/
+
+        //***DEV EXP
+        //now define a media first-play event, to apply the showing state
+        //and define the auto-hiding and auto-showing events
+        //nb. we don't want to do this until the video actually plays, so that
+        //the controls remain visible all the time until it starts playing
+        //nb. we did have a reciprocal pause event to unprime auto-hiding
+        //but that kept getting triggered by xad pause events and meant that
+        //auto-hiding never happens if the commands are closer than the hide timeout
+        //and we don't really need the pause reset anyway, since any user action
+        //that pauses the media is preceded by a manual interaction that shows the controls
+        etc.listen(player.media, 'play', function(e, target, self)
+        {
+            self.silence();
+            primeAutoHiding(player);
         });
     }
 
@@ -11282,8 +11421,9 @@ var OzPlayer = (function()
         {
             if(timer)
             {
-                __.clearTimeout(timer);
-                player.autohiding.timers[key] = null;
+                //OLD//__.clearTimeout(timer);
+                //OLD//player.autohiding.timers[key] = null;
+                player.autohiding.timers[key] = nullifyTimer(timer);
             }
         });
 
@@ -11999,6 +12139,45 @@ var OzPlayer = (function()
     }
 
 
+    //load xad meta-data, which happens during initialisation
+    function loadXADTrackData(player)
+    {
+        //set the xad readyState flag to 2 while we make the request
+        player.tracks.xad.en.readyState = 2;
+
+        //*** DEV TMP
+        //if(__.console) { console.log('loadXADTrackData(readyState='+player.tracks.xad.en.readyState+')'); }
+
+        //load and parse the VTT data specified by the specified track's src
+        //nb. pass null for the cue id prefix and "xad" as the cue kind
+        //also passing the language code which is always "en" for xad data
+        getTrackVTT(
+            player.tracks.xad.en,
+            null,
+            'xad',
+            'en',
+
+        //if that completes successfully we'll get a cues array in return
+        function(cues)
+        {
+            //so save that to the cues array in the xad object
+            player.tracks.xad.en.cues = cues;
+
+            //***DEV VERY TMP
+            if(console.table) { console.table(player.tracks.xad.en.cues); }
+
+            //then set the readyState flag to 4, to say we've done this
+            player.tracks.xad.en.readyState = 4;
+        },
+
+        //or if we failed to load the captions, or the SRC was broken,
+        //or the specified VTT file was empty or invalid
+        function(status)
+        {
+        });
+    }
+
+
     //load captions and transcript data and update the cc button,
     //which happens during initialisation if the captions are enabled by default
     //or there's a transcript, else it happens when the user enables them
@@ -12368,6 +12547,164 @@ var OzPlayer = (function()
 
         //start it straight away
         }).start();
+    }
+
+
+    //*** DEV EXP
+    //track the xad commands to match a specific time
+    function xadTracking(player, time)
+    {
+        /***
+        //...
+        etc.each(player.tracks.xad.en.cues, function(cue, index)
+        {
+            cue.playstatus = time >= cue.startTime ? 2 : 0;
+        });
+
+        //*** DEV VERY TMP
+        if(__.console) { console.log('xadTracking(time=' + time + '; offset='+player.audiodesk.xad.offset+')'); }
+        if(console.table) { console.table(player.tracks.xad.en.cues); }
+
+        //...
+        //if(player.started && !player.media.paused)
+        //{
+        //    audioSynchronise(player);
+        //}
+
+        //...
+        return;
+        ***/
+
+        //don't track unless the media is playing, otherwise manual seeking
+        //while paused would be able to select xad cues that then trigger playback
+        if(!player.started || player.media.paused) { return; }
+
+        //look for a command in the xad cues array that corresponds
+        //with the given time and hasn't been played, or null if there isn't one
+        var timecommand = getXADCommand(player.tracks.xad.en.cues, time);
+
+        //*** DEV VERY TMP
+        if(timecommand !== null)
+        {
+            if(console.table) { console.table([timecommand]); }
+        }
+
+        //then if the timecommand is not null
+        if(timecommand !== null)
+        {
+            //*** DEV VERY TMP
+            console.warn('XAD: Pause (time=' + time + '; offset='+player.audiodesk.xad.offset+')('+getXADOffset(player.tracks.xad.en.cues)+')');
+
+            //pause the video and audio
+            pauseMedia(player);
+
+            //set the playstatus flag for this command
+            //... and that makes it
+            //possible for a cue to be selected again immediately after it starts
+            //so we use the played flag on each cue to prevent that from happening
+            timecommand.playstatus = 2;
+
+            //wait a fraction then restart the audio
+            //*** why do we have to do wait 10ms?
+            etc.delay(10, function() { player.audio.play(); });
+
+            //wait for the cue duration then restart the video and audio
+            //nb. we need to save the timer reference so that we can stop it
+            //if the user manually pauses or seeks during the cue duration
+            //nb. another possible approach was to bind a temporary timeupdate
+            //event to the audio element and use that to synchronise with
+            //however that proved to be a lot less accurate than using a timer
+            player.audiodesk.xad.timer = etc.delay(timecommand.duration * 1000, function()
+            {
+                //clear and nullify this reference
+                player.audiodesk.xad.timer = nullifyTimer(player.audiodesk.xad.timer);
+
+                //*** incremement the xad offset by the length of this timer
+                //player.audiodesk.xad.offset += timecommand.duration;
+                player.audiodesk.xad.offset = getXADOffset(player.tracks.xad.en.cues);
+
+                //resync the audio with the video
+                audioSynchronise(player);
+
+                //restart the video and audio
+                playMedia(player);
+
+                //*** DEV VERY TMP
+                console.warn('XAD: Resume (time=' + time + '; offset='+player.audiodesk.xad.offset+')('+getXADOffset(player.tracks.xad.en.cues)+')');
+
+                //***DEV VERY TMP
+                if(console.table) { console.table(player.tracks.xad.en.cues); }
+            });
+        }
+    }
+
+    //*** DEV EXP
+    //get the xad offset corresponding with the cues that have been played
+    function getXADOffset(cues)
+    {
+        //base offset is zero
+        var xadoffset = 0;
+
+        //iterate through the cues and add each duration to the offset
+        //if the command has been played, until we reach one that hasn't
+        etc.each(cues, function(cue, index)
+        {
+            if(cue.playstatus == 2)
+            {
+                xadoffset += cue.duration;
+                return true;
+            }
+            return false;
+        });
+
+        //return the final offset value
+        return xadoffset;
+    }
+
+    //*** DEV EXP
+    //search a metadata cues array for an xad command matching the current time
+    //and return the cue object, or null if there is no cue for this time
+    function getXADCommand(cues, time)
+    {
+        //assume by default that there is no command for the time
+        var timecommand = null;
+
+        //*** DEV VERY TMP
+        //var devdata = [];
+
+        //then iterate through the cues array and look for one that matches
+        //ie. who's startTime is within (sync-resolution) of the current time
+        //nb. the sync-resolution threshold uses the audio sync resolution
+        //and is slow enough that no two timeupdate events will be further apart
+        etc.each(cues, function(cue, index)
+        {
+            //*** DEV VERY TMP
+            //devdata.push({time:time,startTime:cue.startTime,
+            //    //threshold:('+-'+config['sync-resolution']),
+            //    //matches:(time >= (cue.startTime - config['sync-resolution'])&&time <= (cue.startTime + config['sync-resolution']))?'TRUE':''});
+            //    //matches:(time >= (cue.startTime - config['sync-resolution']))?'TRUE':''});
+            //    matches:(cue.playstatus == 0 && time >= cue.startTime)?'TRUE':''});
+
+            if
+            (
+                cue.playstatus == 0
+                &&
+                //time >= (cue.startTime - config['sync-resolution'])
+                time >= cue.startTime
+                //&&
+                //time <= (cue.startTime + config['sync-resolution'])
+            )
+            {
+                timecommand = cue;
+                return false;
+            }
+        });
+
+        //*** DEV VERY TMP
+        //if(console.table) { console.table(devdata); }
+
+        //then return the timecommand, or null if we didn't find one
+        return timecommand;
     }
 
 

@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer (video)</title>
+    <title>OzPlayer (video<?php if(isset($_GET['video'])) { echo ': ' . $_GET['video']; } ?>)</title>
 
 
 
@@ -16,6 +16,7 @@
 
 
     <!-- *** DEV TEST SCRIPTING *** -->
+    <script type="text/javascript" src="../_dev/console.table.js"></script>
     <script type="text/javascript">
     (function()
     {
@@ -358,25 +359,25 @@
 
 
 
-        /*** DEV LOG (figure reset) ***//*
+        /*** DEV LOG (figure reset) ***//* */
         figure
         {
             display:inline-block !important;
             width:auto !important;
             margin:0 !important;
-        } */
+        }
 
-        /*** DEV LOG (smaller transcript) ***//*
+        /*** DEV LOG (smaller transcript) ***//* */
         .ozplayer-expander
         {
-            width:404px !important;
+            width:484px !important;
         }
         .ozplayer-transcript
         {
-            width:360px !important;
-        } */
+            width:440px !important;
+        }
 
-        /*** DEV LOG (log styles) ***//*
+        /*** DEV LOG (log styles) ***//* */
         .log
         {
             overflow:auto;
@@ -460,9 +461,9 @@
             font:inherit;
             font-weight:bold;
             color:#f00;
-        } */
+        }
 
-        /*** DEV LOG (log filters) ***//*
+        /*** DEV LOG (log filters) ***//* */
         .log + form
         {
             position:absolute;
@@ -483,7 +484,7 @@
         #audiolog.log + form
         {
             top:49%;
-        } */
+        }
 
 
 
@@ -656,17 +657,20 @@
         data-responsive="demo-figure"
         -->
         <!--
-            preload="auto"
+            preload="none"
             width="400" height="225"
             width="240" height="135"
+            width="640" height="360"
         -->
         <video
-            preload="none"
-            width="640" height="360"
+            preload="auto"
+            width="480" height="270"
             controls="controls"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
             poster="./media/posters/BrainSurgerySketch.jpg"
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-counting') : ?>
+            poster="./media/posters/xad-counting.png"
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
             poster="./media/posters/blank-black.jpg"
 <?php elseif(isset($_GET['video'])) : ?>
@@ -760,6 +764,16 @@
 
             <track src="./media/captions/en/BrainSurgerySketch.vtt" kind="captions" srclang="en" default="default" />
             <track src="./media/captions/de/BrainSurgerySketch.vtt" kind="captions" srclang="de" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-counting') : ?>
+
+            <source src="./media/videos/xad-counting.webm" type="video/webm" />
+            <source src="./media/videos/xad-counting.mp4" type="video/mp4" />
+
+            <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/xad-counting.vtt" kind="metadata" data-kind="transcript" srclang="en" />
+
+            <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 
@@ -862,6 +876,11 @@
 
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch-PS.mp3<?php echo('?nocache=' . microtime(true)); ?>" type="audio/mp3" />
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch-PS.ogg<?php echo('?nocache=' . microtime(true)); ?>" type="audio/ogg" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-counting') : ?>
+
+            <source src="./media/descriptions/xad-counting.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/xad-counting" type="audio/ogg" />
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 
@@ -1097,7 +1116,7 @@
 
 
 
-    <!-- *** / DEV LOG *** --><!--
+    <!-- *** / DEV LOG *** --><!-- -->
     <pre id="videolog" class="log" contenteditable="true" spellcheck="false"></pre>
     <pre id="audiolog" class="log" contenteditable="true" spellcheck="false"></pre>
     <script type="text/javascript">
@@ -1124,7 +1143,7 @@
             audiolog.parentNode.removeChild(audiolog);
         }
     })();
-    </script> -->
+    </script>
     <!-- *** DEV LOG *** -->
 
 
