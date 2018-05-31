@@ -450,6 +450,12 @@
             font:inherit;
             color:#7aa;
         }
+        .log mark
+        {
+            font:inherit;
+            background:transparent;
+            color:#66c;
+        }
         .log tt strong,
         .log del strong
         {
@@ -650,10 +656,10 @@
     <div
         id="demo" class="ozplayer"
         data-transcript="demo-transcript"
-        data-controls="row"
+        data-controls="stack"
         >
         <!--
-        data-controls="stack"
+        data-controls="row"
         data-responsive="demo-figure"
         -->
         <!--
@@ -771,7 +777,6 @@
             <source src="./media/videos/xad-counting.mp4" type="video/mp4" />
 
             <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
-            <track src="./media/transcripts/en/xad-counting.vtt" kind="metadata" data-kind="transcript" srclang="en" />
 
             <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
 

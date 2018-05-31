@@ -2554,12 +2554,7 @@ var OzPlayer = (function()
             //as well an enabled flag by whether it has a data-default attribute
             //or keep it null if none of the specified audio sources are supported
             //plus a waiting flag to indicate when the audio is waiting for video loading
-            //plus an object of data with xad flags:
-            //a counter we can use to track accumulated time offset
-            //a timer reference for when xad is playing and the video is paused
-            //nb. when using xad we pause the video while the audio keeps playing
-            //which means that the video and audio time will no longer be the same
-            //so we need to account for that total difference when syncing the audio
+            //plus an object of data with xad flags (see xadTracking for details)
             else if(player.audiodesk = library.getSupportedType(player.audio))
             {
                 player.audiodesk =
@@ -2570,7 +2565,9 @@ var OzPlayer = (function()
                     waiting       : false,
                     xad           :
                     {
-                        offset    : 0,
+                        activecue : null,
+                        lastcue   : null,
+                        playing   : false,
                         timer     : null
                     }
                 };
@@ -3729,12 +3726,17 @@ var OzPlayer = (function()
     //-- private => media functions --//
 
     //play the video and audio if applicable
+    //nb. we don't play audio in regular sync with video if we have xad data
+    //because xad cues are handled differently (see xadTracking for details)
     function playMedia(player)
     {
         player.media.play();
         if(player.audio)
         {
-            player.audio.play();
+            if(!player.tracks.xad)
+            {
+                player.audio.play();
+            }
         }
 
         //*** DEV TMP
@@ -3747,12 +3749,17 @@ var OzPlayer = (function()
     }
 
     //pause the video and audio if applicable
+    //nb. we don't play audio in regular sync with video if we have xad data
+    //because xad cues are handled differently (see xadTracking for details)
     function pauseMedia(player)
     {
         player.media.pause();
         if(player.audio)
         {
-            player.audio.pause();
+            if(!player.tracks.xad)
+            {
+                player.audio.pause();
+            }
         }
 
         //*** DEV TMP
@@ -3786,10 +3793,15 @@ var OzPlayer = (function()
         //then set the currentTime on the media and audio if applicable
         //nb. check the audio readyState in case it's not ready yet
         //since setting currentTime would otherwise throw an error
+        //nb. we don't play audio in regular sync with video if we have xad data
+        //because xad cues are handled differently (see xadTracking for details)
         player.media.setCurrentTime(time);
         if(player.audio && player.audio.readyState >= 2)
         {
-            player.audio.currentTime = time;
+            if(!player.tracks.xad)
+            {
+                player.audio.currentTime = time;
+            }
         }
 
         //if we have enabled audio descriptions, synchronise the audio with the video
@@ -4371,10 +4383,14 @@ var OzPlayer = (function()
                 //nb. we need to check that the audio object is still here
                 //in case a loading error has subsequently nullified it
                 //** so we should probably also silence these events if that happens
+                //nb. we don't play audio in regular sync with video if we have xad data
+                //because xad cues are handled differently (see xadTracking for details)
                 if(player.audio && !player.audio.paused && player.media.paused)
                 {
-                    //*** DEV VERY TMP COMMENTED OUT
-                    //player.audio.pause();
+                    if(!player.tracks.xad)
+                    {
+                        player.audio.pause();
+                    }
 
                     //*** DEV TMP
                     //var e = {type:'a-'+e.type}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
@@ -4400,7 +4416,13 @@ var OzPlayer = (function()
     //and updating the audio time to match the video time
     function audioSynchronise(player)
     {
-        //*** DEV EXP add comments to explain xad.offset
+        //ignore this entirely if we have xad data
+        //nb. we don't play audio in regular sync with video if we have xad data
+        //because xad cues are handled differently (see xadTracking for details)
+        if(player.tracks.xad)
+        {
+            return;
+        }
 
         //check that audio has sufficiently loaded, else we'll get an error
         //eg. if the audio is slow to load, or the user has no sound output
@@ -4442,7 +4464,7 @@ var OzPlayer = (function()
             //** and is that because by the time we've set the time, the video time has changed?
             //** can we do anything about that if so, eg. time the average length of timeupdate
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
-            if(Math.abs(player.audio.currentTime - (player.media.currentTime + player.audiodesk.xad.offset)) > config['sync-resolution'])
+            if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
             {
                 /*** DEV LOG ***//* */
                 if($this.logs.audio)
@@ -4452,12 +4474,12 @@ var OzPlayer = (function()
                         [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
                         [player.audio.duration, 10],
                         [player.audio.currentTime, 0],
-                        [' =&gt; (' + player.media.currentTime.toFixed(2) + ' + ' + player.audiodesk.xad.offset.toFixed(2) + ' = ' + (player.media.currentTime + player.audiodesk.xad.offset).toFixed(2) + ')', 0]
+                        [' =&gt; ' + player.media.currentTime.toFixed(2), 0]
                         ],
                         ['<dfn>','</dfn>']);
                 }
 
-                player.audio.currentTime = player.media.currentTime + player.audiodesk.xad.offset;
+                player.audio.currentTime = player.media.currentTime;
             }
 
             /*** DEV LOG ***//* */
@@ -4468,7 +4490,7 @@ var OzPlayer = (function()
                     [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
                     [player.audio.duration, 10],
                     [player.audio.currentTime, 0],
-                    [' (' + player.media.currentTime.toFixed(2) + ' + ' + player.audiodesk.xad.offset.toFixed(2) + ' = ' + (player.media.currentTime + player.audiodesk.xad.offset).toFixed(2) + ')', 0]
+                    [' (' + player.media.currentTime.toFixed(2) + ')', 0]
                     ],
                     ['<dfn>','</dfn>']);
             }
@@ -4493,8 +4515,9 @@ var OzPlayer = (function()
         //define a null tracks object by default
         var tracks = null;
 
-        //if this is the audio-only player, and either the kind is xad or
-        //we have no transcript, just return the null object without parsing
+        //if this is the audio-only player, and either the kind is xad
+        //or [the kind is captions or transcript and] we have no transcript,
+        //just return the null object without parsing since we don't need the data
         //nb. the audio-only player doesn't support audio-descriptions and doesn't
         //have captions, so we'll only need captions data if we have a transcript
         if(player.isaudio && (kind == 'xad' || !player.transcript))
@@ -4534,12 +4557,22 @@ var OzPlayer = (function()
         {
             if
             (
-                (kind == 'captions' && track.getAttribute('kind') == kind)
+                (
+                    kind == 'captions'
+                    &&
+                    track.getAttribute('kind') == kind
+                )
                 ||
-                ((kind == 'transcript' || kind == 'xad') && track.getAttribute('kind') == 'metadata' && track.getAttribute('data-kind') == kind)
+                (
+                    (kind == 'transcript' || kind == 'xad')
+                    &&
+                    track.getAttribute('kind') == 'metadata'
+                    &&
+                    track.getAttribute('data-kind') == kind
+                )
             )
             {
-                //if the kind is "metadata" set an srclang attribute of "en" on the track in case
+                //if the kind is "xad" set an srclang attribute of "en" on the track in case
                 //another srclang has been defined, because xad metadata is always in english
                 //nb. this also means that if multiple xad tracks are defined, only the last one
                 //will be used, which is helpful since you can't have multiple xad metadata
@@ -4903,21 +4936,13 @@ var OzPlayer = (function()
                         cue.startTime = 0.002;
                     }
 
-                    //if the kind is "xad" then define a duration flag with endTime
-                    //along with a flag to denote the play status of this cue
-                    //(see xadTracking function for more details about this)
-                    if(kind == 'xad')
-                    {
-                        cue.duration = cue.endTime;
-                        cue.playstatus = 0;
-                    }
-
                     //then if the end time is less than the start, make them the same
                     //which does of course mean that the cue won't appear (though wouldn't
                     //have done anyway with negative timing) but it normalizes the numbers
                     //so that any mathematical comparison will infer the correct order
                     //nb. this of course also limits the minimum endTime to 0.002
-                    //also do that if the kind is "xad" since we're not using endTime
+                    //also do this if the kind is xad since we don't use the endTime
+                    //but normalize it for sanity just in case its defined incorrectly
                     if(cue.endTime < cue.startTime || kind == 'xad')
                     {
                         cue.endTime = cue.startTime;
@@ -4947,6 +4972,30 @@ var OzPlayer = (function()
                     {
                         //** should we allow for target attributes which have no quotes, or single quotes?
                         cue.text = cue.text.replace(/target=\"[^\"]+\"/ig, '').replace(/(<a)/ig, '$1 target="_blank"');
+                    }
+
+                    //*** DEV XAD
+                    if(kind == 'xad')
+                    {
+                        //*** temporary parsing assumes perfect format
+                        cue.text.replace(/^audio\(((?:[\d]+[\:\.\,]?){3,4})(?:\s+\-\->\s+)((?:[\d]+[\:\.\,]?){3,4})\);/,
+                        function(all, start, end)
+                        {
+                            //*** we also need to make sure that endAudio is later than startAudio
+                            //*** (and does there have to be a minimum length?)
+                            //*** and that end time is before the very end of the video
+                            //*** (does there have to be a minimum distance before the end?)
+                            cue.startAudio = Math.round(library.getStampTime(start) * 1000) / 1000;
+                            cue.endAudio = Math.round(library.getStampTime(end) * 1000) / 1000;
+                        });
+
+                        //...
+                        //0 = unplayed (future)
+                        //1 = ready to be played
+                        //2 = playing
+                        //3 = just played
+                        //4 = played (past)
+                        cue.playstate = 0;
                     }
                 }
 
@@ -6173,9 +6222,9 @@ var OzPlayer = (function()
         }
 
 
-        //*** DEV VERY TMP
+        //*** DEV TMP
         //if(__.console) { console.log(etc.dump(player.tracks)); }
-        if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
+        //if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
         //if(__.console) { etc.delay(5000, function() { console.log(etc.dump(player.tracks)); }); }
         //if(__.console) { etc.delay(9000, function() { console.log(etc.dump(player.tracks)); }); }
         //etc.get('#info').innerHTML = etc.dump(player.tracks);
@@ -9256,9 +9305,14 @@ var OzPlayer = (function()
             updateControlState(player, 'playpause', 'on');
 
             //then if we have audio and the audio is paused, play that too
+            //nb. we don't play audio in regular sync with video if we have xad data
+            //because xad cues are handled differently (see xadTracking for details)
             if(player.audio && player.audio.paused)
             {
-                player.audio.play();
+                if(!player.tracks.xad)
+                {
+                    player.audio.play();
+                }
             }
         });
 
@@ -9276,9 +9330,14 @@ var OzPlayer = (function()
             updateControlState(player, 'playpause', 'off');
 
             //then if we have audio and the audio isn't paused, pause that too
+            //nb. we don't play audio in regular sync with video if we have xad data
+            //because xad cues are handled differently (see xadTracking for details)
             if(player.audio && !player.audio.paused)
             {
-                player.audio.pause();
+                if(!player.tracks.xad)
+                {
+                    player.audio.pause();
+                }
             }
 
         }, false);
@@ -9588,8 +9647,9 @@ var OzPlayer = (function()
             //because they're also muted, so we can reduce the player's work
             if(player.audio && player.audiodesk.enabled)
             {
-                //*** DEV EXP
-                //if we have extended audio descriptions, track the xad commands to match the current time
+                //if we have xad data then call the xadTracking function
+                //nb. we don't play audio in regular sync with video if we have xad data
+                //because xad cues are handled differently (see xadTracking for details)
                 if(player.tracks.xad)
                 {
                     xadTracking(player, player.media.currentTime);
@@ -9617,10 +9677,13 @@ var OzPlayer = (function()
                 //*** seek forwards in safari from a loaded region to an unloaded region
                 //*** the video's audio continues to sound in the background until seeked
                 //*** so maybe that's related to whatever the fuck is going here?
-                var sync = Math.floor(player.media.currentTime);
-                if(sync % config['sync-frequency'] == 0 && sync != player.audiodesk.lastsync)
+                else
                 {
-                    audioSynchronise(player);
+                    var sync = Math.floor(player.media.currentTime);
+                    if(sync % config['sync-frequency'] == 0 && sync != player.audiodesk.lastsync)
+                    {
+                        audioSynchronise(player);
+                    }
                 }
             }
 
@@ -11267,14 +11330,11 @@ var OzPlayer = (function()
                     'hiding'        : null,
                     'hidden'        : null
                 },
-                //***DEV EXP PROBABLY OLD
-                /***
                 primers :
                 {
                     'play'          : null,
                     'pause'         : null
                 },
-                ***/
                 autoshow :
                 {
                     'mousemove'     : null,
@@ -11286,12 +11346,12 @@ var OzPlayer = (function()
             };
         }
 
-        //***DEV EXP PROBABLY OLD
-        /***
         //now define a media play event, to apply the showing state
         //and define the auto-hiding and auto-showing events
         //nb. we don't want to do this until the video actually plays, so that
         //the controls remain visible all the time until it starts playing
+        //nb. by syncing this with events rather than controls interactions
+        //we ensure that they work via programmatic and native interactions too
         player.autohiding.primers.play = etc.listen(player.media, 'play', function()
         {
             primeAutoHiding(player);
@@ -11303,23 +11363,6 @@ var OzPlayer = (function()
         player.autohiding.primers.pause = etc.listen(player.media, 'pause', function()
         {
             unprimeAutoHiding(player);
-        });
-        ***/
-
-        //***DEV EXP
-        //now define a media first-play event, to apply the showing state
-        //and define the auto-hiding and auto-showing events
-        //nb. we don't want to do this until the video actually plays, so that
-        //the controls remain visible all the time until it starts playing
-        //nb. we did have a reciprocal pause event to unprime auto-hiding
-        //but that kept getting triggered by xad pause events and meant that
-        //auto-hiding never happens if the commands are closer than the hide timeout
-        //and we don't really need the pause reset anyway, since any user action
-        //that pauses the media is preceded by a manual interaction that shows the controls
-        etc.listen(player.media, 'play', function(e, target, self)
-        {
-            self.silence();
-            primeAutoHiding(player);
         });
     }
 
@@ -12163,7 +12206,7 @@ var OzPlayer = (function()
             //so save that to the cues array in the xad object
             player.tracks.xad.en.cues = cues;
 
-            //***DEV VERY TMP
+            //*** DEV VERY TMP
             if(console.table) { console.table(player.tracks.xad.en.cues); }
 
             //then set the readyState flag to 4, to say we've done this
@@ -12174,6 +12217,7 @@ var OzPlayer = (function()
         //or the specified VTT file was empty or invalid
         function(status)
         {
+            //*** DEV XAD TO DO
         });
     }
 
@@ -12550,162 +12594,253 @@ var OzPlayer = (function()
     }
 
 
-    //*** DEV EXP
-    //track the xad commands to match a specific time
+
+    //*** DEV XAD
+    //track xad cues by video time select and play xad audio
+    //nb. this is triggered by timeupdate events, which can be fired by
+    //custom seeking, native seeking, pausing, as well as regular playback
+    //so the conditions within this function need to account for all of that
     function xadTracking(player, time)
     {
-        /***
-        //...
-        etc.each(player.tracks.xad.en.cues, function(cue, index)
-        {
-            cue.playstatus = time >= cue.startTime ? 2 : 0;
-        });
+        //check that the xad metadata has loaded and parsed successfully
+        //and that the audio has sufficiently loaded, else we'll get an error
+        //eg. if the audio is slow to load, or the user has no sound output
+        //but first check that it still exists just in case it's fired an error
+        //and there's a discontinuity between that and audio waiting states
+        if(!(player.audio && player.audio.readyState >= 1 && player.tracks.xad.en.readyState === 4)) { return; }
 
         //*** DEV VERY TMP
-        if(__.console) { console.log('xadTracking(time=' + time + '; offset='+player.audiodesk.xad.offset+')'); }
-        if(console.table) { console.table(player.tracks.xad.en.cues); }
+        console.clear();
+        console.warn('xadTracking(time=' + time + ')\n'
+                 + '\nstarted : ' + player.started
+                 + '\nended   : ' + player.ended
+                 + '\npaused  : ' + player.media.paused
+                 + '\nseeking : ' + player.controlform.seek.seeking
+                 );
 
-        //...
-        //if(player.started && !player.media.paused)
-        //{
-        //    audioSynchronise(player);
-        //}
-
-        //...
-        return;
-        ***/
-
-        //don't track unless the media is playing, otherwise manual seeking
-        //while paused would be able to select xad cues that then trigger playback
-        if(!player.started || player.media.paused) { return; }
-
-        //look for a command in the xad cues array that corresponds
-        //with the given time and hasn't been played, or null if there isn't one
-        var timecommand = getXADCommand(player.tracks.xad.en.cues, time);
-
-        //*** DEV VERY TMP
-        if(timecommand !== null)
+        //if we're currently seeking
+        //nb. the paused condition allows for seeking via the native controls
+        //since they don't update the custom seek slider's seeking flag
+        if(player.controlform.seek.seeking || player.media.paused)
         {
-            if(console.table) { console.table([timecommand]); }
-        }
-
-        //then if the timecommand is not null
-        if(timecommand !== null)
-        {
-            //*** DEV VERY TMP
-            console.warn('XAD: Pause (time=' + time + '; offset='+player.audiodesk.xad.offset+')('+getXADOffset(player.tracks.xad.en.cues)+')');
-
-            //pause the video and audio
-            pauseMedia(player);
-
-            //set the playstatus flag for this command
-            //... and that makes it
-            //possible for a cue to be selected again immediately after it starts
-            //so we use the played flag on each cue to prevent that from happening
-            timecommand.playstatus = 2;
-
-            //wait a fraction then restart the audio
-            //*** why do we have to do wait 10ms?
-            etc.delay(10, function() { player.audio.play(); });
-
-            //wait for the cue duration then restart the video and audio
-            //nb. we need to save the timer reference so that we can stop it
-            //if the user manually pauses or seeks during the cue duration
-            //nb. another possible approach was to bind a temporary timeupdate
-            //event to the audio element and use that to synchronise with
-            //however that proved to be a lot less accurate than using a timer
-            player.audiodesk.xad.timer = etc.delay(timecommand.duration * 1000, function()
+            //if(player.audiodesk.xad.activecue && player.audiodesk.xad.playing)
+            //if an xad cue is currently playing
+            if(player.audiodesk.xad.playing)
             {
-                //clear and nullify this reference
-                player.audiodesk.xad.timer = nullifyTimer(player.audiodesk.xad.timer);
-
-                //*** incremement the xad offset by the length of this timer
-                //player.audiodesk.xad.offset += timecommand.duration;
-                player.audiodesk.xad.offset = getXADOffset(player.tracks.xad.en.cues);
-
-                //resync the audio with the video
-                audioSynchronise(player);
-
-                //restart the video and audio
-                playMedia(player);
+                //stop any playing xad audio and reset xad tracking
+                //setting lastcue to null so it can be selected again
+                xadReset(player, null);
 
                 //*** DEV VERY TMP
-                console.warn('XAD: Resume (time=' + time + '; offset='+player.audiodesk.xad.offset+')('+getXADOffset(player.tracks.xad.en.cues)+')');
+                console.error('SEEKING-RESET\n'
+                    + '\nplaying   = ' + player.audiodesk.xad.playing
+                    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                    + '');
+           }
 
-                //***DEV VERY TMP
-                if(console.table) { console.table(player.tracks.xad.en.cues); }
-            });
-        }
-    }
-
-    //*** DEV EXP
-    //get the xad offset corresponding with the cues that have been played
-    function getXADOffset(cues)
-    {
-        //base offset is zero
-        var xadoffset = 0;
-
-        //iterate through the cues and add each duration to the offset
-        //if the command has been played, until we reach one that hasn't
-        etc.each(cues, function(cue, index)
-        {
-            if(cue.playstatus == 2)
-            {
-                xadoffset += cue.duration;
-                return true;
-            }
-            return false;
-        });
-
-        //return the final offset value
-        return xadoffset;
-    }
-
-    //*** DEV EXP
-    //search a metadata cues array for an xad command matching the current time
-    //and return the cue object, or null if there is no cue for this time
-    function getXADCommand(cues, time)
-    {
-        //assume by default that there is no command for the time
-        var timecommand = null;
-
-        //*** DEV VERY TMP
-        //var devdata = [];
-
-        //then iterate through the cues array and look for one that matches
-        //ie. who's startTime is within (sync-resolution) of the current time
-        //nb. the sync-resolution threshold uses the audio sync resolution
-        //and is slow enough that no two timeupdate events will be further apart
-        etc.each(cues, function(cue, index)
-        {
             //*** DEV VERY TMP
-            //devdata.push({time:time,startTime:cue.startTime,
-            //    //threshold:('+-'+config['sync-resolution']),
-            //    //matches:(time >= (cue.startTime - config['sync-resolution'])&&time <= (cue.startTime + config['sync-resolution']))?'TRUE':''});
-            //    //matches:(time >= (cue.startTime - config['sync-resolution']))?'TRUE':''});
-            //    matches:(cue.playstatus == 0 && time >= cue.startTime)?'TRUE':''});
-
-            if
-            (
-                cue.playstatus == 0
-                &&
-                //time >= (cue.startTime - config['sync-resolution'])
-                time >= cue.startTime
-                //&&
-                //time <= (cue.startTime + config['sync-resolution'])
-            )
+            else
             {
-                timecommand = cue;
-                return false;
+                console.error('SEEKING-IGNORED\n'
+                    + '\nplaying   = ' + player.audiodesk.xad.playing
+                    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                    + '');
             }
-        });
+        }
 
-        //*** DEV VERY TMP
-        //if(console.table) { console.table(devdata); }
+        //if we have no activecue and xad audio isn't currently playing
+        //(ie. we're not currently or just about to start playing xad audio)
+        //proceed to evaluate all xad cues to determine which is the closest
+        if(!player.audiodesk.xad.activecue && !player.audiodesk.xad.playing)
+        {
+            //iterate through the xad cues
+            etc.each(player.tracks.xad.en.cues, function(cue, index)
+            {
+                //if the current time is earlier than this cue time
+                //then the cue is in the future and we can ignore it
+                //setting playstate to 0 to denote that state
+                if(time < cue.startTime)
+                {
+                    cue.playstate = 0;
+                }
 
-        //then return the timecommand, or null if we didn't find one
-        return timecommand;
+                //else if this is the last cue, or [it's an earlier cue and]
+                //the current time is before the start of the next cue
+                //then this is the closest cue to the current video time
+                //however we only proceed to selection if the video has started
+                //and isn't currently paused or seeking, so that cues are only
+                //ever selected for playback while the video is actually playing
+                else if
+                (
+                    (
+                        index == player.tracks.xad.en.cues.length - 1
+                        ||
+                        time < player.tracks.xad.en.cues[index + 1].startTime
+                    )
+                    &&
+                    (
+                        player.started
+                        &&
+                        !player.media.paused
+                        &&
+                        !player.controlform.seek.seeking
+                    )
+                )
+                {
+                    //if the cue does not match the last cue (so that we're not
+                    //selecting a cue that we've only just finished playing)
+                    //and we're within sync-resolution of the start of the cue
+                    //nb. we have to check within sync resolution, otherwise seeking
+                    //to any point in the video and then pressing play would move the
+                    //pointer back to the last unplayed audio description, so we have
+                    //to ensure that we only select a cue if the pointer is close to it
+                    if
+                    (
+                        cue !== player.audiodesk.xad.lastcue
+                        &&
+                        time - cue.startTime < config['sync-resolution']
+                    )
+                    {
+                        //set the playstate to 1 to denote that this is ready to be played
+                        cue.playstate = 1;
+
+                        //copy this cue to the activecue flag
+                        player.audiodesk.xad.activecue = cue;
+                    }
+
+                    //else [if the cue does match the last cue or is not within
+                    //sync-resolution of the start] then set the playstate to 3
+                    //to denote that this is the cue we've just played
+                    else
+                    {
+                        cue.playstate = 3;
+                    }
+                }
+
+                //otherwise set the playstate to 4
+                //to denote that this cue is in the past
+                else
+                {
+                    cue.playstate = 4;
+                }
+            });
+
+            //*** DEV VERY TMP
+            console.error('SELECTING\n'
+                + '\nplaying   = ' + player.audiodesk.xad.playing
+                + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                + '');
+        }
+
+        //if we have an active cue (ie. the video is currently playing,
+        //and we've selected an xad cue which is ready for playback)
+        //and the video playbackrate has not yet been set to zero
+        //nb. ignore this if the playback rate is already zero, because changing the
+        //playback rate may cause an additional timeupdate event to be triggered
+        //which would otherwise cause the start of each cue to be fired twice
+        //this will also cover us just in case any implementation fires additional
+        //timeupdate events from the video even though the playback rate is zero
+        //(eg. some implementation might produce .000001 or something like that,
+        // which is also why we check round(rate) == 1 for extra robustness)
+        if(player.audiodesk.xad.activecue && Math.round(player.media.playbackRate) == 1)
+        {
+            //set the xad playing flag to denote that we're playing a cue
+            player.audiodesk.xad.playing = true;
+
+            //set the cue playstate to 2 to denote that it's being playing
+            player.audiodesk.xad.activecue.playstate = 2;
+
+            //set the video playback rate to zero so it's effectively paused
+            //nb. but we don't actually pause it, so that we don't have to
+            //mess around creating fake states in the pause button to allow
+            //you to pause the whole thing while the video is already paused
+            player.media.playbackRate = 0;
+
+            //set the video time to the cue's start time
+            //nb. this allows for discrepancies between the cue's specified
+            //start time and the current time at which this happens, which will
+            //arise because of the resolution of timeupdate events, ie. there could
+            //be +~250ms between the start time and when the event actually fires
+            player.media.setCurrentTime(player.audiodesk.xad.activecue.startTime);
+
+            /*** DEV LOG ***//* */
+            if($this.logs.video)
+            {
+                videolog([['PLAYBACKRATE', 18],['',26],['' + player.media.playbackRate, 0]],['<mark>','</mark>']);
+            }
+            if($this.logs.audio)
+            {
+                audiolog([['XAD-CUE-START', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
+            }
+
+            //set the audio time to the start audio time specified in the cue
+            player.audio.currentTime = player.audiodesk.xad.activecue.startAudio;
+
+            //then play the audio
+            player.audio.play();
+
+            //start a timer for the length of the cue to resume normal playback
+            //nb. I did try this using audio timeupdate events, but this is much
+            //more accurate given the unpredictable resolution of timeupdate events
+            player.audiodesk.xad.timer = etc.delay((player.audiodesk.xad.activecue.endAudio - player.audiodesk.xad.activecue.startAudio) * 1000, function()
+            {
+                //stop any playing xad audio and reset xad tracking
+                //setting lastcue to this cue so it can't be immediately selected again
+                xadReset(player, player.audiodesk.xad.activecue);
+            });
+
+            //*** DEV VERY TMP
+            console.error('PLAYING\n'
+                + '\nplaying   = ' + player.audiodesk.xad.playing
+                + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                + '');
+        }
+
+        //**** DEV VERY TMP
+        if(console.table) { console.table(player.tracks.xad.en.cues); }
     }
+
+    //*** DEV XAD
+    //stop any playing xad audio and reset xad tracking
+    function xadReset(player, lastcue)
+    {
+        //stop and reset any running xad timer
+        player.audiodesk.xad.timer = nullifyTimer(player.audiodesk.xad.timer);
+
+        //stop audio playback
+        player.audio.pause();
+
+        //reset the video playback rate
+        player.media.playbackRate = 1;
+
+        /*** DEV LOG ***//* */
+        if($this.logs.video)
+        {
+            videolog([['PLAYBACKRATE', 18],['',26],[player.media.playbackRate, 0]],['<mark>','</mark>']);
+        }
+        if($this.logs.audio)
+        {
+            audiolog([['XAD-CUE-STOP', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
+        }
+
+        //set the lastcue flag according to input
+        //nb. whether we reset lastcue depends on whether xad playback
+        //was termindate by the end of the cue (in which case we set it to
+        //the last cue to prevent it being selected again) or by a seeking reset
+        //(in which case we reset it so that the cue can be selected agin)
+        player.audiodesk.xad.lastcue = lastcue;
+
+        //reset the active cue flag
+        player.audiodesk.xad.activecue = null;
+
+        //reset the xad playing flag
+        player.audiodesk.xad.playing = false;
+    }
+
 
 
     //update the captions to match a specific time, either
