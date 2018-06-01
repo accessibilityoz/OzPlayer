@@ -4009,7 +4009,10 @@ var OzPlayer = (function()
         //could fire again before another progress or timeupdate event has fired
         //resulting in a second event with a zero time that triggered the loading
         //indicator, even though we didn't actually need it to display at that point
-        if(media.previousTime === time && time > 0)
+        //nb. we also don't do this if the media playback rate is zero, which caters
+        //for IE11 when playing an xad audio cue, because it continues to fire
+        //timeupdate events even when the rate is zero (see xadTracking for details)
+        if(media.previousTime === time && time > 0 && Math.round(media.playbackRate) == 1)
         {
             return false;
         }
@@ -9999,7 +10002,10 @@ var OzPlayer = (function()
             //ignore this event if the video is not playing, because
             //there's no point showing the indicator for background loading
             //nb. waiting shouldn't fire while paused, but just in case
-            if(player.media.paused)
+            //also don't do this if the media playback rate is zero, which caters
+            //for android when playing an xad audio cue, because the video seek
+            //we do at the start of the cue also triggers a waiting event
+            if(player.media.paused || Math.round(player.media.playbackRate) < 1)
             {
                 return true;
             }
@@ -12741,10 +12747,10 @@ var OzPlayer = (function()
         //nb. ignore this if the playback rate is already zero, because changing the
         //playback rate may cause an additional timeupdate event to be triggered
         //which would otherwise cause the start of each cue to be fired twice
-        //this will also cover us just in case any implementation fires additional
-        //timeupdate events from the video even though the playback rate is zero
-        //(eg. some implementation might produce .000001 or something like that,
-        // which is also why we check round(rate) == 1 for extra robustness)
+        //this also covers us in IE11 which continues to fire timeupdate events
+        //at the same interval (and the same currentTime) while the audio cue happens
+        //nb. we test the rate against round(rate) just in case any implementation
+        //produces a value that's not quite zero when the rate is set to zero
         if(player.audiodesk.xad.activecue && Math.round(player.media.playbackRate) == 1)
         {
             //set the xad playing flag to denote that we're playing a cue
