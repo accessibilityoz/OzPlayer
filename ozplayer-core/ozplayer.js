@@ -4174,7 +4174,7 @@ var OzPlayer = (function()
                 }
 
                 //*** DEV LOG (delay so our log function has an error reference)
-                //etc.delay(200, function(){
+                etc.delay(200, function(){
 
                 //nullify the player audio reference so we don't keep
                 //trying to play and pause it, or keep having to
@@ -4184,7 +4184,7 @@ var OzPlayer = (function()
                 player.audio = null;
 
                 //*** DEV LOG
-                //});
+                });
             }
         });
 
@@ -4425,7 +4425,8 @@ var OzPlayer = (function()
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
             if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
             {
-                /*** DEV LOG ***//*
+                /*** DEV LOG ***//*'<dfn>','</dfn>']);
+                }
                 if($this.logs.audio)
                 {
                     audiolog([
@@ -4435,13 +4436,12 @@ var OzPlayer = (function()
                         [player.audio.currentTime, 0],
                         [' =&gt; ' + player.media.currentTime.toFixed(2), 0]
                         ],
-                        ['<dfn>','</dfn>']);
-                } */
+                        [ */
 
                 player.audio.currentTime = player.media.currentTime;
             }
 
-            /*** DEV LOG ***//*
+            /*** DEV LOG ***//* */
             else if($this.logs.audio)
             {
                 audiolog([
@@ -4452,7 +4452,7 @@ var OzPlayer = (function()
                     [' (' + player.media.currentTime.toFixed(2) + ')', 0]
                     ],
                     ['<dfn>','</dfn>']);
-            } */
+            }
 
             //if the video had to wait a long time to load then it's conceivable
             //that the audio has already ended before this synchronisation occurs
@@ -5468,7 +5468,7 @@ var OzPlayer = (function()
 
 
 
-    /*** DEV LOG ***//*
+    /*** DEV LOG ***//* */
 
     //save references to the logs and define their filter controls
     etc.each($this.logs = { video : etc.get('#videolog'), audio : etc.get('#audiolog') }, function(log, type)
@@ -5974,7 +5974,7 @@ var OzPlayer = (function()
                 });
             });
         }
-    } */
+    }
 
 
 
@@ -6287,9 +6287,9 @@ var OzPlayer = (function()
 
 
 
-        /*** DEV LOG ***//*
+        /*** DEV LOG ***//* */
         doVideoLogging(player);
-        if(player.audio) { doAudioLogging(player); } */
+        if(player.audio) { doAudioLogging(player); }
 
 
         //~~ controls ~~//
@@ -6727,11 +6727,11 @@ var OzPlayer = (function()
                             //reset set the waiting flag
                             player.audiodesk.waiting = false;
 
-                            /*** DEV LOG (audio wait) ***//*
+                            /*** DEV LOG (audio wait) ***//* */
                             if($this.logs.audio)
                             {
                                 audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                            } */
+                            }
 
                             //then if the audio descriptions are enabled
                             if(player.audiodesk.enabled)
@@ -7488,8 +7488,8 @@ var OzPlayer = (function()
                                 //and defining its initialisation events and "auto" preload
                                 audioConstruct(player, true);
 
-                                /*** DEV LOG ***//*
-                                if(player.audio) { doAudioLogging(player); } */
+                                /*** DEV LOG ***//* */
+                                if(player.audio) { doAudioLogging(player); }
 
                                 //then if the media is already playing,
                                 //call the play function to play the audio
@@ -9871,7 +9871,7 @@ var OzPlayer = (function()
                     //if the timer completes, abort loading and playback
                     abortMedia(player);
 
-                    /*** DEV LOG (video timeout) ***//*
+                    /*** DEV LOG (video timeout) ***//* */
                     if($this.logs.video)
                     {
                         videolog([
@@ -9881,14 +9881,14 @@ var OzPlayer = (function()
                             [player.media.currentTime, 0]
                             ],
                             ['<b><b>','</b></b>']);
-                    } */
+                    }
                 });
 
-                /*** DEV LOG (video timeout) ***//*
+                /*** DEV LOG (video timeout) ***//* */
                 if($this.logs.video)
                 {
                     videolog([['TIMEOUT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //but if we get a canplay event then we can reset the timer
                 var timeoutcanplay = etc.listen(player.media, 'canplay', function(e)
@@ -9904,11 +9904,11 @@ var OzPlayer = (function()
                         player.timeout = nullifyTimer(player.timeout);
                     }
 
-                    /*** DEV LOG (video timeout) ***//*
+                    /*** DEV LOG (video timeout) ***//* */
                     if($this.logs.video)
                     {
                         videolog([['TIMEOUT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
                 });
             });
         }
@@ -10091,11 +10091,11 @@ var OzPlayer = (function()
                 return true;
             }
 
-            /*** DEV LOG (show indicator) ***//*
+            /*** DEV LOG (show indicator) ***//* */
             if($this.logs.video && player.indicator.icontype === null)
             {
                 videolog([[e.type.toUpperCase(), 18],['',26],['SHOW', 0]],['<dfn>','</dfn>']);
-            } */
+            }
 
             //show the indicator while waiting
             showIndicator(player, 'loading');
@@ -10106,11 +10106,11 @@ var OzPlayer = (function()
                 //set the audio waiting flag
                 player.audiodesk.waiting = true;
 
-                /*** DEV LOG (audio wait) ***//*
+                /*** DEV LOG (audio wait) ***//* */
                 if($this.logs.audio)
                 {
                     audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //then if audio descriptions are enabled
                 if(player.audiodesk.enabled)
@@ -10129,11 +10129,11 @@ var OzPlayer = (function()
                 return true;
             }
 
-            /*** DEV LOG (hide indicator) ***//*
+            /*** DEV LOG (hide indicator) ***//* */
             if($this.logs.video && player.indicator.icontype === 'loading')
             {
                 videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-            } */
+            }
 
             //hide the indicator now playback can resume
             hideIndicator(player);
@@ -10144,11 +10144,11 @@ var OzPlayer = (function()
                 //reset the audio waiting flag
                 player.audiodesk.waiting = false;
 
-                /*** DEV LOG (audio wait) ***//*
+                /*** DEV LOG (audio wait) ***//* */
                 if($this.logs.audio)
                 {
                     audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //then if audio descriptions are enabled
                 if(player.audiodesk.enabled)
@@ -10167,15 +10167,15 @@ var OzPlayer = (function()
         //we don't get subsequent waiting/canplay when seeking triggers loading
         //however we can monitor other media events to know when to show the loading
         //spinner, by checking whether current time is inside a loaded time range
-        //but we do this for all, not just for flash, because it allows for browsers quirks
-        //such as native implementations that don't fire enough waiting/canplay events (eg. IE9-11)
+        //but we do this for all, not just for flash, because it allows for browser quirks
+        //such as native implementations that don't fire enough waiting/canplay events (eg. IE9-11 and Edge)
         //and for low-bandwidth situations where the video might freeze while loading data
         //even though checking the buffer shows that the time is inside a loaded range
         //and there are two different ways a browser might respond: either continuing to fire
         //timeupdate events with the same currentTime, or not firing timeupdate events while frozen,
         //and this difference in behaviour determines which event we have to use for monitoring:
         //=> progress is used for those that freeze without firing timeupdate (chrome, opera)
-        //=> timeupdate is used for those that keep firing same-time timeupdate (IE, firefox flash)
+        //=> timeupdate is used for those that keep firing same-time timeupdate (IE, Edge, firefox flash)
         //   (and with flash we can't rely on the existence of progress events anyway)
         //=> safari is really weird, jumping in a kind of loop when video freezes, eg. going from
         //   25 to 26 to 27 back to 25, and so on for as long as the freeze state persists
@@ -10212,7 +10212,7 @@ var OzPlayer = (function()
         //but we do need to do it for the ipad since iOS(8) doesn't fire the necessary waiting/canplay events
         if(!((defs.agent.firefox && player.mode == 'native') || defs.agent.android || defs.agent.iphone || defs.agent.winphone))
         {
-            etc.listen(player.media, (defs.agent.ie || defs.agent.firefox || player.mode == 'youtube' ? 'timeupdate' : 'progress'), function(e)
+            etc.listen(player.media, (defs.agent.ie || defs.agent.edge || defs.agent.firefox || player.mode == 'youtube' ? 'timeupdate' : 'progress'), function(e)
             {
                 //ignore this event if the video is not playing, because
                 //there's no point showing the indicator for background loading
@@ -10225,11 +10225,11 @@ var OzPlayer = (function()
                 //if the indicator is not showing and the current time is not buffered
                 if(player.indicator.icontype === null && !isTimeBuffered(player.media))
                 {
-                    /*** DEV LOG (show indicator) ***//*
+                    /*** DEV LOG (show indicator) ***//* */
                     if($this.logs.video)
                     {
                         videolog([[e.type.toUpperCase(), 18],['',26],['SHOW', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //show indicator while loading
                     showIndicator(player, 'loading');
@@ -10240,11 +10240,11 @@ var OzPlayer = (function()
                         //set the audio waiting flag
                         player.audiodesk.waiting = true;
 
-                        /*** DEV LOG (audio wait) ***//*
+                        /*** DEV LOG (audio wait) ***//* */
                         if($this.logs.audio)
                         {
                             audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                        } */
+                        }
 
                         //then if audio descriptions are enabled
                         if(player.audiodesk.enabled)
@@ -10258,11 +10258,11 @@ var OzPlayer = (function()
                 //if the indicator is showing and the current time is buffered
                 if(player.indicator.icontype === 'loading' && isTimeBuffered(player.media))
                 {
-                    /*** DEV LOG (hide indicator) ***//*
+                    /*** DEV LOG (hide indicator) ***//* */
                     if($this.logs.video)
                     {
                         videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //hide indicator after loading
                     hideIndicator(player);
@@ -10273,11 +10273,11 @@ var OzPlayer = (function()
                         //reset the audio waiting flag
                         player.audiodesk.waiting = false;
 
-                        /*** DEV LOG (audio wait) ***//*
+                        /*** DEV LOG (audio wait) ***//* */
                         if($this.logs.audio)
                         {
                             audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                        } */
+                        }
 
                         //then if audio descriptions are enabled
                         if(player.audiodesk.enabled)
@@ -10302,11 +10302,11 @@ var OzPlayer = (function()
             //if the indicator is showing
             if(player.indicator.icontype === 'loading')
             {
-                /*** DEV LOG (hide indicator) ***//*
+                /*** DEV LOG (hide indicator) ***//* */
                 if($this.logs.video)
                 {
                     videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-                } */
+                }
 
                 //hide indicator while paused
                 hideIndicator(player);
@@ -10317,11 +10317,11 @@ var OzPlayer = (function()
                     //reset the audio waiting flag
                     player.audiodesk.waiting = false;
 
-                    /*** DEV LOG (audio wait) ***//*
+                    /*** DEV LOG (audio wait) ***//* */
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //then if audio descriptions are enabled
                     if(player.audiodesk.enabled)
@@ -10351,11 +10351,11 @@ var OzPlayer = (function()
                     //mute the audio while we're waiting
                     player.audio.muted = true;
 
-                    /*** DEV LOG (audio wait) ***//*
+                    /*** DEV LOG (audio wait) ***//* */
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
                 }
             });
 
@@ -10378,11 +10378,11 @@ var OzPlayer = (function()
                     //reset the audio waitinf flag
                     player.audiodesk.waiting = false;
 
-                    /*** DEV LOG (audio wait) ***//*
+                    /*** DEV LOG (audio wait) ***//* */
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
+                    }
 
                     //if the audio is enabled
                     //nb. also check that it still exists just in case it's fired an error in between
@@ -12335,7 +12335,7 @@ var OzPlayer = (function()
             }
 
             //*** DEV LOG (delay so our log function has an error reference)
-            //etc.delay(200, function(){
+            etc.delay(200, function(){
 
             //nullify the player audio reference so we don't keep
             //trying to play and pause it, or keep having to
@@ -12345,7 +12345,7 @@ var OzPlayer = (function()
             player.audio = null;
 
             //*** DEV LOG
-            //});
+            });
         });
     }
 
@@ -12891,7 +12891,7 @@ var OzPlayer = (function()
             //*** that much discrepancy is allowable as it is for regular AD
             //player.media.setCurrentTime(player.audiodesk.xad.activecue.startTime);
 
-            /*** DEV LOG ***//*
+            /*** DEV LOG ***//* */
             if($this.logs.video)
             {
                 videolog([['PLAYBACKRATE', 18],['',26],['' + player.media.playbackRate, 0]],['<mark>','</mark>']);
@@ -12899,7 +12899,7 @@ var OzPlayer = (function()
             if($this.logs.audio)
             {
                 audiolog([['XAD-CUE-START', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
-            } */
+            }
 
             //set the audio time to the start audio time specified in the cue
             player.audio.currentTime = player.audiodesk.xad.activecue.startAudio;
@@ -12947,7 +12947,7 @@ var OzPlayer = (function()
         //reset the video playback rate
         player.media.playbackRate = 1;
 
-        /*** DEV LOG ***//*
+        /*** DEV LOG ***//* */
         if($this.logs.video)
         {
             videolog([['PLAYBACKRATE', 18],['',26],[player.media.playbackRate, 0]],['<mark>','</mark>']);
@@ -12955,7 +12955,7 @@ var OzPlayer = (function()
         if($this.logs.audio)
         {
             audiolog([['XAD-CUE-STOP', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
-        } */
+        }
 
         //set the lastcue flag according to input
         //nb. whether we reset lastcue depends on whether xad playback

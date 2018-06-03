@@ -359,15 +359,15 @@
 
 
 
-        /*** DEV LOG (figure reset) ***//*
+        /*** DEV LOG (figure reset) ***//* */
         figure
         {
             display:inline-block !important;
             width:auto !important;
             margin:0 !important;
-        } */
+        }
 
-        /*** DEV LOG (smaller transcript) ***//*
+        /*** DEV LOG (smaller transcript) ***//* */
         .ozplayer-expander
         {
             width:484px !important;
@@ -375,9 +375,9 @@
         .ozplayer-transcript
         {
             width:440px !important;
-        } */
+        }
 
-        /*** DEV LOG (log styles) ***//*
+        /*** DEV LOG (log styles) ***//* */
         .log
         {
             overflow:auto;
@@ -467,9 +467,9 @@
             font:inherit;
             font-weight:bold;
             color:#f00;
-        } */
+        }
 
-        /*** DEV LOG (log filters) ***//*
+        /*** DEV LOG (log filters) ***//* */
         .log + form
         {
             position:absolute;
@@ -490,7 +490,7 @@
         #audiolog.log + form
         {
             top:49%;
-        } */
+        }
 
 
 
@@ -520,9 +520,9 @@
 
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
-    <link rel="stylesheet" href="./tools/css_compressor.php?codebase=../ozplayer-core/ozplayer.css<?php echo('&amp;nocache=' . microtime(true)); ?>" media="all" type="text/css" />
-    <!--
     <link rel="stylesheet" href="./ozplayer-core/ozplayer.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
+    <!--
+    <link rel="stylesheet" href="./tools/css_compressor.php?codebase=../ozplayer-core/ozplayer.css<?php echo('&amp;nocache=' . microtime(true)); ?>" media="all" type="text/css" />
     -->
     <link rel="stylesheet" href="./ozplayer-skin/highlights-pink.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
 
@@ -664,13 +664,13 @@
         -->
         <!--
             preload="auto"
-            width="240" height="135"
             width="400" height="225"
-            width="480" height="270"
+            width="240" height="135"
+            width="640" height="360"
         -->
         <video
-            width="640" height="360"
             preload="none"
+            width="480" height="270"
             controls="controls"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
@@ -1084,6 +1084,7 @@
         //*** DEV TMP (convert video, audio[, and track] paths to remote files)
         //nb. the src isn't qualified in IE so we have to do that manually
         /***
+        ***/
         function qualify(href)
         {
             var here = document.location.href;var parts = here.replace('//', '/').split('/');var loc = {'protocol' : parts[0],'host' : parts[1]};parts.splice(0, 2);loc.pathname = '/' + parts.join('/');var uri = loc.protocol + '//' + loc.host;if(/^(\.\/)([^\/]?)/.test(href)){href = href.replace(/^(\.\/)([^\/]?)/, '$2');}if(/^([a-z]+)\:\/\//.test(href)){uri = href;}else if(href.substr(0, 1) == '/'){uri += href;}else if(/^((\.\.\/)+)([^\/].*$)/.test(href)){var lastpath = href.match(/^((\.\.\/)+)([^\/].*$)/);lastpath = lastpath[lastpath.length - 1];var references = href.split('../').length - 1;var parts = loc.pathname.split('/');parts = parts.splice(0, parts.length - 1);for(var i=0; i<references; i++){parts = parts.splice(0, parts.length - 1);}var path = '';for(i=0; i<parts.length; i++){if(parts[i] != ''){path += '/' + parts[i];}}path += '/';path += lastpath;uri += path;}else{path = '';parts = loc.pathname.split('/');parts = parts.splice(0, parts.length - 1);for(var i=0; i<parts.length; i++){if(parts[i] != ''){path += '/' + parts[i];}}path += '/';uri += path + href;}return uri;
@@ -1091,7 +1092,7 @@
         function remote(src)
         {
             return qualify(src)
-                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
+                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3|192\.168\.1\.64)/, 'www.brothercake.com')
                     .replace('OzPlayer/media/', 'media/')
                 + '?nocache=' + new Date().getTime()
                 + '';
@@ -1120,7 +1121,6 @@
             //{
             //    tracks[i].src = './media/captions/proxy.php?src=' + remote(tracks[i].src);
             //}
-        ***/
 
 
     })();
@@ -1129,7 +1129,7 @@
 
 
 
-    <!-- *** DEV LOG *** --><!--
+    <!-- *** / DEV LOG *** --><!-- -->
     <pre id="videolog" class="log" contenteditable="true" spellcheck="false"></pre>
     <pre id="audiolog" class="log" contenteditable="true" spellcheck="false"></pre>
     <script type="text/javascript">
@@ -1156,8 +1156,8 @@
             audiolog.parentNode.removeChild(audiolog);
         }
     })();
-    </script> -->
-    <!-- *** / DEV LOG *** -->
+    </script>
+    <!-- *** DEV LOG *** -->
 
 
 
@@ -1298,9 +1298,9 @@
 
     <!-- required player + optional lang + required configuration
          (these should be at the end of the body, and must go in order: core, lang, configuration) -->
-    <script src="./tools/compressor.php?codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
-    <!--
     <script src="./ozplayer-core/ozplayer.js<?php echo('?nocache=' . microtime(true)); ?>" type="text/javascript"></script>
+    <!--
+    <script src="./tools/compressor.php?codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
     <script src="./tools/compressor.php?fork=subs&amp;do-compression=false&amp;codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
     <script src="./tools/compressor.php?fork=free&amp;do-compression=false&amp;codebase=../ozplayer-core/ozplayer.js<?php echo('&amp;nocache=' . microtime(true)); ?>" type="text/javascript"></script>
     <script src="https://ozplayer.global.ssl.fastly.net/3.0/ozplayer-core/ozplayer.free.js" type="text/javascript"></script>
