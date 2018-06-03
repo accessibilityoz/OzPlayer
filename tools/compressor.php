@@ -81,7 +81,7 @@ $functions = array
 
     'getBufferData','isTimeBuffered',
 
-    'doResponsiveEvent'
+    'doResponsiveEvent','xadTracking','xadReset'
 
 );
 

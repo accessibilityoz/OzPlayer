@@ -1003,57 +1003,6 @@ var OzPlayer = (function()
 
             return false;
         }
-
-
-
-        //*** DEV VERY TMP => stringify an object, and its child objects, arrays and values
-        //but don't stringify DOM nodes or we'll be here all night!
-        //and don't output the value of functions, just their type (unless specified)
-        //and don't include built-in constants as they're seldom relevant (unless specified)
-        ,dump : function(data, keyspace, tabsize, godeep, spreadfunc, addconst, foundobjects, depth)
-        {
-            if(!this.def(keyspace) || keyspace == 'auto') { keyspace = 20; }
-            if(!this.def(tabsize) || tabsize == 'auto') { tabsize = 10; }
-            if(!this.def(godeep) || godeep == 'auto') { godeep = true; }
-            if(!this.def(spreadfunc) || spreadfunc == 'auto') { spreadfunc = false; }
-            if(!this.def(addconst) || addconst == 'auto') { addconst = false; }
-            if(!this.def(foundobjects)) { foundobjects = []; }
-            if(!this.def(depth)) { depth = 0; }
-            var etc = this, str = '';
-            function in_array(subject, value)
-            {
-                var index = -1;
-                etc.each(subject, function(data, i)
-                {
-                    if(value === data)
-                    {
-                        index = i;
-                        return false;
-                    }
-                });
-                return index;
-            }
-            this.each(data, function(v,k)
-            {
-                if(addconst || typeof(k)!=='string' || k.toUpperCase() !== k)
-                {
-                    etc.each((depth * tabsize), function() { str += '\u00a0'; });
-                    if(typeof(k)==='string') { str += '"'+k+'"'; }
-                    else { str += '['+k+']'; }
-                    etc.each((keyspace-(k.toString().length+2)), function() { str += '\u00a0'; });
-                    if(k == 'cues') { str += '[...](' + v.length + ')'; }
-                    else if((v && typeof(v)==='object') && !etc.def(v.nodeType) && (in_array(foundobjects, v) < 0) && godeep)
-                    {
-                        foundobjects.push(v);//to prevent infinite recursion
-                        str += '\n' + etc.dump(v, keyspace, tabsize, godeep, spreadfunc, addconst, foundobjects, (depth + 1));
-                    }
-                    else if(typeof(v)==='function' && !spreadfunc) { str += 'function(){ ... }'; }
-                    else { str += (typeof(v)==='string'?'"':'') + v + (typeof(v)==='string'?'"':''); }
-                    str += '\n';
-                }
-            });
-            return str;
-        }
     },
 
 
@@ -1496,8 +1445,8 @@ var OzPlayer = (function()
             'button-ad-error'         : "Audio Descriptions are not available",
             "button-fullscreen-off"   : "Fullscreen",
             "button-fullscreen-on"    : "Exit Fullscreen",
-            "button-rewind-off"       : "Back %2 seconds",
-            "button-forward-off"      : "Forward %2 seconds",
+            "button-rewind-off"       : "Back\ %2 seconds",
+            "button-forward-off"      : "Forward\ %2 seconds",
 
             //controls => fallback text (eg. for styled no-images)
             "text-playpause-off"      : "Play",
@@ -1540,7 +1489,7 @@ var OzPlayer = (function()
 
             //transcript language, loading and error messages
             "transcript-off"          : "Transcript is off",
-            "transcript-lang"         : "Transcript = %1",
+            "transcript-lang"         : "Transcript\ =\ %1",
             'transcript-loading'      : 'Loading transcript ...',
             "transcript-nolang"       : "%1 failed to load.",
             'transcript-error'        : 'Transcript is not available.',
@@ -1589,7 +1538,7 @@ var OzPlayer = (function()
             'constructor-bad-id'      : 'There is no p\layer with the ID "%id".',
             'constructor-dupe-id'     : 'A p\layer with the ID "%id" has already been initialised.',
             'constructor-bad-class'   : 'The p\layer with the ID "%id" does not have the class "%name".',
-            'constructor-no-media'    : 'The p\layer with the ID "%id" has no media element.',
+            'constructor-no-media'    : 'The p\layer with the ID "%id" has no m\edia element.',
             'constructor-not-new'     : 'The OzPlayer.Video function must be called with the "new" keyword.',
             'constructor-not-new-audio': 'The OzPlayer.Audio function must be called with the "new" keyword.',
 
@@ -1602,7 +1551,7 @@ var OzPlayer = (function()
             'option-bad-callback'     : 'The "%option" callback for #%id must be\ %type.',
             'option-bad-controls'     : 'The "data-controls" attribute for #%id must be "row" or "stack".',
             'option-bad-transcript'   : 'The "data-transcript" element for #%id does not exist.',
-            'option-wrong-transcript' : 'The "data-transcript" element for #%id must be outside the player.',
+            'option-wrong-transcript' : 'The "data-transcript" element for #%id must be outside the p\layer.',
             'option-busy-transcript'  : 'The "data-transcript" element for #%id is already being used by #%other.',
 
             //transcript errors and warnings
@@ -1624,7 +1573,7 @@ var OzPlayer = (function()
             'vtt-load-failure'        : 'VTT file failed to load\ [%status].\n<%src>',
             'vtt-no-usable-cues'      : 'VTT file contained no usable cues.\n<%src>',
             'vtt-invalid-cue'         : 'Invalid cue in VTT file.\n<%src>',
-            'vtt-invalid-xad'         : 'Invalid XAD command in VTT file.\n<%src>'
+            'vtt-invalid-xad'         : 'Invalid XAD c\ommand in VTT file.\n<%src>'
         }
 
     },
@@ -2449,7 +2398,9 @@ var OzPlayer = (function()
                 player.video = clone;
             }
 
-            /*** DEV VERY TMP COMMENTED OUT ***//***
+            /*** DEV TMP COMMENTED OUT ***//***
+
+            ***/
 
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
@@ -2471,8 +2422,6 @@ var OzPlayer = (function()
                     return null;
                 }
             });
-
-            ***/
 
             //nb. we also do the same thing to block any native dblclick action
             //which is implemented later in the script (see "global mouse shortcuts")
@@ -4225,7 +4174,7 @@ var OzPlayer = (function()
                 }
 
                 //*** DEV LOG (delay so our log function has an error reference)
-                etc.delay(200, function(){
+                //etc.delay(200, function(){
 
                 //nullify the player audio reference so we don't keep
                 //trying to play and pause it, or keep having to
@@ -4235,7 +4184,7 @@ var OzPlayer = (function()
                 player.audio = null;
 
                 //*** DEV LOG
-                });
+                //});
             }
         });
 
@@ -4476,7 +4425,7 @@ var OzPlayer = (function()
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
             if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
             {
-                /*** DEV LOG ***//* */
+                /*** DEV LOG ***//*
                 if($this.logs.audio)
                 {
                     audiolog([
@@ -4487,12 +4436,12 @@ var OzPlayer = (function()
                         [' =&gt; ' + player.media.currentTime.toFixed(2), 0]
                         ],
                         ['<dfn>','</dfn>']);
-                }
+                } */
 
                 player.audio.currentTime = player.media.currentTime;
             }
 
-            /*** DEV LOG ***//* */
+            /*** DEV LOG ***//*
             else if($this.logs.audio)
             {
                 audiolog([
@@ -4503,7 +4452,7 @@ var OzPlayer = (function()
                     [' (' + player.media.currentTime.toFixed(2) + ')', 0]
                     ],
                     ['<dfn>','</dfn>']);
-            }
+            } */
 
             //if the video had to wait a long time to load then it's conceivable
             //that the audio has already ended before this synchronisation occurs
@@ -5519,7 +5468,7 @@ var OzPlayer = (function()
 
 
 
-    /*** DEV LOG ***//* */
+    /*** DEV LOG ***//*
 
     //save references to the logs and define their filter controls
     etc.each($this.logs = { video : etc.get('#videolog'), audio : etc.get('#audiolog') }, function(log, type)
@@ -6025,7 +5974,7 @@ var OzPlayer = (function()
                 });
             });
         }
-    }
+    } */
 
 
 
@@ -6338,9 +6287,9 @@ var OzPlayer = (function()
 
 
 
-        /*** DEV LOG ***//* */
+        /*** DEV LOG ***//*
         doVideoLogging(player);
-        if(player.audio) { doAudioLogging(player); }
+        if(player.audio) { doAudioLogging(player); } */
 
 
         //~~ controls ~~//
@@ -6531,12 +6480,12 @@ var OzPlayer = (function()
                         //setting lastcue to null so it can be selected again
                         xadReset(player, null);
 
-                        //*** DEV VERY TMP
-                        console.error('REWIND-RESET\n'
-                            + '\nplaying   = ' + player.audiodesk.xad.playing
-                            + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                            + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                            + '');
+                        //*** DEV TMP
+                        //console.error('REWIND-RESET\n'
+                        //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                        //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                        //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                        //    + '');
                     }
 
                     //*** DEV TMP
@@ -6601,12 +6550,12 @@ var OzPlayer = (function()
                         //setting lastcue to null so it can be selected again
                         xadReset(player, null);
 
-                        //*** DEV VERY TMP
-                        console.error('FORWARD-RESET\n'
-                            + '\nplaying   = ' + player.audiodesk.xad.playing
-                            + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                            + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                            + '');
+                        //*** DEV TMP
+                        //console.error('FORWARD-RESET\n'
+                        //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                        //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                        //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                        //    + '');
                     }
 
                     //*** DEV TMP
@@ -6778,11 +6727,11 @@ var OzPlayer = (function()
                             //reset set the waiting flag
                             player.audiodesk.waiting = false;
 
-                            /*** DEV LOG (audio wait) ***//* */
+                            /*** DEV LOG (audio wait) ***//*
                             if($this.logs.audio)
                             {
                                 audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                            }
+                            } */
 
                             //then if the audio descriptions are enabled
                             if(player.audiodesk.enabled)
@@ -7539,8 +7488,8 @@ var OzPlayer = (function()
                                 //and defining its initialisation events and "auto" preload
                                 audioConstruct(player, true);
 
-                                /*** DEV LOG ***//* */
-                                if(player.audio) { doAudioLogging(player); }
+                                /*** DEV LOG ***//*
+                                if(player.audio) { doAudioLogging(player); } */
 
                                 //then if the media is already playing,
                                 //call the play function to play the audio
@@ -7574,12 +7523,12 @@ var OzPlayer = (function()
                                     //setting lastcue to null so it can be selected again
                                     xadReset(player, null);
 
-                                    //*** DEV VERY TMP
-                                    console.error('AD-OFF-RESET\n'
-                                        + '\nplaying   = ' + player.audiodesk.xad.playing
-                                        + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                                        + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                                        + '');
+                                    //*** DEV TMP
+                                    //console.error('AD-OFF-RESET\n'
+                                    //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                                    //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                                    //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                                    //    + '');
                                 }
                             }
 
@@ -9467,12 +9416,12 @@ var OzPlayer = (function()
                 //setting lastcue to null so it can be selected again
                 xadReset(player, null);
 
-                //*** DEV VERY TMP
-                console.error('PAUSE-RESET\n'
-                    + '\nplaying   = ' + player.audiodesk.xad.playing
-                    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                    + '');
+                //*** DEV TMP
+                //console.error('PAUSE-RESET\n'
+                //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                //    + '');
             }
 
         }, false);
@@ -9922,7 +9871,7 @@ var OzPlayer = (function()
                     //if the timer completes, abort loading and playback
                     abortMedia(player);
 
-                    /*** DEV LOG (video timeout) ***//* */
+                    /*** DEV LOG (video timeout) ***//*
                     if($this.logs.video)
                     {
                         videolog([
@@ -9932,14 +9881,14 @@ var OzPlayer = (function()
                             [player.media.currentTime, 0]
                             ],
                             ['<b><b>','</b></b>']);
-                    }
+                    } */
                 });
 
-                /*** DEV LOG (video timeout) ***//* */
+                /*** DEV LOG (video timeout) ***//*
                 if($this.logs.video)
                 {
                     videolog([['TIMEOUT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                }
+                } */
 
                 //but if we get a canplay event then we can reset the timer
                 var timeoutcanplay = etc.listen(player.media, 'canplay', function(e)
@@ -9955,11 +9904,11 @@ var OzPlayer = (function()
                         player.timeout = nullifyTimer(player.timeout);
                     }
 
-                    /*** DEV LOG (video timeout) ***//* */
+                    /*** DEV LOG (video timeout) ***//*
                     if($this.logs.video)
                     {
                         videolog([['TIMEOUT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    }
+                    } */
                 });
             });
         }
@@ -10142,11 +10091,11 @@ var OzPlayer = (function()
                 return true;
             }
 
-            /*** DEV LOG (show indicator) ***//* */
+            /*** DEV LOG (show indicator) ***//*
             if($this.logs.video && player.indicator.icontype === null)
             {
                 videolog([[e.type.toUpperCase(), 18],['',26],['SHOW', 0]],['<dfn>','</dfn>']);
-            }
+            } */
 
             //show the indicator while waiting
             showIndicator(player, 'loading');
@@ -10157,11 +10106,11 @@ var OzPlayer = (function()
                 //set the audio waiting flag
                 player.audiodesk.waiting = true;
 
-                /*** DEV LOG (audio wait) ***//* */
+                /*** DEV LOG (audio wait) ***//*
                 if($this.logs.audio)
                 {
                     audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                }
+                } */
 
                 //then if audio descriptions are enabled
                 if(player.audiodesk.enabled)
@@ -10180,11 +10129,11 @@ var OzPlayer = (function()
                 return true;
             }
 
-            /*** DEV LOG (hide indicator) ***//* */
+            /*** DEV LOG (hide indicator) ***//*
             if($this.logs.video && player.indicator.icontype === 'loading')
             {
                 videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-            }
+            } */
 
             //hide the indicator now playback can resume
             hideIndicator(player);
@@ -10195,11 +10144,11 @@ var OzPlayer = (function()
                 //reset the audio waiting flag
                 player.audiodesk.waiting = false;
 
-                /*** DEV LOG (audio wait) ***//* */
+                /*** DEV LOG (audio wait) ***//*
                 if($this.logs.audio)
                 {
                     audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                }
+                } */
 
                 //then if audio descriptions are enabled
                 if(player.audiodesk.enabled)
@@ -10276,11 +10225,11 @@ var OzPlayer = (function()
                 //if the indicator is not showing and the current time is not buffered
                 if(player.indicator.icontype === null && !isTimeBuffered(player.media))
                 {
-                    /*** DEV LOG (show indicator) ***//* */
+                    /*** DEV LOG (show indicator) ***//*
                     if($this.logs.video)
                     {
                         videolog([[e.type.toUpperCase(), 18],['',26],['SHOW', 0]],['<dfn>','</dfn>']);
-                    }
+                    } */
 
                     //show indicator while loading
                     showIndicator(player, 'loading');
@@ -10291,11 +10240,11 @@ var OzPlayer = (function()
                         //set the audio waiting flag
                         player.audiodesk.waiting = true;
 
-                        /*** DEV LOG (audio wait) ***//* */
+                        /*** DEV LOG (audio wait) ***//*
                         if($this.logs.audio)
                         {
                             audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                        }
+                        } */
 
                         //then if audio descriptions are enabled
                         if(player.audiodesk.enabled)
@@ -10309,11 +10258,11 @@ var OzPlayer = (function()
                 //if the indicator is showing and the current time is buffered
                 if(player.indicator.icontype === 'loading' && isTimeBuffered(player.media))
                 {
-                    /*** DEV LOG (hide indicator) ***//* */
+                    /*** DEV LOG (hide indicator) ***//*
                     if($this.logs.video)
                     {
                         videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-                    }
+                    } */
 
                     //hide indicator after loading
                     hideIndicator(player);
@@ -10324,11 +10273,11 @@ var OzPlayer = (function()
                         //reset the audio waiting flag
                         player.audiodesk.waiting = false;
 
-                        /*** DEV LOG (audio wait) ***//* */
+                        /*** DEV LOG (audio wait) ***//*
                         if($this.logs.audio)
                         {
                             audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                        }
+                        } */
 
                         //then if audio descriptions are enabled
                         if(player.audiodesk.enabled)
@@ -10353,11 +10302,11 @@ var OzPlayer = (function()
             //if the indicator is showing
             if(player.indicator.icontype === 'loading')
             {
-                /*** DEV LOG (hide indicator) ***//* */
+                /*** DEV LOG (hide indicator) ***//*
                 if($this.logs.video)
                 {
                     videolog([[e.type.toUpperCase(), 18],['',26],['HIDE', 0]],['<dfn>','</dfn>']);
-                }
+                } */
 
                 //hide indicator while paused
                 hideIndicator(player);
@@ -10368,11 +10317,11 @@ var OzPlayer = (function()
                     //reset the audio waiting flag
                     player.audiodesk.waiting = false;
 
-                    /*** DEV LOG (audio wait) ***//* */
+                    /*** DEV LOG (audio wait) ***//*
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    }
+                    } */
 
                     //then if audio descriptions are enabled
                     if(player.audiodesk.enabled)
@@ -10402,11 +10351,11 @@ var OzPlayer = (function()
                     //mute the audio while we're waiting
                     player.audio.muted = true;
 
-                    /*** DEV LOG (audio wait) ***//* */
+                    /*** DEV LOG (audio wait) ***//*
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                    }
+                    } */
                 }
             });
 
@@ -10429,11 +10378,11 @@ var OzPlayer = (function()
                     //reset the audio waitinf flag
                     player.audiodesk.waiting = false;
 
-                    /*** DEV LOG (audio wait) ***//* */
+                    /*** DEV LOG (audio wait) ***//*
                     if($this.logs.audio)
                     {
                         audiolog([['AUDIO-WAIT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    }
+                    } */
 
                     //if the audio is enabled
                     //nb. also check that it still exists just in case it's fired an error in between
@@ -12344,8 +12293,8 @@ var OzPlayer = (function()
             //so save that to the cues array in the xad object
             player.tracks.xad.en.cues = cues;
 
-            //*** DEV VERY TMP
-            if(console.table) { console.table(player.tracks.xad.en.cues); }
+            //*** DEV TMP
+            //if(console.table) { console.table(player.tracks.xad.en.cues); }
 
             //then set the readyState flag to 4, to say we've done this
             player.tracks.xad.en.readyState = 4;
@@ -12386,7 +12335,7 @@ var OzPlayer = (function()
             }
 
             //*** DEV LOG (delay so our log function has an error reference)
-            etc.delay(200, function(){
+            //etc.delay(200, function(){
 
             //nullify the player audio reference so we don't keep
             //trying to play and pause it, or keep having to
@@ -12396,7 +12345,7 @@ var OzPlayer = (function()
             player.audio = null;
 
             //*** DEV LOG
-            });
+            //});
         });
     }
 
@@ -12783,14 +12732,14 @@ var OzPlayer = (function()
         //check that the audio exists and that the xad metadata has loaded and parsed
         if(!(player.audio && player.tracks.xad.en.readyState === 4)) { return; }
 
-        //*** DEV VERY TMP
-        console.clear();
-        console.warn('xadTracking(time=' + time + ')\n'
-                 + '\nstarted : ' + player.started
-                 + '\nended   : ' + player.ended
-                 + '\npaused  : ' + player.media.paused
-                 + '\nseeking : ' + player.controlform.seek.seeking
-                 );
+        //*** DEV TMP
+        //console.clear();
+        //console.warn('xadTracking(time=' + time + ')\n'
+        //         + '\nstarted : ' + player.started
+        //         + '\nended   : ' + player.ended
+        //         + '\npaused  : ' + player.media.paused
+        //         + '\nseeking : ' + player.controlform.seek.seeking
+        //         );
 
         //if we're currently seeking or paused
         //nb. the paused condition also handles seeking via the native controls
@@ -12804,23 +12753,23 @@ var OzPlayer = (function()
                 //setting lastcue to null so it can be selected again
                 xadReset(player, null);
 
-                //*** DEV VERY TMP
-                console.error('SEEKING-RESET\n'
-                    + '\nplaying   = ' + player.audiodesk.xad.playing
-                    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                    + '');
+                //*** DEV TMP
+                //console.error('SEEKING-RESET\n'
+                //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                //    + '');
            }
 
-            //*** DEV VERY TMP
-            else
-            {
-                console.error('SEEKING-IGNORED\n'
-                    + '\nplaying   = ' + player.audiodesk.xad.playing
-                    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                    + '');
-            }
+            //*** DEV TMP
+            //else
+            //{
+            //    console.error('SEEKING-IGNORED\n'
+            //        + '\nplaying   = ' + player.audiodesk.xad.playing
+            //        + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+            //        + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+            //        + '');
+            //}
         }
 
         //if we have no activecue and xad audio isn't currently playing
@@ -12900,12 +12849,12 @@ var OzPlayer = (function()
                 }
             });
 
-            //*** DEV VERY TMP
-            console.error('SELECTING\n'
-                + '\nplaying   = ' + player.audiodesk.xad.playing
-                + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                + '');
+            //*** DEV TMP
+            //console.error('SELECTING\n'
+            //    + '\nplaying   = ' + player.audiodesk.xad.playing
+            //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+            //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+            //    + '');
         }
 
         //if we have an active cue (ie. the video is currently playing,
@@ -12942,7 +12891,7 @@ var OzPlayer = (function()
             //*** that much discrepancy is allowable as it is for regular AD
             //player.media.setCurrentTime(player.audiodesk.xad.activecue.startTime);
 
-            /*** DEV LOG ***//* */
+            /*** DEV LOG ***//*
             if($this.logs.video)
             {
                 videolog([['PLAYBACKRATE', 18],['',26],['' + player.media.playbackRate, 0]],['<mark>','</mark>']);
@@ -12950,7 +12899,7 @@ var OzPlayer = (function()
             if($this.logs.audio)
             {
                 audiolog([['XAD-CUE-START', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
-            }
+            } */
 
             //set the audio time to the start audio time specified in the cue
             player.audio.currentTime = player.audiodesk.xad.activecue.startAudio;
@@ -12968,22 +12917,22 @@ var OzPlayer = (function()
                 xadReset(player, player.audiodesk.xad.activecue);
             });
 
-            //*** DEV VERY TMP
-            console.error('PLAYING\n'
-                + '\nplaying   = ' + player.audiodesk.xad.playing
-                + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                + '');
+            //*** DEV TMP
+            //console.error('PLAYING\n'
+            //    + '\nplaying   = ' + player.audiodesk.xad.playing
+            //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+            //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+            //    + '');
         }
 
-        //**** DEV VERY TMP
-        etc.each(player.tracks.xad.en.cues, function(cue, index)
-        {
-            cue.text = 'xad()';
-        });
+        //**** DEV TMP
+        //etc.each(player.tracks.xad.en.cues, function(cue, index)
+        //{
+        //    cue.text = 'xad()';
+        //});
 
-        //**** DEV VERY TMP
-        if(console.table) { console.table(player.tracks.xad.en.cues); }
+        //**** DEV TMP
+        //if(console.table) { console.table(player.tracks.xad.en.cues); }
     }
 
     //stop any playing xad audio and reset xad tracking
@@ -12998,7 +12947,7 @@ var OzPlayer = (function()
         //reset the video playback rate
         player.media.playbackRate = 1;
 
-        /*** DEV LOG ***//* */
+        /*** DEV LOG ***//*
         if($this.logs.video)
         {
             videolog([['PLAYBACKRATE', 18],['',26],[player.media.playbackRate, 0]],['<mark>','</mark>']);
@@ -13006,7 +12955,7 @@ var OzPlayer = (function()
         if($this.logs.audio)
         {
             audiolog([['XAD-CUE-STOP', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
-        }
+        } */
 
         //set the lastcue flag according to input
         //nb. whether we reset lastcue depends on whether xad playback
