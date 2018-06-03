@@ -656,26 +656,26 @@
     <div
         id="demo" class="ozplayer"
         data-transcript="demo-transcript"
-        data-controls="stack"
+        data-controls="row"
         >
         <!--
-        data-controls="row"
+        data-controls="stack"
         data-responsive="demo-figure"
         -->
         <!--
-            preload="none"
+            preload="auto"
             width="400" height="225"
             width="240" height="135"
             width="640" height="360"
         -->
         <video
-            preload="auto"
+            preload="none"
             width="480" height="270"
             controls="controls"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
             poster="./media/posters/BrainSurgerySketch.jpg"
-<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-counting') : ?>
+<?php elseif(isset($_GET['video']) && ($_GET['video'] == 'xad-counting' || $_GET['video'] == 'xad-youtube')) : ?>
             poster="./media/posters/xad-counting.png"
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
             poster="./media/posters/blank-black.jpg"
@@ -775,6 +775,14 @@
 
             <source src="./media/videos/xad-counting.webm" type="video/webm" />
             <source src="./media/videos/xad-counting.mp4" type="video/mp4" />
+
+            <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
+
+            <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-youtube') : ?>
+
+            <source src="//www.youtube.com/watch?v=JLiidg5PtkM" type="video/x-youtube" />
 
             <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
 
@@ -882,10 +890,10 @@
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch-PS.mp3<?php echo('?nocache=' . microtime(true)); ?>" type="audio/mp3" />
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch-PS.ogg<?php echo('?nocache=' . microtime(true)); ?>" type="audio/ogg" />
 
-<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-counting') : ?>
+<?php elseif(isset($_GET['video']) && ($_GET['video'] == 'xad-counting' || $_GET['video'] == 'xad-youtube')) : ?>
 
             <source src="./media/descriptions/xad-counting.mp3" type="audio/mp3" />
-            <source src="./media/descriptions/xad-counting" type="audio/ogg" />
+            <source src="./media/descriptions/xad-counting.ogg" type="audio/ogg" />
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 

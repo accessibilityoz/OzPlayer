@@ -1621,9 +1621,10 @@ var OzPlayer = (function()
             'wrapper-failure'         : 'OzPlayer failed to initialize the med\ia.',
 
             //vtt loading and parsing errors
-            'vtt-load-failure'        : 'Captions file failed to load\ [%status].\n<%src>',
-            'vtt-no-usable-cues'      : 'Captions file contained no usable cues.\n<%src>',
-            'vtt-invalid-cue'         : 'Invalid cue in captions file.\n<%src>'
+            'vtt-load-failure'        : 'VTT file failed to load\ [%status].\n<%src>',
+            'vtt-no-usable-cues'      : 'VTT file contained no usable cues.\n<%src>',
+            'vtt-invalid-cue'         : 'Invalid cue in VTT file.\n<%src>',
+            'vtt-invalid-xad'         : 'Invalid XAD command in VTT file.\n<%src>'
         }
 
     },
@@ -1940,7 +1941,6 @@ var OzPlayer = (function()
         }
 
         //convert a value in seconds[.milliseconds] to a timestamp in "(hh:)?mm:ss" format
-        //which will be either the current video time or the video's duration
         , getTimeStamp : function(time)
         {
             var
@@ -4204,7 +4204,8 @@ var OzPlayer = (function()
             //resulting in cases where the audio keeps playing even though the video is paused
             //nb. although now we're silencing the error events onprogress and onloadedmetadata
             //this set of circumstances shouldn't happen, but let's leave the condition jic
-            if(player.audio.readyState < 2)
+            //nb. check the audio in case xad metadata failure has created an audio error state
+            if(player.audio && player.audio.readyState < 2)
             {
                 //if we've added the controls by now
                 if(player.controlform)
@@ -4244,7 +4245,8 @@ var OzPlayer = (function()
         player.audiodesk.onprogress = etc.listen(player.audio, 'progress', function()
         {
             //if the ready state is less than 2 then we're still waiting to load enough
-            if(player.audio.readyState < 2)
+            //nb. check the audio in case xad metadata failure has created an audio error state
+            if(player.audio && player.audio.readyState < 2)
             {
                 //if we've added the controls by now and playback
                 //has already started and audio is currently enabled
@@ -4263,8 +4265,9 @@ var OzPlayer = (function()
             //so it doesn't try to update the audio position until it's ready
             else
             {
-                //if we've added the controls by now
-                if(player.controlform)
+                //if we've added the controls by now and the audio has not been nullified
+                //nb. we check this in case xad metadata failure has created an audio error state
+                if(player.controlform && player.audio)
                 {
                     //update the button's aria-label
                     //to show the text corresponding with its state
@@ -4315,8 +4318,9 @@ var OzPlayer = (function()
         //in which case we won't get more than one progress event when enabling mid-playback
         player.audiodesk.onloadedmetadata = etc.listen(player.audio, 'loadedmetadata', function()
         {
-            //if we've added the controls by now
-            if(player.controlform)
+            //if we've added the controls by now and the audio has not been nullified
+            //nb. we check this in case xad metadata failure has created an audio error state
+            if(player.controlform && player.audio)
             {
                 //update the button's aria-label
                 //to show the text corresponding with its state
@@ -4408,7 +4412,10 @@ var OzPlayer = (function()
         //(and which we also do for the video, so the paused flag is always true when the media is not playing)
         etc.listen(player.audio, 'ended', function()
         {
-            player.audio.pause();
+            if(player.audio)
+            {
+                player.audio.pause();
+            }
         });
 
         //finally define the SRC to kick all that off
@@ -4980,19 +4987,37 @@ var OzPlayer = (function()
                     //*** DEV XAD
                     if(kind == 'xad')
                     {
-                        //*** temporary parsing assumes perfect format
-                        cue.text.replace(/^audio\(((?:[\d]+[\:\.\,]?){3,4})(?:\s+\-\->\s+)((?:[\d]+[\:\.\,]?){3,4})\);/,
+                        //extract the individual start and end timestamps from the xad() command
+                        //then parse those into absolute offsets and save them to startAudio and endAudio
+                        //nb. the timestamp regex is very basic and will allow invalid numbers
+                        //but it also allows the european "," instead of "." for the milliseconds
+                        //nb. the command name is case-insensitive so xad() and XAD() are allowed
+                        //nb. anything defined after the timestamp end bracket will be ignored
+                        //multiple xad() commands are also ignored (ie. we only keep the first)
+                        cue.text.replace(/^xad\(((?:[\d]+[\:\.\,]?){3,4})(?:\s+\-\->\s+)((?:[\d]+[\:\.\,]?){3,4})\)/i,
                         function(all, start, end)
                         {
-                            //*** we also need to make sure that endAudio is later than startAudio
-                            //*** (and does there have to be a minimum length?)
-                            //*** and that end time is before the very end of the video
-                            //*** (does there have to be a minimum distance before the end?)
                             cue.startAudio = Math.round(library.getStampTime(start) * 1000) / 1000;
                             cue.endAudio = Math.round(library.getStampTime(end) * 1000) / 1000;
                         });
 
-                        //...
+                        //if we don't have startAudio and endAudio values then the command was improperly defined
+                        //so there's no point creating a cue for it, so just continue to the next cue
+                        //but first show a console info with the invalid xad message
+                        //(therefore each invalid command will generate a separate warning)
+                        if(!(typeof(cue.startAudio) == 'number' && typeof(cue.endAudio) == 'number'))
+                        {
+                            etc.console(etc.sprintf(config.lang['vtt-invalid-xad'], { src : track.src }), 'warn');
+                            return this.next();
+                        }
+
+                        //[else] normalize endAudio so it can't be earlier than startAudio
+                        if(cue.endAudio < cue.startAudio)
+                        {
+                            cue.endAudio = cue.startAudio;
+                        }
+
+                        //define a playstate flag on the cue (see xadTracking for details)
                         //0 = unplayed (future)
                         //1 = ready to be played
                         //2 = playing
@@ -5845,41 +5870,50 @@ var OzPlayer = (function()
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    audiolog([
-                        [e.type.toUpperCase(), 18],
-                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                        [player.audio.duration, 10],
-                        [player.audio.currentTime, 10]
-                        ],
-                        ['<i>','</i>']);
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10]
+                            ],
+                            ['<i>','</i>']);
+                    }
                 });
             });
             etc.each(['volumechange'], function(type)
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    audiolog([
-                        [e.type.toUpperCase(), 18],
-                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                        [player.audio.duration, 10],
-                        [player.audio.currentTime, 10],
-                        ['', 5],
-                        [player.audio.volume + ' [' + player.audio.muted + ']', 0]
-                        ],
-                        ['<i>','</i>']);
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10],
+                            ['', 5],
+                            [player.audio.volume + ' [' + player.audio.muted + ']', 0]
+                            ],
+                            ['<i>','</i>']);
+                    }
                 });
             });
             etc.each(['play','playing','pause','ended'], function(type)
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    audiolog([
-                        [e.type.toUpperCase(), 18],
-                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                        [player.audio.duration, 10],
-                        [player.audio.currentTime, 10]
-                        ],
-                        ['<ins>','</ins>']);
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10]
+                            ],
+                            ['<ins>','</ins>']);
+                    }
                 });
             });
         }
@@ -5890,6 +5924,23 @@ var OzPlayer = (function()
             {
                 etc.listen(player.audio, type, function(e)
                 {
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10],
+                            ['', 5],
+                            [getbuffer(player.audio), 0]
+                            ]);
+                    }
+                });
+            });
+            etc.listen(player.audio, 'waiting', function(e)
+            {
+                if(player.audio)
+                {
                     audiolog([
                         [e.type.toUpperCase(), 18],
                         [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
@@ -5897,59 +5948,57 @@ var OzPlayer = (function()
                         [player.audio.currentTime, 10],
                         ['', 5],
                         [getbuffer(player.audio), 0]
-                        ]);
-                });
-            });
-            etc.listen(player.audio, 'waiting', function(e)
-            {
-                audiolog([
-                    [e.type.toUpperCase(), 18],
-                    [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                    [player.audio.duration, 10],
-                    [player.audio.currentTime, 10],
-                    ['', 5],
-                    [getbuffer(player.audio), 0]
-                    ],
-                    ['<b>','</b>']);
+                        ],
+                        ['<b>','</b>']);
+                }
             });
             etc.listen(player.audio, 'canplay', function(e)
             {
-                audiolog([
-                    [e.type.toUpperCase(), 18],
-                    [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                    [player.audio.duration, 10],
-                    [player.audio.currentTime, 10],
-                    ['', 5],
-                    [getbuffer(player.audio), 0]
-                    ],
-                    ['<u>','</u>']);
+                if(player.audio)
+                {
+                    audiolog([
+                        [e.type.toUpperCase(), 18],
+                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                        [player.audio.duration, 10],
+                        [player.audio.currentTime, 10],
+                        ['', 5],
+                        [getbuffer(player.audio), 0]
+                        ],
+                        ['<u>','</u>']);
+                }
             });
             etc.listen(player.audio, 'error', function(e)
             {
-                audiolog([
-                    [e.type.toUpperCase(), 18],
-                    [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                    [player.audio.duration, 10],
-                    [player.audio.currentTime, 0]
-                    ],
-                    ['<b><b>','</b></b>']);
+                if(player.audio)
+                {
+                    audiolog([
+                        [e.type.toUpperCase(), 18],
+                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                        [player.audio.duration, 10],
+                        [player.audio.currentTime, 0]
+                        ],
+                        ['<b><b>','</b></b>']);
+                }
             });
             etc.each(['progress'], function(type)
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    if($this.logs.audio.getAttribute('data-filter-progress'))
+                    if(player.audio)
                     {
-                        audiolog([
-                            [e.type.toUpperCase(), 18],
-                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                            [player.audio.duration, 10],
-                            [player.audio.currentTime, 10],
-                            //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
-                            ['',5],
-                            [getbuffer(player.audio), 0]
-                            ],
-                            ['<tt>','</tt>']);
+                        if($this.logs.audio.getAttribute('data-filter-progress'))
+                        {
+                            audiolog([
+                                [e.type.toUpperCase(), 18],
+                                [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                                [player.audio.duration, 10],
+                                [player.audio.currentTime, 10],
+                                //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
+                                ['',5],
+                                [getbuffer(player.audio), 0]
+                                ],
+                                ['<tt>','</tt>']);
+                        }
                     }
                 });
             });
@@ -5959,16 +6008,19 @@ var OzPlayer = (function()
                 {
                     if($this.logs.audio.getAttribute('data-filter-timeupdate'))
                     {
-                        audiolog([
-                            [e.type.toUpperCase(), 18],
-                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                            [player.audio.duration, 10],
-                            [player.audio.currentTime, 10],
-                            //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
-                            ['',5],
-                            [getbuffer(player.audio), 0]
-                            ],
-                            ['<del>','</del>']);
+                        if(player.audio)
+                        {
+                            audiolog([
+                                [e.type.toUpperCase(), 18],
+                                [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                                [player.audio.duration, 10],
+                                [player.audio.currentTime, 10],
+                                //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
+                                ['',5],
+                                [getbuffer(player.audio), 0]
+                                ],
+                                ['<del>','</del>']);
+                        }
                     }
                 });
             });
@@ -6469,6 +6521,24 @@ var OzPlayer = (function()
                     //then seek to an earlier point, it will carry on playing from there
                     player.ended = false;
 
+                    //if we have xad data and an xad cue is currently playing
+                    //nb. there's no need to check the ready states
+                    //of the audio and xad data, because the playing flag
+                    //wouldn't be true unless all of that was already checked
+                    if(player.tracks.xad && player.audiodesk.xad.playing)
+                    {
+                        //stop any playing xad audio and reset xad tracking
+                        //setting lastcue to null so it can be selected again
+                        xadReset(player, null);
+
+                        //*** DEV VERY TMP
+                        console.error('REWIND-RESET\n'
+                            + '\nplaying   = ' + player.audiodesk.xad.playing
+                            + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                            + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                            + '');
+                    }
+
                     //*** DEV TMP
                     //if(__.console) { console.log('rewind(' + Math.floor(player.media.currentTime) + ' => ' + Math.floor(player.media.currentTime - config['seek-duration']) +')'); }
                 }
@@ -6520,6 +6590,24 @@ var OzPlayer = (function()
                     //because setting the media time will cause a reciprocal timeupdate
                     //event to be fired, which in turn will update theslider and its input
                     setMediaTime(player, Math.floor(player.media.currentTime + config['seek-duration']));
+
+                    //if we have xad data and an xad cue is currently playing
+                    //nb. there's no need to check the ready states
+                    //of the audio and xad data, because the playing flag
+                    //wouldn't be true unless all of that was already checked
+                    if(player.tracks.xad && player.audiodesk.xad.playing)
+                    {
+                        //stop any playing xad audio and reset xad tracking
+                        //setting lastcue to null so it can be selected again
+                        xadReset(player, null);
+
+                        //*** DEV VERY TMP
+                        console.error('FORWARD-RESET\n'
+                            + '\nplaying   = ' + player.audiodesk.xad.playing
+                            + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                            + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                            + '');
+                    }
 
                     //*** DEV TMP
                     //if(__.console) { console.log('forward(' + Math.floor(player.media.currentTime) + ' => ' + Math.floor(player.media.currentTime + config['seek-duration']) +')'); }
@@ -7471,6 +7559,28 @@ var OzPlayer = (function()
                             if(player.audiodesk.enabled)
                             {
                                 audioSynchronise(player);
+                            }
+
+                            //else [if we're disabling audio and] we have xad data
+                            else if(player.tracks.xad)
+                            {
+                                //if an xad cue is currently playing
+                                //nb. there's no need to check the ready states
+                                //of the audio and xad data, because the playing flag
+                                //wouldn't be true unless all of that was already checked
+                                if(player.audiodesk.xad.playing)
+                                {
+                                    //stop any playing xad audio and reset xad tracking
+                                    //setting lastcue to null so it can be selected again
+                                    xadReset(player, null);
+
+                                    //*** DEV VERY TMP
+                                    console.error('AD-OFF-RESET\n'
+                                        + '\nplaying   = ' + player.audiodesk.xad.playing
+                                        + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                                        + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                                        + '');
+                                }
                             }
 
                             //and then set audio muted to the opposite of enabled
@@ -9341,6 +9451,28 @@ var OzPlayer = (function()
                 {
                     player.audio.pause();
                 }
+            }
+
+            //if we have xad data and an xad cue is currently playing
+            //nb. there's no need to check the ready states
+            //of the audio and xad data, because the playing flag
+            //wouldn't be true unless all of that was already checked
+            //nb. we only really need this condition for Safari, because other
+            //browsers fire a timeupdate when pausing, which triggers a reset
+            //from within xadTracking, but we may as well implement this for all
+            //just in case of unpredictable browsers or situations that need it
+            if(player.tracks.xad && player.audiodesk.xad.playing)
+            {
+                //stop any playing xad audio and reset xad tracking
+                //setting lastcue to null so it can be selected again
+                xadReset(player, null);
+
+                //*** DEV VERY TMP
+                console.error('PAUSE-RESET\n'
+                    + '\nplaying   = ' + player.audiodesk.xad.playing
+                    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                    + '');
             }
 
         }, false);
@@ -12223,7 +12355,48 @@ var OzPlayer = (function()
         //or the specified VTT file was empty or invalid
         function(status)
         {
-            //*** DEV XAD TO DO
+            //if the status is 415 then the VTT file was empty
+            //so show a console warning with the no usable cues message
+            //else show the console warning with the general loading failure message
+            etc.console(etc.sprintf(config.lang[status == 415 ? 'vtt-no-usable-cues' : 'vtt-load-failure'],
+            {
+                status  : status,
+                src     : player.tracks.xad.en.src
+
+            }), 'warn');
+
+            //now set the readyState flag to 0, to say we failed here
+            player.tracks.xad.en.readyState = 0;
+
+            //if we've added the controls by now
+            if(player.controlform)
+            {
+                //disable the ad button and update it to the "off" state
+                //(so it's both grayed and dimmed, and clearly out of it!)
+                updateControlDisabled(player, 'ad', true);
+                updateControlState(player, 'ad', 'off');
+
+                //set aria-live on the button so that the error message is announced
+                //then update the button's aria-label with a short general error message
+                etc.render(player.controlform.ad,
+                {
+                    'aria-live'     : 'assertive',
+                    'aria-label'    : getLang(player, 'button-ad-error')
+                });
+            }
+
+            //*** DEV LOG (delay so our log function has an error reference)
+            etc.delay(200, function(){
+
+            //nullify the player audio reference so we don't keep
+            //trying to play and pause it, or keep having to
+            //test its readyState to see if we can synchronise
+            //we can also use this to detect existing failure
+            //when we build the form if it isn't there already
+            player.audio = null;
+
+            //*** DEV LOG
+            });
         });
     }
 
@@ -12601,19 +12774,14 @@ var OzPlayer = (function()
 
 
 
-    //*** DEV XAD
     //track xad cues by video time select and play xad audio
     //nb. this is triggered by timeupdate events, which can be fired by
     //custom seeking, native seeking, pausing, as well as regular playback
     //so the conditions within this function need to account for all of that
     function xadTracking(player, time)
     {
-        //check that the xad metadata has loaded and parsed successfully
-        //and that the audio has sufficiently loaded, else we'll get an error
-        //eg. if the audio is slow to load, or the user has no sound output
-        //but first check that it still exists just in case it's fired an error
-        //and there's a discontinuity between that and audio waiting states
-        if(!(player.audio && player.audio.readyState >= 1 && player.tracks.xad.en.readyState === 4)) { return; }
+        //check that the audio exists and that the xad metadata has loaded and parsed
+        if(!(player.audio && player.tracks.xad.en.readyState === 4)) { return; }
 
         //*** DEV VERY TMP
         console.clear();
@@ -12624,12 +12792,11 @@ var OzPlayer = (function()
                  + '\nseeking : ' + player.controlform.seek.seeking
                  );
 
-        //if we're currently seeking
-        //nb. the paused condition allows for seeking via the native controls
+        //if we're currently seeking or paused
+        //nb. the paused condition also handles seeking via the native controls
         //since they don't update the custom seek slider's seeking flag
         if(player.controlform.seek.seeking || player.media.paused)
         {
-            //if(player.audiodesk.xad.activecue && player.audiodesk.xad.playing)
             //if an xad cue is currently playing
             if(player.audiodesk.xad.playing)
             {
@@ -12769,8 +12936,11 @@ var OzPlayer = (function()
             //nb. this allows for discrepancies between the cue's specified
             //start time and the current time at which this happens, which will
             //arise because of the resolution of timeupdate events, ie. there could
-            //be +~250ms between the start time and when the event actually fires
-            player.media.setCurrentTime(player.audiodesk.xad.activecue.startTime);
+            //be up to ~1/3s between the start time and when the event actually fires
+            //*** don't do this because it's visually jerky, although that means that
+            //*** there will be small discrepancies between the cue time and the video time
+            //*** that much discrepancy is allowable as it is for regular AD
+            //player.media.setCurrentTime(player.audiodesk.xad.activecue.startTime);
 
             /*** DEV LOG ***//* */
             if($this.logs.video)
@@ -12807,10 +12977,15 @@ var OzPlayer = (function()
         }
 
         //**** DEV VERY TMP
+        etc.each(player.tracks.xad.en.cues, function(cue, index)
+        {
+            cue.text = 'xad()';
+        });
+
+        //**** DEV VERY TMP
         if(console.table) { console.table(player.tracks.xad.en.cues); }
     }
 
-    //*** DEV XAD
     //stop any playing xad audio and reset xad tracking
     function xadReset(player, lastcue)
     {

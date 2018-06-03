@@ -36,7 +36,7 @@
     OzPlayer.define("auto-hiding-delay",    4);                      //auto-hiding delay for stack controls and skip links (float seconds, or zero to disable auto-hiding)
     OzPlayer.define("user-persistence",     "ozplayer-userdata");    //user data persistence key (or empty-string to disable persistence)
     OzPlayer.define("allow-fullscreen",     true);                   //add a fullscreen button (where supported by the browser)
-
+    OzPlayer.define("seek-duration",        15);                     //seek duration (seconds) when using the forward and rewind buttons
 
 
     //THIRD => initialise all player instances
