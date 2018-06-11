@@ -2631,21 +2631,21 @@ var OzPlayer = (function()
                 //switch by option key
                 switch(key)
                 {
-                    //show a console error and exit if the transcript value is not a valid ID
+                    //show a console error if the transcript value is not a valid ID
                     //or if the referenced element is already being used by another instance
                     //or if the referenced element is inside the player (or is the player)
                     //** what if you define the transcript inside a different instance player?
                     //** presumably it will overwrite it entirely and break that player with errors
-                    //or show a console error but don't exit if it doesn't have the right class
-                    //so that it can still work, but the user is warned of the missing styles
+                    //or if the referenced element doesn't have the right class
+                    //nb. don't exit for any of these errors, because that can cause later features
+                    //to fail unnecessarily, eg. no responsive behaviour if the transcipt is mis-defined
                     //nb. I did consider using "warn" for the missing class, because it's not quite
                     //as serious as other errors, but it is serious enough to warrant the alert
-                    //nb. we have to use normal iteration so we can return from it
                     case 'transcript' :
 
                         if((option = etc.get('#' + option)) === null)
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-transcript'],
+                            etc.console(etc.sprintf(config.lang['option-bad-transcript'],
                             {
                                 id : player.instance.id
 
@@ -2653,7 +2653,7 @@ var OzPlayer = (function()
                         }
                         else if(etc.contains(player.container, option))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-wrong-transcript'],
+                            etc.console(etc.sprintf(config.lang['option-wrong-transcript'],
                             {
                                 id : player.instance.id
 
@@ -2676,7 +2676,7 @@ var OzPlayer = (function()
                                 {
                                     if(players[p].transcript && players[p].transcript.id == option.id)
                                     {
-                                        return etc.console(etc.sprintf(config.lang['option-busy-transcript'],
+                                        etc.console(etc.sprintf(config.lang['option-busy-transcript'],
                                         {
                                             id    : player.instance.id,
                                             other : p
@@ -2688,14 +2688,14 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and exit if the responsive value is not a valid ID
+                    //show a console error if the responsive value is not a valid ID
                     //or if the referenced element is inside the player (or is the player)
                     //nb. multiple player instances can all use the same responsive element
                     case 'responsive' :
 
                         if((option = etc.get('#' + option)) === null)
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-responsive'],
+                            etc.console(etc.sprintf(config.lang['option-bad-responsive'],
                             {
                                 id : player.instance.id
 
@@ -2703,7 +2703,7 @@ var OzPlayer = (function()
                         }
                         else if(etc.contains(player.container, option))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-wrong-responsive'],
+                            etc.console(etc.sprintf(config.lang['option-wrong-responsive'],
                             {
                                 id : player.instance.id
 
@@ -2711,12 +2711,12 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and break if the responsive-mode value is not valid
+                    //show a console error if the responsive-mode value is not valid
                     case 'responsive-mode' :
 
                         if(!(option == 'max' || option == 'initial' || option == 'min'))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-responsive-mode'],
+                            etc.console(etc.sprintf(config.lang['option-bad-responsive-mode'],
                             {
                                 id : player.instance.id
 
@@ -2724,12 +2724,12 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and break if the controls value is not valid
+                    //show a console error if the controls value is not valid
                     case 'controls' :
 
                         if(!(option == 'row' || option == 'stack'))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-controls'],
+                            etc.console(etc.sprintf(config.lang['option-bad-controls'],
                             {
                                 id : player.instance.id
 
