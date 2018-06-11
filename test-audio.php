@@ -138,7 +138,7 @@
     <!-- *** / DEV WORDPRESS STYLESHEET *** -->
 
 
-    <!-- *** DEV VERY TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
+    <!-- *** DEV TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
     <!--
     <style>
     .oz-controls .oz-menuitem[aria-disabled="true"]

@@ -359,15 +359,15 @@
 
 
 
-        /*** DEV LOG (figure reset) ***//* */
+        /*** DEV LOG (figure reset) ***//*
         figure
         {
             display:inline-block !important;
             width:auto !important;
             margin:0 !important;
-        }
+        } */
 
-        /*** DEV LOG (smaller transcript) ***//* */
+        /*** DEV LOG (smaller transcript) ***//*
         .ozplayer-expander
         {
             width:484px !important;
@@ -375,9 +375,9 @@
         .ozplayer-transcript
         {
             width:440px !important;
-        }
+        } */
 
-        /*** DEV LOG (log styles) ***//* */
+        /*** DEV LOG (log styles) ***//*
         .log
         {
             overflow:auto;
@@ -467,9 +467,9 @@
             font:inherit;
             font-weight:bold;
             color:#f00;
-        }
+        } */
 
-        /*** DEV LOG (log filters) ***//* */
+        /*** DEV LOG (log filters) ***//*
         .log + form
         {
             position:absolute;
@@ -490,7 +490,7 @@
         #audiolog.log + form
         {
             top:49%;
-        }
+        } */
 
 
 
@@ -540,7 +540,7 @@
     <!-- *** / DEV WORDPRESS STYLESHEET *** -->
 
 
-    <!-- *** DEV VERY TMP ON/OFF STATE STYLES --><!--
+    <!-- *** DEV TMP ON/OFF STATE STYLES --><!--
     <style>
     .oz-controls .oz-field button.oz-on
     {
@@ -666,11 +666,11 @@
             preload="auto"
             width="400" height="225"
             width="240" height="135"
-            width="640" height="360"
+            width="480" height="270"
         -->
         <video
             preload="none"
-            width="480" height="270"
+            width="640" height="360"
             controls="controls"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
@@ -1129,7 +1129,7 @@
 
 
 
-    <!-- *** / DEV LOG *** --><!-- -->
+    <!-- *** / DEV LOG *** --><!--
     <pre id="videolog" class="log" contenteditable="true" spellcheck="false"></pre>
     <pre id="audiolog" class="log" contenteditable="true" spellcheck="false"></pre>
     <script type="text/javascript">
@@ -1156,7 +1156,7 @@
             audiolog.parentNode.removeChild(audiolog);
         }
     })();
-    </script>
+    </script> -->
     <!-- *** DEV LOG *** -->
 
 
