@@ -777,6 +777,7 @@
             <source src="./media/videos/xad-counting.mp4" type="video/mp4" />
 
             <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/xad-counting.vtt" kind="metadata" data-kind="transcript" srclang="en" />
 
             <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
 
