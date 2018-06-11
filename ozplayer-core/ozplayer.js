@@ -4751,7 +4751,8 @@ var OzPlayer = (function()
         //since it's being redefined every time the parent function is called
         //but the advantage of having closure access to the parent arguments
         //outweights the disadvantage, given how infrequently it's called
-        //ie. the parent function won't be called more than twice per sesson
+        //ie. the parent function won't be called more than once per track type
+        //(so three times: for captions, transcript and xad; if all three are defined)
         function parseTrackVTT(vtt)
         {
             //trim the data, normalize line-breaks to unix, then split by empty lines
@@ -4799,7 +4800,7 @@ var OzPlayer = (function()
                 //otherwise we wouldn't be able to support SRT files
                 //the WebVTT specification also says that "WEBVTT" should be
                 //the first 6 characters (ie. not preceded by any whitespace)
-                //but I don't think it's reasonable to enforce that requirement
+                //but I don't think it's necessary to enforce that requirement
                 if(/^\s*(WEBVTT|NOTE)/.test(vtt[i]))
                 {
                     vtt.splice(i, 1);
@@ -4933,7 +4934,7 @@ var OzPlayer = (function()
                         cue.text = cue.text.replace(/target=\"[^\"]+\"/ig, '').replace(/(<a)/ig, '$1 target="_blank"');
                     }
 
-                    //*** DEV XAD
+                    //then if the kind is xad we need to parse the cue text to get the time information
                     if(kind == 'xad')
                     {
                         //extract the individual start and end timestamps from the xad() command
@@ -4977,7 +4978,7 @@ var OzPlayer = (function()
                 }
 
                 //but if it is empty, there's no point creating a cue for it at all
-                //since we'd have nothing to display, so just continue to the next cue
+                //since we'd have no data in it, so just continue to the next cue
                 //but first show a console info with the invalid cue message
                 //(therefore each invalid cue will generate a separate warning)
                 else
@@ -6216,12 +6217,36 @@ var OzPlayer = (function()
 
 
         //if we have audio descriptions, look for xad track data
-        //then if we have any such data, try to load the data
         if(player.audiodesk)
         {
             if(player.tracks.xad = getTracksData(player, 'xad'))
             {
-                loadXADTrackData(player);
+                //if this is a youtube video then xad is not supported because
+                //the youtube API doesn't support setting playbackrate to 0
+                //and playing the AD normally would be pointless since they'd be out of sync
+                //so we set the ad error state the same as if the data had failed to load
+                //nb. also don't support it for flash video for simplicity
+                //since the only possible browser that could support native
+                //audio but not native video is old Firefox when the video is MP4
+                //and since we're about to drop support for that it's not worth testing
+                if(player.mode == 'youtube' || player.mode == 'flash')
+                {
+                    //set the xad tracks data to null
+                    player.tracks.xad = null;
+
+                    //nullify the player audio reference so we don't keep
+                    //trying to play and pause it, or keep having to
+                    //test its readyState to see if we can synchronise
+                    //we can also use this to detect existing failure
+                    //when we build the form in just a moment
+                    player.audio = null;
+                }
+
+                //else [for a regular video] try to load the xad data
+                else
+                {
+                    loadXADTrackData(player);
+                }
             }
         }
 
