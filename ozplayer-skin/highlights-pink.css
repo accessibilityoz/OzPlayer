@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.3] => interface highlight colours => pink + white
+ OzPlayer [3.5] => interface highlight colours => pink + white
  ------------------------------------------------------------------------------
 *******************************************************************************/
 
@@ -15,11 +15,11 @@
 }
 .oz-controls .oz-field button
 {
-    background-image:url("buttons-white.png?v=3") !important;
+    background-image:url("buttons-white.png?v=4") !important;
 }
 .oz-large .oz-controls .oz-field button
 {
-    background-image:url("buttons-white-large.png?v=3") !important;
+    background-image:url("buttons-white-large.png?v=4") !important;
 }
 .ozplayer .oz-poster span,
 .oz-indicator.oz-timeout strong
@@ -58,11 +58,11 @@
     }
     .oz-controls .oz-field button
     {
-        background-image:url("buttons-white-large.png?v=3") !important;
+        background-image:url("buttons-white-large.png?v=4") !important;
     }
     .oz-large .oz-controls .oz-field button
     {
-        background-image:url("buttons-white-large@2x.png?v=3") !important;
+        background-image:url("buttons-white-large@2x.png?v=4") !important;
     }
     .ozplayer .oz-poster span,
     .oz-indicator.oz-timeout strong

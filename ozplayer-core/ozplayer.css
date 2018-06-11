@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.3] => interface core
+ OzPlayer [3.5] => interface core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 
@@ -846,6 +846,11 @@
     width:100% !important;
     height:100% !important;
 
+    /* prevent the click to play icon overlapping the poster
+       nb. this can only happen at the very smallest video sizes
+       with stack controls, and even then only clips a small part of the icon */
+    overflow:hidden;
+
     /* set a corresponding poster min-height in case the video
        min-height applies, so the poster always covers it completely
        (even if some or most of that is just a black background)
@@ -889,7 +894,7 @@
        so the icon is centered in the space above the controls */
     width:96px !important;
     height:96px !important;
-    margin:-64px 0 0 -48px !important;
+    margin:-80px 0 0 -48px !important;
 
     /* default overlays background */
     background:none no-repeat !important;
@@ -969,7 +974,7 @@
     /* large size and margin center offset */
     width:192px !important;
     height:192px !important;
-    margin:-128px 0 0 -96px !important;
+    margin:-160px 0 0 -96px !important;
 }
 
 /* large poster => overlay icon component elements for css3 browsers */
@@ -1415,7 +1420,7 @@
        nb. using margin so we don't have to change bottom
        and since that's relative to the bottom of the player
        it's the same for stack "controls" as it is for "row" */
-    margin-bottom:32px !important;
+    margin-bottom:64px !important;
 
     /* base font-size and line-height */
     font-size:18px !important;
@@ -1487,7 +1492,7 @@
 .oz-large .oz-captions
 {
     /* large margin adjustment */
-    margin-bottom:64px !important;
+    margin-bottom:128px !important;
 }
 
 /* smallscreen => captions */
@@ -1633,8 +1638,8 @@
     /* default auto width (which is then set by scripting) */
     width:auto;                                           /* [STYLE MODIFIED] */
 
-    /* default overall height (same as the buttons) */
-    height:32px !important;
+    /* default overall height (for two rows of buttons) */
+    height:64px !important;
 
     /* nb. use transparency on the form so the fieldset
        can use margin to create a space around the controls */
@@ -1649,11 +1654,8 @@
 
 
     /*** DEV TMP ***//*
-    height:64px !important; */
-
-
-    /*** DEV TMP ***//*
-    background-color:#f0f !important; */
+    background-color:#f0f !important;
+    height:128px !important; */
 }
 
 /* no-images controls */
@@ -1668,13 +1670,13 @@
 /* large controls */
 .oz-large .oz-controls
 {
-    /* large overall height (same as the buttons) */
-    height:64px !important;
+    /* large overall height (for two rows of buttons) */
+    height:128px !important;
 
 
 
     /*** DEV TMP ***//*
-    height:128px !important; */
+    height:256px !important; */
 }
 
 /* no-images large controls */
@@ -1883,16 +1885,6 @@
     box-shadow:inset 0 0 0 2px darkcyan !important; */
 }
 
-/* smallscreen => mute and volume field wrappers */
-.ozplayer.oz-smallscreen .oz-controls .oz-field.oz-mute,
-.ozplayer.oz-smallscreen .oz-controls .oz-field.oz-volume
-{
-    /* hide the wrappers entirely so the controls are not displayed
-       nb. but may still be announced to ATs, which is ideally what we want
-       so we use aria-hidden=false to try to encourage that to happen */
-    display:none !important;
-}
-
 
 /* controls => buttons */
 .oz-controls .oz-field button
@@ -2016,6 +2008,26 @@
 /* controls => button icons by field class, state class and pseudo state
    nb. we need to prevent it from taking the active and focus states when it's disabled
    (but keyboard users will still get focus indication from the other style changes) */
+.oz-controls .oz-rewind button.oz-off,
+.oz-controls .oz-rewind.oz-disabled button.oz-off:hover,
+.oz-controls .oz-rewind.oz-disabled button.oz-off:focus,
+.oz-controls .oz-rewind.oz-disabled button.oz-off:active
+    { background-position:-416px 0 !important; }
+.oz-controls .oz-rewind button.oz-off:hover,
+.oz-controls .oz-rewind button.oz-off:focus,
+.oz-controls .oz-rewind button.oz-off:active
+    { background-position:-416px -32px !important; }
+
+.oz-controls .oz-forward button.oz-off,
+.oz-controls .oz-forward.oz-disabled button.oz-off:hover,
+.oz-controls .oz-forward.oz-disabled button.oz-off:focus,
+.oz-controls .oz-forward.oz-disabled button.oz-off:active
+    { background-position:-448px 0 !important; }
+.oz-controls .oz-forward button.oz-off:hover,
+.oz-controls .oz-forward button.oz-off:focus,
+.oz-controls .oz-forward button.oz-off:active
+    { background-position:-448px -32px !important; }
+
 .oz-controls .oz-playpause button.oz-off,
 .oz-controls .oz-playpause.oz-disabled button.oz-off:hover,
 .oz-controls .oz-playpause.oz-disabled button.oz-off:focus,
@@ -2025,7 +2037,6 @@
 .oz-controls .oz-playpause button.oz-off:focus,
 .oz-controls .oz-playpause button.oz-off:active
     { background-position:0 -32px !important; }
-
 .oz-controls .oz-playpause button.oz-on,
 .oz-controls .oz-playpause.oz-disabled button.oz-on:hover,
 .oz-controls .oz-playpause.oz-disabled button.oz-on:focus,
@@ -2166,6 +2177,26 @@
 }
 
 /* large controls => button icons by field class, state class and dynamic state */
+.oz-large .oz-rewind button.oz-off,
+.oz-large .oz-rewind.oz-disabled button.oz-off:hover,
+.oz-large .oz-rewind.oz-disabled button.oz-off:focus,
+.oz-large .oz-rewind.oz-disabled button.oz-off:active
+    { background-position:-832px 0 !important; }
+.oz-large .oz-rewind button.oz-off:hover,
+.oz-large .oz-rewind button.oz-off:focus,
+.oz-large .oz-rewind button.oz-off:active
+    { background-position:-832px -64px !important; }
+
+.oz-large .oz-forward button.oz-off,
+.oz-large .oz-forward.oz-disabled button.oz-off:hover,
+.oz-large .oz-forward.oz-disabled button.oz-off:focus,
+.oz-large .oz-forward.oz-disabled button.oz-off:active
+    { background-position:-896px 0 !important; }
+.oz-large .oz-forward button.oz-off:hover,
+.oz-large .oz-forward button.oz-off:focus,
+.oz-large .oz-forward button.oz-off:active
+    { background-position:-896px -64px !important; }
+
 .oz-large .oz-playpause button.oz-off,
 .oz-large .oz-playpause.oz-disabled button.oz-off:hover,
 .oz-large .oz-playpause.oz-disabled button.oz-off:focus,
@@ -2309,11 +2340,11 @@
 {
     .oz-controls .oz-field button
     {
-        background-size:416px 64px !important;
+        background-size:480px 64px !important;
     }
     .oz-large .oz-controls .oz-field button
     {
-        background-size:832px 128px !important;
+        background-size:960px 128px !important;
     }
 }
 

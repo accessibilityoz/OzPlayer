@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer (video)</title>
+    <title>OzPlayer (video<?php if(isset($_GET['video'])) { echo ': ' . $_GET['video']; } ?>)</title>
 
 
 
@@ -16,6 +16,7 @@
 
 
     <!-- *** DEV TEST SCRIPTING *** -->
+    <script type="text/javascript" src="../_dev/console.table.js"></script>
     <script type="text/javascript">
     (function()
     {
@@ -369,11 +370,11 @@
         /*** DEV LOG (smaller transcript) ***//*
         .ozplayer-expander
         {
-            width:404px !important;
+            width:484px !important;
         }
         .ozplayer-transcript
         {
-            width:360px !important;
+            width:440px !important;
         } */
 
         /*** DEV LOG (log styles) ***//*
@@ -448,6 +449,12 @@
         {
             font:inherit;
             color:#7aa;
+        }
+        .log mark
+        {
+            font:inherit;
+            background:transparent;
+            color:#66c;
         }
         .log tt strong,
         .log del strong
@@ -533,7 +540,7 @@
     <!-- *** / DEV WORDPRESS STYLESHEET *** -->
 
 
-    <!-- *** DEV VERY TMP ON/OFF STATE STYLES --><!--
+    <!-- *** DEV TMP ON/OFF STATE STYLES --><!--
     <style>
     .oz-controls .oz-field button.oz-on
     {
@@ -659,6 +666,7 @@
             preload="auto"
             width="400" height="225"
             width="240" height="135"
+            width="480" height="270"
         -->
         <video
             preload="none"
@@ -667,6 +675,8 @@
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
             poster="./media/posters/BrainSurgerySketch.jpg"
+<?php elseif(isset($_GET['video']) && ($_GET['video'] == 'xad-counting' || $_GET['video'] == 'xad-youtube')) : ?>
+            poster="./media/posters/xad-counting.png"
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
             poster="./media/posters/blank-black.jpg"
 <?php elseif(isset($_GET['video'])) : ?>
@@ -760,6 +770,24 @@
 
             <track src="./media/captions/en/BrainSurgerySketch.vtt" kind="captions" srclang="en" default="default" />
             <track src="./media/captions/de/BrainSurgerySketch.vtt" kind="captions" srclang="de" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-counting') : ?>
+
+            <source src="./media/videos/xad-counting.webm" type="video/webm" />
+            <source src="./media/videos/xad-counting.mp4" type="video/mp4" />
+
+            <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/xad-counting.vtt" kind="metadata" data-kind="transcript" srclang="en" />
+
+            <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-youtube') : ?>
+
+            <source src="//www.youtube.com/watch?v=JLiidg5PtkM" type="video/x-youtube" />
+
+            <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
+
+            <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 
@@ -862,6 +890,11 @@
 
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch-PS.mp3<?php echo('?nocache=' . microtime(true)); ?>" type="audio/mp3" />
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch-PS.ogg<?php echo('?nocache=' . microtime(true)); ?>" type="audio/ogg" />
+
+<?php elseif(isset($_GET['video']) && ($_GET['video'] == 'xad-counting' || $_GET['video'] == 'xad-youtube')) : ?>
+
+            <source src="./media/descriptions/xad-counting.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/xad-counting.ogg" type="audio/ogg" />
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 
@@ -1059,7 +1092,7 @@
         function remote(src)
         {
             return qualify(src)
-                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
+                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3|192\.168\.1\.64)/, 'www.brothercake.com')
                     .replace('OzPlayer/media/', 'media/')
                 + '?nocache=' + new Date().getTime()
                 + '';

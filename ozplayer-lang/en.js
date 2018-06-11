@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.3] => interface language
+ OzPlayer [3.5] => interface language
  ------------------------------------------------------------------------------
 *******************************************************************************/
 (function(){var lang={
@@ -9,8 +9,9 @@
 
 
     //button labels and tooltips
-    //n.b. the %1 token represents dynamic text:
-    //the label attribute defined on the captions language's track element
+    //n.b. the % tokens represents dynamic text:
+    //%1 = the label attribute defined on the captions language's track element
+    //%2 = the number of seconds' seeking controlled by rewind/forward buttons
     "button-playpause-off"      : "Play"
     ,"button-playpause-on"      : "Pause"
     ,"button-mute-off"          : "Mute"
@@ -27,10 +28,13 @@
     ,'button-ad-error'          : "Audio Descriptions are not available"
     ,"button-fullscreen-off"    : "Fullscreen"
     ,"button-fullscreen-on"     : "Exit Fullscreen"
+    ,"button-rewind-off"        : "Back %2 seconds"
+    ,"button-forward-off"       : "Forward %2 seconds"
 
     //button fallback text (e.g. when images are disabled)
-    //n.b. the %1 token represents dynamic text:
-    //the src attribute defined on the captions language's track element
+    //n.b. the % tokens represents dynamic text:
+    //%1 = the src attribute defined on the captions language's track element
+    //%2 = the number of seconds' seeking controlled by rewind/forward buttons
     ,"text-playpause-off"       : "Play"
     ,"text-playpause-on"        : "Pause"
     ,"text-mute-off"            : "Mute"
@@ -47,13 +51,15 @@
     ,"text-ad-on"               : "AD (on)"
     ,"text-fullscreen-off"      : "Full"
     ,"text-fullscreen-on"       : "Exit"
+    ,"text-rewind-off"          : "-%2"
+    ,"text-forward-off"         : "+%2"
 
     //menu labels
     ,"menu-cc-off"              : "Off"
 
     //slider tooltips
-    //n.b. the %1 tokens represent dynamic numbers:
-    //either the seek slider time, or the volume slider value
+    //n.b. the % tokens represent dynamic values:
+    //%1 = the seek slider time, or the volume slider volume
     ,"slider-seek"              : "Time = %1"
     ,"slider-volume"            : "Volume = %1"
 
@@ -66,8 +72,8 @@
     ,"indicator-timeout"        : "Media failed to load."
 
     //transcript messages
-    //n.b. the %1 token represents dynamic text:
-    //the label attribute defined on the captions language's track element
+    //n.b. the % tokens represents dynamic text:
+    //%1 = the label attribute defined on the captions language's track element
     ,"transcript-off"           : "Transcript is off"
     ,"transcript-lang"          : "Transcript = %1"
     ,"transcript-loading"       : "Loading transcript ..."

@@ -138,7 +138,7 @@
     <!-- *** / DEV WORDPRESS STYLESHEET *** -->
 
 
-    <!-- *** DEV VERY TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
+    <!-- *** DEV TMP TEST STYLES FOR WHEN CSS IS NOT APPLIED -->
     <!--
     <style>
     .oz-controls .oz-menuitem[aria-disabled="true"]
@@ -416,9 +416,11 @@
         }
         function remote(src)
         {
-            return qualify(src).replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3)/, 'www.brothercake.com')
-            + '?nocache=' + new Date().getTime()
-            + '';
+            return qualify(src)
+                    .replace(/(localhost|cakebook(\.local)?|192\.168\.1\.3|192\.168\.1\.64)/, 'www.brothercake.com')
+                    .replace('OzPlayer/media/', 'media/')
+                + '?nocache=' + new Date().getTime()
+                + '';
         }
         var sources = document.getElementsByTagName('source');
         for(var i = 0; i < sources.length; i ++)

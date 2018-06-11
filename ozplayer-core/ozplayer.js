@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-7 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.3] => player core
+ OzPlayer [3.5] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -1180,9 +1180,10 @@ var OzPlayer = (function()
         //default video size (px) when the width and height are not defined
         //nb. this is similar to what webkit does natively in that situation
         //(whereas firefox would use the native video size)
-        //the width is designed to provide enough minimum space
+        //nb. the width is designed to provide enough minimum space
         //for all the supported controls when images are disabled
         //while the height maintains a widescreen aspect ratio of 16:9
+        //nb. this is also the threshold below which the smallscreen class is applied
         'default-width'           : 400,
         'default-height'          : 225,
 
@@ -1203,6 +1204,9 @@ var OzPlayer = (function()
         //means that the longer the duration is, the higher the step will be
         //or for anything less than 10 minutes the step will be 1 second
         'seek-resolution'         : 600,
+
+        //seek duration (seconds) when using the forward and rewind buttons
+        'seek-duration'           : 15,
 
         //synchronisation resolution (s) for audio descriptions
         //ie. the maximum amount of drift that can occur between the
@@ -1376,13 +1380,16 @@ var OzPlayer = (function()
             'last-field-wrapper'      : 'oz-last-field',
 
             //controls => specific field wrapper classes
-            'field-playpause'         : 'oz-playpause',
             'field-seek'              : 'oz-seek',
+            'field-playpause'         : 'oz-playpause',
             'field-mute'              : 'oz-mute',
             'field-volume'            : 'oz-volume',
             'field-cc'                : 'oz-cc',
             'field-ad'                : 'oz-ad',
             'field-fullscreen'        : 'oz-fullscreen',
+            'field-spacer'            : 'oz-spacer',
+            'field-rewind'            : 'oz-rewind',
+            'field-forward'           : 'oz-forward',
 
             //controls => field state classes
             //eg. playpause is "on" when it's playing or "off" when it's paused
@@ -1421,6 +1428,7 @@ var OzPlayer = (function()
         {
             //controls => button labels and tooltips
             //indexed by button name and state key (eg. "playpause" and "on")
+            //nb. rewind and forward are stateless buttons which are always off
             "button-playpause-off"    : "Play",
             "button-playpause-on"     : "Pause",
             "button-mute-off"         : "Mute",
@@ -1437,6 +1445,8 @@ var OzPlayer = (function()
             'button-ad-error'         : "Audio Descriptions are not available",
             "button-fullscreen-off"   : "Fullscreen",
             "button-fullscreen-on"    : "Exit Fullscreen",
+            "button-rewind-off"       : "Back\ %2 seconds",
+            "button-forward-off"      : "Forward\ %2 seconds",
 
             //controls => fallback text (eg. for styled no-images)
             "text-playpause-off"      : "Play",
@@ -1455,6 +1465,8 @@ var OzPlayer = (function()
             "text-ad-on"              : "AD\ (on)",
             "text-fullscreen-off"     : "Full",
             "text-fullscreen-on"      : "Exit",
+            "text-rewind-off"         : "-%2",
+            "text-forward-off"        : "+%2",
 
             //controls => menu labels
             "menu-cc-off"             : "Off",
@@ -1477,7 +1489,7 @@ var OzPlayer = (function()
 
             //transcript language, loading and error messages
             "transcript-off"          : "Transcript is off",
-            "transcript-lang"         : "Transcript = %1",
+            "transcript-lang"         : "Transcript\ =\ %1",
             'transcript-loading'      : 'Loading transcript ...',
             "transcript-nolang"       : "%1 failed to load.",
             'transcript-error'        : 'Transcript is not available.',
@@ -1526,7 +1538,7 @@ var OzPlayer = (function()
             'constructor-bad-id'      : 'There is no p\layer with the ID "%id".',
             'constructor-dupe-id'     : 'A p\layer with the ID "%id" has already been initialised.',
             'constructor-bad-class'   : 'The p\layer with the ID "%id" does not have the class "%name".',
-            'constructor-no-media'    : 'The p\layer with the ID "%id" has no media element.',
+            'constructor-no-media'    : 'The p\layer with the ID "%id" has no m\edia element.',
             'constructor-not-new'     : 'The OzPlayer.Video function must be called with the "new" keyword.',
             'constructor-not-new-audio': 'The OzPlayer.Audio function must be called with the "new" keyword.',
 
@@ -1539,7 +1551,7 @@ var OzPlayer = (function()
             'option-bad-callback'     : 'The "%option" callback for #%id must be\ %type.',
             'option-bad-controls'     : 'The "data-controls" attribute for #%id must be "row" or "stack".',
             'option-bad-transcript'   : 'The "data-transcript" element for #%id does not exist.',
-            'option-wrong-transcript' : 'The "data-transcript" element for #%id must be outside the player.',
+            'option-wrong-transcript' : 'The "data-transcript" element for #%id must be outside the p\layer.',
             'option-busy-transcript'  : 'The "data-transcript" element for #%id is already being used by #%other.',
 
             //transcript errors and warnings
@@ -1558,9 +1570,10 @@ var OzPlayer = (function()
             'wrapper-failure'         : 'OzPlayer failed to initialize the med\ia.',
 
             //vtt loading and parsing errors
-            'vtt-load-failure'        : 'Captions file failed to load\ [%status].\n<%src>',
-            'vtt-no-usable-cues'      : 'Captions file contained no usable cues.\n<%src>',
-            'vtt-invalid-cue'         : 'Invalid cue in captions file.\n<%src>'
+            'vtt-load-failure'        : 'VTT file failed to load\ [%status].\n<%src>',
+            'vtt-no-usable-cues'      : 'VTT file contained no usable cues.\n<%src>',
+            'vtt-invalid-cue'         : 'Invalid cue in VTT file.\n<%src>',
+            'vtt-invalid-xad'         : 'Invalid XAD c\ommand in VTT file.\n<%src>'
         }
 
     },
@@ -1877,7 +1890,6 @@ var OzPlayer = (function()
         }
 
         //convert a value in seconds[.milliseconds] to a timestamp in "(hh:)?mm:ss" format
-        //which will be either the current video time or the video's duration
         , getTimeStamp : function(time)
         {
             var
@@ -2491,6 +2503,7 @@ var OzPlayer = (function()
             //as well an enabled flag by whether it has a data-default attribute
             //or keep it null if none of the specified audio sources are supported
             //plus a waiting flag to indicate when the audio is waiting for video loading
+            //plus an object of data with xad flags (see xadTracking for details)
             else if(player.audiodesk = library.getSupportedType(player.audio))
             {
                 player.audiodesk =
@@ -2498,7 +2511,14 @@ var OzPlayer = (function()
                     type          : player.audiodesk,
                     //basevolume  : library.getBaseVolume(player.audio),
                     enabled       : player.audio.getAttribute('data-default') !== null,
-                    waiting       : false
+                    waiting       : false,
+                    xad           :
+                    {
+                        activecue : null,
+                        lastcue   : null,
+                        playing   : false,
+                        timer     : null
+                    }
                 };
                 if(!(player.audiodesk.src = player.audio.getAttribute('src')))
                 {
@@ -2611,21 +2631,21 @@ var OzPlayer = (function()
                 //switch by option key
                 switch(key)
                 {
-                    //show a console error and exit if the transcript value is not a valid ID
+                    //show a console error if the transcript value is not a valid ID
                     //or if the referenced element is already being used by another instance
                     //or if the referenced element is inside the player (or is the player)
                     //** what if you define the transcript inside a different instance player?
                     //** presumably it will overwrite it entirely and break that player with errors
-                    //or show a console error but don't exit if it doesn't have the right class
-                    //so that it can still work, but the user is warned of the missing styles
+                    //or if the referenced element doesn't have the right class
+                    //nb. don't exit for any of these errors, because that can cause later features
+                    //to fail unnecessarily, eg. no responsive behaviour if the transcipt is mis-defined
                     //nb. I did consider using "warn" for the missing class, because it's not quite
                     //as serious as other errors, but it is serious enough to warrant the alert
-                    //nb. we have to use normal iteration so we can return from it
                     case 'transcript' :
 
                         if((option = etc.get('#' + option)) === null)
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-transcript'],
+                            etc.console(etc.sprintf(config.lang['option-bad-transcript'],
                             {
                                 id : player.instance.id
 
@@ -2633,7 +2653,7 @@ var OzPlayer = (function()
                         }
                         else if(etc.contains(player.container, option))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-wrong-transcript'],
+                            etc.console(etc.sprintf(config.lang['option-wrong-transcript'],
                             {
                                 id : player.instance.id
 
@@ -2656,7 +2676,7 @@ var OzPlayer = (function()
                                 {
                                     if(players[p].transcript && players[p].transcript.id == option.id)
                                     {
-                                        return etc.console(etc.sprintf(config.lang['option-busy-transcript'],
+                                        etc.console(etc.sprintf(config.lang['option-busy-transcript'],
                                         {
                                             id    : player.instance.id,
                                             other : p
@@ -2668,14 +2688,14 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and exit if the responsive value is not a valid ID
+                    //show a console error if the responsive value is not a valid ID
                     //or if the referenced element is inside the player (or is the player)
                     //nb. multiple player instances can all use the same responsive element
                     case 'responsive' :
 
                         if((option = etc.get('#' + option)) === null)
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-responsive'],
+                            etc.console(etc.sprintf(config.lang['option-bad-responsive'],
                             {
                                 id : player.instance.id
 
@@ -2683,7 +2703,7 @@ var OzPlayer = (function()
                         }
                         else if(etc.contains(player.container, option))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-wrong-responsive'],
+                            etc.console(etc.sprintf(config.lang['option-wrong-responsive'],
                             {
                                 id : player.instance.id
 
@@ -2691,12 +2711,12 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and break if the responsive-mode value is not valid
+                    //show a console error if the responsive-mode value is not valid
                     case 'responsive-mode' :
 
                         if(!(option == 'max' || option == 'initial' || option == 'min'))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-responsive-mode'],
+                            etc.console(etc.sprintf(config.lang['option-bad-responsive-mode'],
                             {
                                 id : player.instance.id
 
@@ -2704,12 +2724,12 @@ var OzPlayer = (function()
                         }
                         break;
 
-                    //show a console error and break if the controls value is not valid
+                    //show a console error if the controls value is not valid
                     case 'controls' :
 
                         if(!(option == 'row' || option == 'stack'))
                         {
-                            return etc.console(etc.sprintf(config.lang['option-bad-controls'],
+                            etc.console(etc.sprintf(config.lang['option-bad-controls'],
                             {
                                 id : player.instance.id
 
@@ -3655,12 +3675,17 @@ var OzPlayer = (function()
     //-- private => media functions --//
 
     //play the video and audio if applicable
+    //nb. we don't play audio in regular sync with video if we have xad data
+    //because xad cues are handled differently (see xadTracking for details)
     function playMedia(player)
     {
         player.media.play();
         if(player.audio)
         {
-            player.audio.play();
+            if(!player.tracks.xad)
+            {
+                player.audio.play();
+            }
         }
 
         //*** DEV TMP
@@ -3673,12 +3698,17 @@ var OzPlayer = (function()
     }
 
     //pause the video and audio if applicable
+    //nb. we don't play audio in regular sync with video if we have xad data
+    //because xad cues are handled differently (see xadTracking for details)
     function pauseMedia(player)
     {
         player.media.pause();
         if(player.audio)
         {
-            player.audio.pause();
+            if(!player.tracks.xad)
+            {
+                player.audio.pause();
+            }
         }
 
         //*** DEV TMP
@@ -3712,10 +3742,15 @@ var OzPlayer = (function()
         //then set the currentTime on the media and audio if applicable
         //nb. check the audio readyState in case it's not ready yet
         //since setting currentTime would otherwise throw an error
+        //nb. we don't play audio in regular sync with video if we have xad data
+        //because xad cues are handled differently (see xadTracking for details)
         player.media.setCurrentTime(time);
         if(player.audio && player.audio.readyState >= 2)
         {
-            player.audio.currentTime = time;
+            if(!player.tracks.xad)
+            {
+                player.audio.currentTime = time;
+            }
         }
 
         //if we have enabled audio descriptions, synchronise the audio with the video
@@ -3923,7 +3958,10 @@ var OzPlayer = (function()
         //could fire again before another progress or timeupdate event has fired
         //resulting in a second event with a zero time that triggered the loading
         //indicator, even though we didn't actually need it to display at that point
-        if(media.previousTime === time && time > 0)
+        //nb. we also don't do this if the media playback rate is zero, which caters
+        //for IE11 when playing an xad audio cue, because it continues to fire
+        //timeupdate events even when the rate is zero (see xadTracking for details)
+        if(media.previousTime === time && time > 0 && Math.round(media.playbackRate) == 1)
         {
             return false;
         }
@@ -4029,12 +4067,15 @@ var OzPlayer = (function()
         //(just in case you're already in fullscreen when this happens)
         //nb. there are cases where the mute button is already disabled
         //but it doesn't do any harm and doesn't need to be excepted
-        etc.each(player.buttonkeys, function(key)
+        etc.each(player.buttonkeys, function(row)
         {
-            if(key != 'fullscreen')
+            etc.each(row, function(key)
             {
-                updateControlDisabled(player, key, true);
-            }
+                if(key != 'fullscreen')
+                {
+                    updateControlDisabled(player, key, true);
+                }
+            });
         });
 
         //remove any active tooltip and nullify the tooltipbutton flag
@@ -4112,7 +4153,8 @@ var OzPlayer = (function()
             //resulting in cases where the audio keeps playing even though the video is paused
             //nb. although now we're silencing the error events onprogress and onloadedmetadata
             //this set of circumstances shouldn't happen, but let's leave the condition jic
-            if(player.audio.readyState < 2)
+            //nb. check the audio in case xad metadata failure has created an audio error state
+            if(player.audio && player.audio.readyState < 2)
             {
                 //if we've added the controls by now
                 if(player.controlform)
@@ -4152,7 +4194,8 @@ var OzPlayer = (function()
         player.audiodesk.onprogress = etc.listen(player.audio, 'progress', function()
         {
             //if the ready state is less than 2 then we're still waiting to load enough
-            if(player.audio.readyState < 2)
+            //nb. check the audio in case xad metadata failure has created an audio error state
+            if(player.audio && player.audio.readyState < 2)
             {
                 //if we've added the controls by now and playback
                 //has already started and audio is currently enabled
@@ -4171,8 +4214,9 @@ var OzPlayer = (function()
             //so it doesn't try to update the audio position until it's ready
             else
             {
-                //if we've added the controls by now
-                if(player.controlform)
+                //if we've added the controls by now and the audio has not been nullified
+                //nb. we check this in case xad metadata failure has created an audio error state
+                if(player.controlform && player.audio)
                 {
                     //update the button's aria-label
                     //to show the text corresponding with its state
@@ -4223,8 +4267,9 @@ var OzPlayer = (function()
         //in which case we won't get more than one progress event when enabling mid-playback
         player.audiodesk.onloadedmetadata = etc.listen(player.audio, 'loadedmetadata', function()
         {
-            //if we've added the controls by now
-            if(player.controlform)
+            //if we've added the controls by now and the audio has not been nullified
+            //nb. we check this in case xad metadata failure has created an audio error state
+            if(player.controlform && player.audio)
             {
                 //update the button's aria-label
                 //to show the text corresponding with its state
@@ -4294,9 +4339,14 @@ var OzPlayer = (function()
                 //nb. we need to check that the audio object is still here
                 //in case a loading error has subsequently nullified it
                 //** so we should probably also silence these events if that happens
+                //nb. we don't play audio in regular sync with video if we have xad data
+                //because xad cues are handled differently (see xadTracking for details)
                 if(player.audio && !player.audio.paused && player.media.paused)
                 {
-                    player.audio.pause();
+                    if(!player.tracks.xad)
+                    {
+                        player.audio.pause();
+                    }
 
                     //*** DEV TMP
                     //var e = {type:'a-'+e.type}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
@@ -4311,7 +4361,10 @@ var OzPlayer = (function()
         //(and which we also do for the video, so the paused flag is always true when the media is not playing)
         etc.listen(player.audio, 'ended', function()
         {
-            player.audio.pause();
+            if(player.audio)
+            {
+                player.audio.pause();
+            }
         });
 
         //finally define the SRC to kick all that off
@@ -4322,6 +4375,14 @@ var OzPlayer = (function()
     //and updating the audio time to match the video time
     function audioSynchronise(player)
     {
+        //ignore this entirely if we have xad data
+        //nb. we don't play audio in regular sync with video if we have xad data
+        //because xad cues are handled differently (see xadTracking for details)
+        if(player.tracks.xad)
+        {
+            return;
+        }
+
         //check that audio has sufficiently loaded, else we'll get an error
         //eg. if the audio is slow to load, or the user has no sound output
         //but first check that it still exists just in case it's fired an error
@@ -4364,7 +4425,8 @@ var OzPlayer = (function()
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
             if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
             {
-                /*** DEV LOG ***//*
+                /*** DEV LOG ***//*'<dfn>','</dfn>']);
+                }
                 if($this.logs.audio)
                 {
                     audiolog([
@@ -4372,10 +4434,9 @@ var OzPlayer = (function()
                         [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
                         [player.audio.duration, 10],
                         [player.audio.currentTime, 0],
-                        [' =&gt; ' + player.media.currentTime, 0]
+                        [' =&gt; ' + player.media.currentTime.toFixed(2), 0]
                         ],
-                        ['<dfn>','</dfn>']);
-                } */
+                        [ */
 
                 player.audio.currentTime = player.media.currentTime;
             }
@@ -4388,7 +4449,7 @@ var OzPlayer = (function()
                     [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
                     [player.audio.duration, 10],
                     [player.audio.currentTime, 0],
-                    [' (' + player.media.currentTime + ')', 0]
+                    [' (' + player.media.currentTime.toFixed(2) + ')', 0]
                     ],
                     ['<dfn>','</dfn>']);
             } */
@@ -4413,11 +4474,12 @@ var OzPlayer = (function()
         //define a null tracks object by default
         var tracks = null;
 
-        //if this is the audio-only player and we have no transcript
-        //just return the null object without parsing the tracks
-        //nb. since audio-only doesn't have captions, we won't need
-        //the data unless we have a transcript to display them in
-        if(player.isaudio && !player.transcript)
+        //if this is the audio-only player, and either the kind is xad
+        //or [the kind is captions or transcript and] we have no transcript,
+        //just return the null object without parsing since we don't need the data
+        //nb. the audio-only player doesn't support audio-descriptions and doesn't
+        //have captions, so we'll only need captions data if we have a transcript
+        if(player.isaudio && (kind == 'xad' || !player.transcript))
         {
             return tracks;
         }
@@ -4449,16 +4511,35 @@ var OzPlayer = (function()
         //now iterate through the collection of <track> elements
         //inside the player container, and for each of the specified kind
         //nb. if kind is "captions" it matches the kind attribute, but if kind is
-        //"transcript" it matches the data-kind attribute where kind is "metadata"
+        //"transcript" or "xad" it matches the data-kind attribute where kind is "metadata"
         etc.each(etc.get('track', player.container), function(track, key)
         {
             if
             (
-                (kind == 'captions' && track.getAttribute('kind') == kind)
+                (
+                    kind == 'captions'
+                    &&
+                    track.getAttribute('kind') == kind
+                )
                 ||
-                (kind == 'transcript'&& track.getAttribute('kind') == 'metadata' && track.getAttribute('data-kind') == kind)
+                (
+                    (kind == 'transcript' || kind == 'xad')
+                    &&
+                    track.getAttribute('kind') == 'metadata'
+                    &&
+                    track.getAttribute('data-kind') == kind
+                )
             )
             {
+                //if the kind is "xad" set an srclang attribute of "en" on the track in case
+                //another srclang has been defined, because xad metadata is always in english
+                //nb. this also means that if multiple xad tracks are defined, only the last one
+                //will be used, which is helpful since you can't have multiple xad metadata
+                if(kind == 'xad')
+                {
+                    track.setAttribute('srclang', 'en');
+                }
+
                 //add a new object to the tracks, indexed by srclang
                 //which we get from the track's "srclang" attribute, or use
                 //the user language if that's undefined, also lowercased
@@ -4484,8 +4565,9 @@ var OzPlayer = (function()
                     cues        : []
                 };
 
+                //if the kind is not xad
                 //add this key to the languages array if it's not already present
-                if(etc.find(languages, key) < 0)
+                if(kind != 'xad' && etc.find(languages, key) < 0)
                 {
                     languages.push(key);
                 }
@@ -4566,7 +4648,7 @@ var OzPlayer = (function()
                     }
                 }
 
-                //else [if the kind is transcript or we don't have
+                //else [if the kind is transcript or xad or we don't have
                 //native track support] we can just remove the track
                 //since even the native captions won't require transcript data
                 else
@@ -4669,7 +4751,8 @@ var OzPlayer = (function()
         //since it's being redefined every time the parent function is called
         //but the advantage of having closure access to the parent arguments
         //outweights the disadvantage, given how infrequently it's called
-        //ie. the parent function won't be called more than twice per sesson
+        //ie. the parent function won't be called more than once per track type
+        //(so three times: for captions, transcript and xad; if all three are defined)
         function parseTrackVTT(vtt)
         {
             //trim the data, normalize line-breaks to unix, then split by empty lines
@@ -4686,6 +4769,9 @@ var OzPlayer = (function()
             //        );
             //}
             //catch(ex){}
+
+            //*** DEV TMP
+            //var cuedevdata = {};
 
             //create an empty cues array for storing processed cues
             //then start an asynchronous processor to iterate through the lines of VTT text
@@ -4714,7 +4800,7 @@ var OzPlayer = (function()
                 //otherwise we wouldn't be able to support SRT files
                 //the WebVTT specification also says that "WEBVTT" should be
                 //the first 6 characters (ie. not preceded by any whitespace)
-                //but I don't think it's reasonable to enforce that requirement
+                //but I don't think it's necessary to enforce that requirement
                 if(/^\s*(WEBVTT|NOTE)/.test(vtt[i]))
                 {
                     vtt.splice(i, 1);
@@ -4815,7 +4901,9 @@ var OzPlayer = (function()
                     //have done anyway with negative timing) but it normalizes the numbers
                     //so that any mathematical comparison will infer the correct order
                     //nb. this of course also limits the minimum endTime to 0.002
-                    if(cue.endTime < cue.startTime)
+                    //also do this if the kind is xad since we don't use the endTime
+                    //but normalize it for sanity just in case its defined incorrectly
+                    if(cue.endTime < cue.startTime || kind == 'xad')
                     {
                         cue.endTime = cue.startTime;
                     }
@@ -4845,10 +4933,52 @@ var OzPlayer = (function()
                         //** should we allow for target attributes which have no quotes, or single quotes?
                         cue.text = cue.text.replace(/target=\"[^\"]+\"/ig, '').replace(/(<a)/ig, '$1 target="_blank"');
                     }
+
+                    //then if the kind is xad we need to parse the cue text to get the time information
+                    if(kind == 'xad')
+                    {
+                        //extract the individual start and end timestamps from the xad() command
+                        //then parse those into absolute offsets and save them to startAudio and endAudio
+                        //nb. the timestamp regex is very basic and will allow invalid numbers
+                        //but it also allows the european "," instead of "." for the milliseconds
+                        //nb. the command name is case-insensitive so xad() and XAD() are allowed
+                        //nb. anything defined after the timestamp end bracket will be ignored
+                        //multiple xad() commands are also ignored (ie. we only keep the first)
+                        cue.text.replace(/^xad\(((?:[\d]+[\:\.\,]?){3,4})(?:\s+\-\->\s+)((?:[\d]+[\:\.\,]?){3,4})\)/i,
+                        function(all, start, end)
+                        {
+                            cue.startAudio = Math.round(library.getStampTime(start) * 1000) / 1000;
+                            cue.endAudio = Math.round(library.getStampTime(end) * 1000) / 1000;
+                        });
+
+                        //if we don't have startAudio and endAudio values then the command was improperly defined
+                        //so there's no point creating a cue for it, so just continue to the next cue
+                        //but first show a console info with the invalid xad message
+                        //(therefore each invalid command will generate a separate warning)
+                        if(!(typeof(cue.startAudio) == 'number' && typeof(cue.endAudio) == 'number'))
+                        {
+                            etc.console(etc.sprintf(config.lang['vtt-invalid-xad'], { src : track.src }), 'warn');
+                            return this.next();
+                        }
+
+                        //[else] normalize endAudio so it can't be earlier than startAudio
+                        if(cue.endAudio < cue.startAudio)
+                        {
+                            cue.endAudio = cue.startAudio;
+                        }
+
+                        //define a playstate flag on the cue (see xadTracking for details)
+                        //0 = unplayed (future)
+                        //1 = ready to be played
+                        //2 = playing
+                        //3 = just played
+                        //4 = played (past)
+                        cue.playstate = 0;
+                    }
                 }
 
                 //but if it is empty, there's no point creating a cue for it at all
-                //since we'd have nothing to display, so just continue to the next cue
+                //since we'd have no data in it, so just continue to the next cue
                 //but first show a console info with the invalid cue message
                 //(therefore each invalid cue will generate a separate warning)
                 else
@@ -4860,6 +4990,9 @@ var OzPlayer = (function()
                 //finally add this cue object to the cues array
                 cues.push(cue);
 
+
+                //*** DEV TMP
+                //cuedevdata[cue.id] = {startTime:cue.startTime,endTime:cue.endTime,duration:(etc.def(cue.duration)?cue.duration:null),text:cue.text,kind:cue.kind,lang:cue.lang};
 
                 //*** DEV TMP
                 //if(__.console) { console.log('id\t"'+cue.id+'"\n'+ 'startTime\t'+cue.startTime+'\n'+ 'endTime\t'+cue.endTime+'\n'+ 'text\t"'+cue.text+'"\n'+ ''); }
@@ -4892,6 +5025,9 @@ var OzPlayer = (function()
                 {
                     return onfail(415);
                 }
+
+                //*** DEV TMP
+                //if(console.table) { console.table(cuedevdata); }
 
                 //else call oncomplete with the finished cues array
                 return oncomplete(cues);
@@ -5684,41 +5820,50 @@ var OzPlayer = (function()
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    audiolog([
-                        [e.type.toUpperCase(), 18],
-                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                        [player.audio.duration, 10],
-                        [player.audio.currentTime, 10]
-                        ],
-                        ['<i>','</i>']);
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10]
+                            ],
+                            ['<i>','</i>']);
+                    }
                 });
             });
             etc.each(['volumechange'], function(type)
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    audiolog([
-                        [e.type.toUpperCase(), 18],
-                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                        [player.audio.duration, 10],
-                        [player.audio.currentTime, 10],
-                        ['', 5],
-                        [player.audio.volume + ' [' + player.audio.muted + ']', 0]
-                        ],
-                        ['<i>','</i>']);
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10],
+                            ['', 5],
+                            [player.audio.volume + ' [' + player.audio.muted + ']', 0]
+                            ],
+                            ['<i>','</i>']);
+                    }
                 });
             });
             etc.each(['play','playing','pause','ended'], function(type)
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    audiolog([
-                        [e.type.toUpperCase(), 18],
-                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                        [player.audio.duration, 10],
-                        [player.audio.currentTime, 10]
-                        ],
-                        ['<ins>','</ins>']);
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10]
+                            ],
+                            ['<ins>','</ins>']);
+                    }
                 });
             });
         }
@@ -5729,6 +5874,23 @@ var OzPlayer = (function()
             {
                 etc.listen(player.audio, type, function(e)
                 {
+                    if(player.audio)
+                    {
+                        audiolog([
+                            [e.type.toUpperCase(), 18],
+                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                            [player.audio.duration, 10],
+                            [player.audio.currentTime, 10],
+                            ['', 5],
+                            [getbuffer(player.audio), 0]
+                            ]);
+                    }
+                });
+            });
+            etc.listen(player.audio, 'waiting', function(e)
+            {
+                if(player.audio)
+                {
                     audiolog([
                         [e.type.toUpperCase(), 18],
                         [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
@@ -5736,59 +5898,57 @@ var OzPlayer = (function()
                         [player.audio.currentTime, 10],
                         ['', 5],
                         [getbuffer(player.audio), 0]
-                        ]);
-                });
-            });
-            etc.listen(player.audio, 'waiting', function(e)
-            {
-                audiolog([
-                    [e.type.toUpperCase(), 18],
-                    [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                    [player.audio.duration, 10],
-                    [player.audio.currentTime, 10],
-                    ['', 5],
-                    [getbuffer(player.audio), 0]
-                    ],
-                    ['<b>','</b>']);
+                        ],
+                        ['<b>','</b>']);
+                }
             });
             etc.listen(player.audio, 'canplay', function(e)
             {
-                audiolog([
-                    [e.type.toUpperCase(), 18],
-                    [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                    [player.audio.duration, 10],
-                    [player.audio.currentTime, 10],
-                    ['', 5],
-                    [getbuffer(player.audio), 0]
-                    ],
-                    ['<u>','</u>']);
+                if(player.audio)
+                {
+                    audiolog([
+                        [e.type.toUpperCase(), 18],
+                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                        [player.audio.duration, 10],
+                        [player.audio.currentTime, 10],
+                        ['', 5],
+                        [getbuffer(player.audio), 0]
+                        ],
+                        ['<u>','</u>']);
+                }
             });
             etc.listen(player.audio, 'error', function(e)
             {
-                audiolog([
-                    [e.type.toUpperCase(), 18],
-                    [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                    [player.audio.duration, 10],
-                    [player.audio.currentTime, 0]
-                    ],
-                    ['<b><b>','</b></b>']);
+                if(player.audio)
+                {
+                    audiolog([
+                        [e.type.toUpperCase(), 18],
+                        [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                        [player.audio.duration, 10],
+                        [player.audio.currentTime, 0]
+                        ],
+                        ['<b><b>','</b></b>']);
+                }
             });
             etc.each(['progress'], function(type)
             {
                 etc.listen(player.audio, type, function(e)
                 {
-                    if($this.logs.audio.getAttribute('data-filter-progress'))
+                    if(player.audio)
                     {
-                        audiolog([
-                            [e.type.toUpperCase(), 18],
-                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                            [player.audio.duration, 10],
-                            [player.audio.currentTime, 10],
-                            //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
-                            ['',5],
-                            [getbuffer(player.audio), 0]
-                            ],
-                            ['<tt>','</tt>']);
+                        if($this.logs.audio.getAttribute('data-filter-progress'))
+                        {
+                            audiolog([
+                                [e.type.toUpperCase(), 18],
+                                [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                                [player.audio.duration, 10],
+                                [player.audio.currentTime, 10],
+                                //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
+                                ['',5],
+                                [getbuffer(player.audio), 0]
+                                ],
+                                ['<tt>','</tt>']);
+                        }
                     }
                 });
             });
@@ -5798,16 +5958,19 @@ var OzPlayer = (function()
                 {
                     if($this.logs.audio.getAttribute('data-filter-timeupdate'))
                     {
-                        audiolog([
-                            [e.type.toUpperCase(), 18],
-                            [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
-                            [player.audio.duration, 10],
-                            [player.audio.currentTime, 10],
-                            //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
-                            ['',5],
-                            [getbuffer(player.audio), 0]
-                            ],
-                            ['<del>','</del>']);
+                        if(player.audio)
+                        {
+                            audiolog([
+                                [e.type.toUpperCase(), 18],
+                                [(etc.def(player.audio.readyState) ? player.audio.readyState : '?') + '/' + (etc.def(player.audio.networkState) ? player.audio.networkState : '?'), 7],
+                                [player.audio.duration, 10],
+                                [player.audio.currentTime, 10],
+                                //[isTimeBuffered(player.audio) ? '<strong> Y </strong>' : '<small> N </small>', 5],
+                                ['',5],
+                                [getbuffer(player.audio), 0]
+                                ],
+                                ['<del>','</del>']);
+                        }
                     }
                 });
             });
@@ -5989,7 +6152,8 @@ var OzPlayer = (function()
             descriptions        : null,     //text descriptions (for future use)
             youtube_captions    : null,     //youtube embedded captions
             captions            : null,     //track captions
-            transcript          : null      //track transcript data
+            transcript          : null,     //track transcript data
+            xad                 : null      //track xad metadata
         };
 
         //if this is a youtube video then check the source element for a data-captions attribute
@@ -6038,13 +6202,6 @@ var OzPlayer = (function()
         //    console.log(str);
         //}
 
-        //*** DEV TMP
-        //if(__.console) { console.log(etc.dump(player.tracks)); }
-        //if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
-        //if(__.console) { etc.delay(5000, function() { console.log(etc.dump(player.tracks)); }); }
-        //if(__.console) { etc.delay(9000, function() { console.log(etc.dump(player.tracks)); }); }
-        //etc.get('#info').innerHTML = etc.dump(player.tracks);
-
         //then if we have any captions tracks data, and either they're
         //enabled by default or the transcript container is present
         //nb. if there's transcript data but no captions data, the transcript
@@ -6057,6 +6214,49 @@ var OzPlayer = (function()
             //and show a failure message in the button title and transcript container
             loadTracksData(player, player.tracks.captions.selected.transcript);
         }
+
+
+        //if we have audio descriptions, look for xad track data
+        if(player.audiodesk)
+        {
+            if(player.tracks.xad = getTracksData(player, 'xad'))
+            {
+                //if this is a youtube video then xad is not supported because
+                //the youtube API doesn't support setting playbackrate to 0
+                //and playing the AD normally would be pointless since they'd be out of sync
+                //so we set the ad error state the same as if the data had failed to load
+                //nb. also don't support it for flash video for simplicity
+                //since the only possible browser that could support native
+                //audio but not native video is old Firefox when the video is MP4
+                //and since we're about to drop support for that it's not worth testing
+                if(player.mode == 'youtube' || player.mode == 'flash')
+                {
+                    //set the xad tracks data to null
+                    player.tracks.xad = null;
+
+                    //nullify the player audio reference so we don't keep
+                    //trying to play and pause it, or keep having to
+                    //test its readyState to see if we can synchronise
+                    //we can also use this to detect existing failure
+                    //when we build the form in just a moment
+                    player.audio = null;
+                }
+
+                //else [for a regular video] try to load the xad data
+                else
+                {
+                    loadXADTrackData(player);
+                }
+            }
+        }
+
+
+        //*** DEV TMP
+        //if(__.console) { console.log(etc.dump(player.tracks)); }
+        //if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
+        //if(__.console) { etc.delay(5000, function() { console.log(etc.dump(player.tracks)); }); }
+        //if(__.console) { etc.delay(9000, function() { console.log(etc.dump(player.tracks)); }); }
+        //etc.get('#info').innerHTML = etc.dump(player.tracks);
 
 
         //create an indicator overlay which covers the entire interface
@@ -6125,10 +6325,11 @@ var OzPlayer = (function()
         //keep a record of all the buttons we add (recording each key)
         //which we'll need to calculate the total space they take up
         //so we can apply dynamic widths to the seek and volume fields
-        player.buttonkeys = [];
+        //and since we now have two rows, we need two separate collections
+        //indexed by the node reference of the row relative to the controlform
+        player.buttonkeys = { firstChild : [], lastChild : [] };
 
         //create the controls form inside the container
-        //including an offleft legend for assistive meta-data
         //including an action that points to the media wrapper ID
         //(which is better semantics than using javascript:void(null))
         //so then we need an onsubmit event to block native submission and bubbling
@@ -6256,11 +6457,222 @@ var OzPlayer = (function()
         startAutoHiding(player);
 
 
-        //create a span-wrapped play/pause button inside the controls fieldset
+        //detect whether range inputs are supported, so we know what input type
+        //to use for the sliders' underlying controls, using "range" if supported
+        //which renders as a slider when CSS is not available, or "hidden" if not
+        //so you don't see a text field, since the value would be in seconds,
+        //and is effectively impossible to manually change while the video is playing
+        var slidertype = etc.build('input', { 'type' : 'range' }).type == 'range' ? 'range' : 'hidden';
+
+
+        //create a span-wrapped rewind button inside the first fieldset
         //with its state set to "off" and the button disabled by default
         //nb. the open-bracket must be on the same line for function name compression
         addControlButton(
             player,
+            player.controlform.firstChild,
+            'rewind',
+            false,
+            'off',
+            'off',
+            {
+                //then define an abstraction for the button's command handler
+                //so we can call it programatically (eg. from the global key handler)
+                '.command'  : function()
+                {
+                    //*** DEV TMP
+                    //if(__.console) { console.log('player.controlform.rewind.command()'); }
+
+                    //get the media's currentTime and subtract the config seek duration
+                    //then pass the new value straight to setMediaTime
+                    //nb. we don't need to worry about out-of-range values because setMediaTime
+                    //takes of that; we also don't need to worry about the updating the seek slider,
+                    //because setting the media time will cause a reciprocal timeupdate
+                    //event to be fired, which in turn will update theslider and its input
+                    setMediaTime(player, Math.floor(player.media.currentTime - config['seek-duration']));
+
+                    //then set the ended flag to false, so that if you play to the end
+                    //then seek to an earlier point, it will carry on playing from there
+                    player.ended = false;
+
+                    //if we have xad data and an xad cue is currently playing
+                    //nb. there's no need to check the ready states
+                    //of the audio and xad data, because the playing flag
+                    //wouldn't be true unless all of that was already checked
+                    if(player.tracks.xad && player.audiodesk.xad.playing)
+                    {
+                        //stop any playing xad audio and reset xad tracking
+                        //setting lastcue to null so it can be selected again
+                        xadReset(player, null);
+
+                        //*** DEV TMP
+                        //console.error('REWIND-RESET\n'
+                        //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                        //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                        //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                        //    + '');
+                    }
+
+                    //*** DEV TMP
+                    //if(__.console) { console.log('rewind(' + Math.floor(player.media.currentTime) + ' => ' + Math.floor(player.media.currentTime - config['seek-duration']) +')'); }
+                }
+            }
+        );
+
+        //update the button's aria-label and text parsed with the seek duration
+        //nb. this process may trigger updateSliderStretch, but we haven't
+        //built all the sliders and spacer yet so that would cause an error,
+        //so pass the explicit noupdate flag to prevent that from happening
+        updateControlText(player, 'rewind',
+            etc.sprintf(getLang(player, 'button-rewind-off'), { '2' : config['seek-duration'] }),
+            etc.sprintf(getLang(player, 'text-rewind-off'), { '2' : config['seek-duration'] }),
+            true
+            );
+
+        //bind the button's click handler to its command abstraction
+        //which we have to do separately since we can't rely on the order of
+        //iteration through the properties object passed to the build function
+        //nb. since this is a proper button, it will work for touch and keyboard
+        addControlClick(player, 'rewind');
+
+        //then add it to the firstChild buttonkeys
+        player.buttonkeys.firstChild.push('rewind');
+
+
+        //create a span-wrapped forward button inside the first fieldset
+        //with its state set to "off" and the button disabled by default
+        //nb. the open-bracket must be on the same line for function name compression
+        addControlButton(
+            player,
+            player.controlform.firstChild,
+            'forward',
+            false,
+            'off',
+            'off',
+            {
+                //then define an abstraction for the button's command handler
+                //so we can call it programatically (eg. from the global key handler)
+                '.command'  : function()
+                {
+                    //*** DEV TMP
+                    //if(__.console) { console.log('player.controlform.forward.command()'); }
+
+                    //get the media's currentTime and add the config seek duration
+                    //then pass the new value straight to setMediaTime
+                    //nb. we don't need to worry about out-of-range values because setMediaTime
+                    //takes of that; we also don't need to worry about the updating the seek slider,
+                    //because setting the media time will cause a reciprocal timeupdate
+                    //event to be fired, which in turn will update theslider and its input
+                    setMediaTime(player, Math.floor(player.media.currentTime + config['seek-duration']));
+
+                    //if we have xad data and an xad cue is currently playing
+                    //nb. there's no need to check the ready states
+                    //of the audio and xad data, because the playing flag
+                    //wouldn't be true unless all of that was already checked
+                    if(player.tracks.xad && player.audiodesk.xad.playing)
+                    {
+                        //stop any playing xad audio and reset xad tracking
+                        //setting lastcue to null so it can be selected again
+                        xadReset(player, null);
+
+                        //*** DEV TMP
+                        //console.error('FORWARD-RESET\n'
+                        //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                        //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                        //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                        //    + '');
+                    }
+
+                    //*** DEV TMP
+                    //if(__.console) { console.log('forward(' + Math.floor(player.media.currentTime) + ' => ' + Math.floor(player.media.currentTime + config['seek-duration']) +')'); }
+                }
+            }
+        );
+
+        //update the button's aria-label and text parsed with the seek duration
+        //nb. this process may trigger updateSliderStretch, but we haven't
+        //built all the sliders and spacer yet so that would cause an error,
+        //so pass the explicit noupdate flag to prevent that from happening
+        updateControlText(player, 'forward',
+            etc.sprintf(getLang(player, 'button-forward-off'), { '2' : config['seek-duration'] }),
+            etc.sprintf(getLang(player, 'text-forward-off'), { '2' : config['seek-duration'] }),
+            true
+            );
+
+        //bind the button's click handler to its command abstraction
+        //which we have to do separately since we can't rely on the order of
+        //iteration through the properties object passed to the build function
+        //nb. since this is a proper button, it will work for touch and keyboard
+        addControlClick(player, 'forward');
+
+        //then add it to the firstChild buttonkeys
+        player.buttonkeys.firstChild.push('forward');
+
+
+        //create a span-wrapped seek input inside the first fieldset, of the specified type
+        //including the field wrapper classes (but we don't need a state class)
+        //plus a default field disabled class and the button disabled attribute
+        //defining a name so we can refer to it in the control form collection
+        //but also explicitly creating that reference just to be on the safe side
+        //and we also have to define an ID because the slider script requires one
+        //set the default range from zero to zero, until we know the duration
+        //and set the default step to one second, until we know it should be greater
+        //as well as defining a timestep property, which is simply a numeric version of that
+        //but is easier and more efficient to refer to than parseInt(getAttribute)
+        //also define aria-hidden so that screenreaders should ignore it
+        //then they'll use the aria data encoded in the custom slider instead
+        //(and it also has display:none which should help in that respect)
+        //nb. the custom sliders function will add and maintain its title
+        //nb. when the max is zero the slider thumb and this input will be disabled
+        //and the thumb will be hidden with opacity (so it's invisible but accessible)
+        //nb. also add a single space after button, just to create basic spacing
+        etc.build('span',
+        {
+            '=parent'           : player.controlform.firstChild,
+            'class'             : config.classes['field-wrapper']
+                                + ' '
+                                + config.classes['field-seek']
+                                + ' '
+                                + config.classes['state-disabled'],
+            '#dom'              : (player.controlform.seek = etc.build('input',
+            {
+                'type'          : slidertype,
+                'name'          : 'seek',
+                'id'            : etc.sprintf(config.ids['slider'],
+                {
+                    'id'        : player.container.id,
+                    'field'     : config.classes['field-seek']
+                }),
+                'disabled'      : 'disabled',
+                'aria-hidden'   : 'true',
+                'min'           : '0',
+                'max'           : '0',
+                'step'          : '1',
+                '.timestep'     : 1,
+                'value'         : '0',
+
+                //add a mouseup focuser for the benefit of webkit
+                //which otherwise doesn't focus the input when you click it
+                'onmouseup'     : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
+
+                //also define a seeking flag, that we'll set and clear in the
+                //slider event to indicate whether we're currently seeking
+                '.seeking'      : false
+            })),
+            '#text' : ' '
+        });
+
+
+        //now create a second fieldset for the rest of the controls
+        etc.build('fieldset', { '=parent' : player.controlform });
+
+
+        //create a span-wrapped play/pause button inside the second fieldset
+        //with its state set to "off" and the button disabled by default
+        //nb. the open-bracket must be on the same line for function name compression
+        addControlButton(
+            player,
+            player.controlform.lastChild,
             'playpause',
             false,
             'off',
@@ -6373,77 +6785,24 @@ var OzPlayer = (function()
         //nb. since this is a proper button, it will work for touch and keyboard
         addControlClick(player, 'playpause');
 
-        //then add it to the buttonkeys
-        player.buttonkeys.push('playpause');
+        //then add it to the lastChild buttonkeys
+        player.buttonkeys.lastChild.push('playpause');
 
 
-        //detect whether range inputs are supported, so we know what input type
-        //to use for the sliders' underlying controls, using "range" if supported
-        //which renders as a slider when CSS is not available, or "hidden" if not
-        //so you don't see a text field, since the value would be in seconds,
-        //and is effectively impossible to manually change while the video is playing
-        var slidertype = etc.build('input', { 'type' : 'range' }).type == 'range' ? 'range' : 'hidden';
-
-
-        //create a span-wrapped seek input inside the controls fieldset, of the specified type
-        //including the field wrapper classes (but we don't need a state class)
-        //plus a default field disabled class and the button disabled attribute
-        //defining a name so we can refer to it in the control form collection
-        //but also explicitly creating that reference just to be on the safe side
-        //and we also have to define an ID because the slider script requires one
-        //set the default range from zero to zero, until we know the duration
-        //and set the default step to one second, until we know it should be greater
-        //as well as defining a timestep property, which is simply a numeric version of that
-        //but is easier and more efficient to refer to than parseInt(getAttribute)
-        //also define aria-hidden so that screenreaders should ignore it
-        //then they'll use the aria data encoded in the custom slider instead
-        //(and it also has display:none which should help in that respect)
-        //nb. the custom sliders function will add and maintain its title
-        //nb. when the max is zero the slider thumb and this input will be disabled
-        //and the thumb will be hidden with opacity (so it's invisible but accessible)
-        //nb. also add a single space after button, just to create basic spacing
-        etc.build('span',
+        //add a spacer element to create a gap before the next group of buttons
+        player.controlform.spacer = etc.build('span',
         {
-            '=parent'           : player.controlform.firstChild,
-            'class'             : config.classes['field-wrapper']
-                                + ' '
-                                + config.classes['field-seek']
-                                + ' '
-                                + config.classes['state-disabled'],
-            '#dom'              : (player.controlform.seek = etc.build('input',
-            {
-                'type'          : slidertype,
-                'name'          : 'seek',
-                'id'            : etc.sprintf(config.ids['slider'],
-                {
-                    'id'        : player.container.id,
-                    'field'     : config.classes['field-seek']
-                }),
-                'disabled'      : 'disabled',
-                'aria-hidden'   : 'true',
-                'min'           : '0',
-                'max'           : '0',
-                'step'          : '1',
-                '.timestep'     : 1,
-                'value'         : '0',
-
-                //add a mouseup focuser for the benefit of webkit
-                //which otherwise doesn't focus the input when you click it
-                'onmouseup'     : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
-                //also define a seeking flag, that we'll set and clear in the
-                //slider event to indicate whether we're currently seeking
-                '.seeking'      : false
-            })),
-            '#text' : ' '
+            '=parent'    : player.controlform.lastChild,
+            'class'      : config.classes['field-wrapper']
+                         + ' '
+                         + config.classes['field-spacer']
         });
-
 
         //add a cheeky <br> to provide some basic formatting when CSS is unavailable
         //(ie. so the volume button and input are on a line of their own)
         //nb. it would be better to do this with fieldsets, but that's too much
         //complication, as it's much simpler if the controls all have the same parent
-        etc.build('br', { '=parent' : player.controlform.firstChild });
+        etc.build('br', { '=parent' : player.controlform.lastChild });
 
 
         //if we have any captions tracks data or embedded youtube captions
@@ -6486,10 +6845,11 @@ var OzPlayer = (function()
                          : 'off';
             }
 
-            //create a span-wrapped cc button inside the controls fieldset
+            //create a span-wrapped cc button inside the second fieldset
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
+                player.controlform.lastChild,
                 'cc',
                 true,
                 statekey,
@@ -7079,14 +7439,14 @@ var OzPlayer = (function()
             //bind the button's click handler to its command abstraction
             addControlClick(player, 'cc');
 
-            //then add it to the buttonkeys
-            player.buttonkeys.push('cc');
+            //then add it to the lastChild buttonkeys
+            player.buttonkeys.lastChild.push('cc');
         }
 
         //if we've added the cc button, add another cheeky <br>
         if(player.controlform.cc)
         {
-            etc.build('br', { '=parent' : player.controlform.firstChild });
+            etc.build('br', { '=parent' : player.controlform.lastChild });
         }
 
 
@@ -7115,10 +7475,11 @@ var OzPlayer = (function()
                 onstate = _.location.href.indexOf(player.audiolinks.on) < 0 ? 'off' : 'on';
             }
 
-            //create a span-wrapped ad button inside the controls fieldset with the corresponding state
+            //create a span-wrapped ad button inside the second fieldset with the corresponding state
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
+                player.controlform.lastChild,
                 'ad',
                 true,
                 onstate,
@@ -7172,6 +7533,28 @@ var OzPlayer = (function()
                             if(player.audiodesk.enabled)
                             {
                                 audioSynchronise(player);
+                            }
+
+                            //else [if we're disabling audio and] we have xad data
+                            else if(player.tracks.xad)
+                            {
+                                //if an xad cue is currently playing
+                                //nb. there's no need to check the ready states
+                                //of the audio and xad data, because the playing flag
+                                //wouldn't be true unless all of that was already checked
+                                if(player.audiodesk.xad.playing)
+                                {
+                                    //stop any playing xad audio and reset xad tracking
+                                    //setting lastcue to null so it can be selected again
+                                    xadReset(player, null);
+
+                                    //*** DEV TMP
+                                    //console.error('AD-OFF-RESET\n'
+                                    //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                                    //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                                    //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                                    //    + '');
+                                }
                             }
 
                             //and then set audio muted to the opposite of enabled
@@ -7239,14 +7622,14 @@ var OzPlayer = (function()
             //bind the button's click handler to its command abstraction
             addControlClick(player, 'ad');
 
-            //then add it to the buttonkeys
-            player.buttonkeys.push('ad');
+            //then add it to the lastChild buttonkeys
+            player.buttonkeys.lastChild.push('ad');
         }
 
         //if we've added the ad button, add another cheeky <br>
         if(player.controlform.ad)
         {
-            etc.build('br', { '=parent' : player.controlform.firstChild });
+            etc.build('br', { '=parent' : player.controlform.lastChild });
         }
 
 
@@ -7256,7 +7639,7 @@ var OzPlayer = (function()
         //so there's no point adding the controls since they won't do anything
         if(!(defs.agent.ios || defs.agent.winphone))
         {
-            //create a span-wrapped mute button inside the controls fieldset
+            //create a span-wrapped mute button inside the second fieldset
             //with its state according to the default muting, which will be
             //true if the user has no sound output, or if the persisted
             //volume was zero for browsers using the flash player
@@ -7264,6 +7647,7 @@ var OzPlayer = (function()
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
+                player.controlform.lastChild,
                 'mute',
                 true,
                 (player.media.muted ? 'on' : 'off'),
@@ -7319,11 +7703,11 @@ var OzPlayer = (function()
             //bind the button's click handler to its command abstraction
             addControlClick(player, 'mute');
 
-            //then add it to the buttonkeys
-            player.buttonkeys.push('mute');
+            //then add it to the lastChild buttonkeys
+            player.buttonkeys.lastChild.push('mute');
 
 
-            //create a span-wrapped volume input inside the controls fieldset
+            //create a span-wrapped volume input inside the second fieldset
             //including the field wrapper classes (but we don't need a state class)
             //defining a name so we can refer to it in the control form collection
             //but also explicitly creating that reference just to be on the safe side
@@ -7341,7 +7725,7 @@ var OzPlayer = (function()
             //nb. also add a single space after button, just to create basic spacing
             etc.build('span',
             {
-                '=parent'           : player.controlform.firstChild,
+                '=parent'           : player.controlform.lastChild,
                 'class'             : config.classes['field-wrapper']
                                     + ' '
                                     + config.classes['field-volume'],
@@ -7392,7 +7776,7 @@ var OzPlayer = (function()
         //   whereby the transcript container ends up still visible above the fullscreen video
         //   and this could happen more generally with positioned content at the same context
         //   so it's safer and more reliable if we just get rid of fullscreen mode
-        //   (and windows versions of safari aren't officially supported anyway)
+        //   (and windows versions of safari aren't officially supported anymore anyway)
         //=> in firefox 10-15 it fails to resize the screen and controls properly
         //   while in firefox 9 it just plain doesn't work even though it claims support
         //   (and firefox 9-15 aren't officially supported anyway)
@@ -7461,13 +7845,14 @@ var OzPlayer = (function()
 
 
             //now add another cheeky <br> so this button has a line of its own
-            etc.build('br', { '=parent' : player.controlform.firstChild });
+            etc.build('br', { '=parent' : player.controlform.lastChild });
 
-            //create a span-wrapped fullscreen button inside the controls fieldset
+            //create a span-wrapped fullscreen button inside the second fieldset
             //with its state set to "off" but the button enabled by default
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
+                player.controlform.lastChild,
                 'fullscreen',
                 true,
                 'off',
@@ -7705,7 +8090,7 @@ var OzPlayer = (function()
                             if(button.videowidth < config['default-width'])
                             {
                                 //add the smallscreen class to the player container
-                                //which will hide the links and logo, and the mute and volume controls
+                                //which will hide the links and logo
                                 etc.addClass(player.container, config.classes['smallscreen']);
                             }
 
@@ -7915,7 +8300,7 @@ var OzPlayer = (function()
                                 {
                                     //temporarily silence the responsive events before we enter fullscreen mode
                                     //otherwise the change in layout will trigger a resize that causes a conflicting response
-                                    //and therefore we need to it here because that would fire before the screenchange event
+                                    //and therefore we need to do it here because that would fire before the screenchange event
                                     etc.each(player.responsivedata.responsiveevents, function(re)
                                     {
                                         re.silence();
@@ -8279,8 +8664,8 @@ var OzPlayer = (function()
             //etc.get('#info').innerHTML += str;
 
 
-            //then add it to the buttonkeys
-            player.buttonkeys.push('fullscreen');
+            //then add it to the lastChild buttonkeys
+            player.buttonkeys.lastChild.push('fullscreen');
         }
 
 
@@ -8476,15 +8861,13 @@ var OzPlayer = (function()
                 //since the slider only updates a maximum of once per second
                 if(player.controlform.seek.unseeking)
                 {
-                    __.clearTimeout(player.controlform.seek.unseeking);
-                    player.controlform.seek.unseeking = null;
+                    player.controlform.seek.unseeking = nullifyTimer(player.controlform.seek.unseeking);
                 }
                 player.controlform.seek.seeking = true;
                 player.controlform.seek.unseeking = etc.delay(config['ke\y-repeat-delay'], function()
                 {
                     player.controlform.seek.seeking = false;
-                    __.clearTimeout(player.controlform.seek.unseeking);
-                    player.controlform.seek.unseeking = null;
+                    player.controlform.seek.unseeking = nullifyTimer(player.controlform.seek.unseeking);
 
                 });
 
@@ -8590,7 +8973,7 @@ var OzPlayer = (function()
             //_.title = player.wrapper.nodeName + ' [!] ' + player.wrapper.offsetWidth;
 
             //add the smallscreen class to the player container
-            //which will hide the links and logo, and the mute and volume controls
+            //which will hide the links and logo
             etc.addClass(player.container, config.classes['smallscreen']);
 
             //then update the slider stretch to compensate for the hidden controls
@@ -8686,12 +9069,15 @@ var OzPlayer = (function()
         player.controlform.tooltipbutton = null;
 
         //now create a collection of all the elements we want with this behavior
-        //starting with all the control buttons from the buttonkeys array
+        //starting with all the control buttons from the buttonkeys arrays
         //then adding each of the skip links which also need to have tooltips
         player.controlform.tooltipnodes = [];
-        etc.each(player.buttonkeys, function(key)
+        etc.each(player.buttonkeys, function(row)
         {
-            player.controlform.tooltipnodes.push(player.controlform[key]);
+            etc.each(row, function(key)
+            {
+                player.controlform.tooltipnodes.push(player.controlform[key]);
+            });
         });
         if(player.skiplinks)
         {
@@ -8702,8 +9088,6 @@ var OzPlayer = (function()
         }
 
         //iterate through the collection to define the button tooltip events
-        //and while we're at it copy the buttonkeys reference to the control form
-        //so we can access it later from the buttons' circular form reference
         etc.each(player.controlform.tooltipnodes, function(node)
         {
             //create a circular reference from the button to the form,
@@ -8882,16 +9266,16 @@ var OzPlayer = (function()
                     //    + '<br>' + 'player.fullscreen = ' + player.fullscreen;
 
                     //so if this is Tab from the fullscreen button, send focus back to
-                    //the playpause button, then prevent its default and cancel bubble
+                    //the rewind button, then prevent its default and cancel bubble
                     if(!e.shiftKey && thetarget == player.controlform.fullscreen)
                     {
-                        player.controlform.playpause.focus();
+                        player.controlform.rewind.focus();
                         return null;
                     }
 
-                    //else if this is Shift+Tab from the playpause button, send focus back to
+                    //else if this is Shift+Tab from the rewind button, send focus back to
                     //the fullscreen button, then prevent its default and cancel bubble
-                    else if(e.shiftKey && thetarget == player.controlform.playpause)
+                    else if(e.shiftKey && thetarget == player.controlform.rewind)
                     {
                         player.controlform.fullscreen.focus();
                         return null;
@@ -9004,9 +9388,14 @@ var OzPlayer = (function()
             updateControlState(player, 'playpause', 'on');
 
             //then if we have audio and the audio is paused, play that too
+            //nb. we don't play audio in regular sync with video if we have xad data
+            //because xad cues are handled differently (see xadTracking for details)
             if(player.audio && player.audio.paused)
             {
-                player.audio.play();
+                if(!player.tracks.xad)
+                {
+                    player.audio.play();
+                }
             }
         });
 
@@ -9024,9 +9413,36 @@ var OzPlayer = (function()
             updateControlState(player, 'playpause', 'off');
 
             //then if we have audio and the audio isn't paused, pause that too
+            //nb. we don't play audio in regular sync with video if we have xad data
+            //because xad cues are handled differently (see xadTracking for details)
             if(player.audio && !player.audio.paused)
             {
-                player.audio.pause();
+                if(!player.tracks.xad)
+                {
+                    player.audio.pause();
+                }
+            }
+
+            //if we have xad data and an xad cue is currently playing
+            //nb. there's no need to check the ready states
+            //of the audio and xad data, because the playing flag
+            //wouldn't be true unless all of that was already checked
+            //nb. we only really need this condition for Safari, because other
+            //browsers fire a timeupdate when pausing, which triggers a reset
+            //from within xadTracking, but we may as well implement this for all
+            //just in case of unpredictable browsers or situations that need it
+            if(player.tracks.xad && player.audiodesk.xad.playing)
+            {
+                //stop any playing xad audio and reset xad tracking
+                //setting lastcue to null so it can be selected again
+                xadReset(player, null);
+
+                //*** DEV TMP
+                //console.error('PAUSE-RESET\n'
+                //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                //    + '');
             }
 
         }, false);
@@ -9050,6 +9466,19 @@ var OzPlayer = (function()
 
             //then update the button state
             updateControlState(player, 'playpause', 'off');
+
+            //and move the seek slider to the end (unless the seeking flag is true)
+            //nb. this is in case a long video has created a slider with
+            //several seconds per step and the video duration doesn't match
+            //an exact number of steps, in which case the seek slider would
+            //finish on its penultimate physical step not the very last one
+            //which is unlikely to be noticeable TBH since the difference is just
+            //a few pixels, but it was noticeable when using a temporarily tiny (10)
+            //seek-resolution for testing, and that's when it bugged me so I did this
+            if(!player.controlform.seek.seeking)
+            {
+                dispatchMediaSliderEvent(player.controlform.seek, Math.floor(player.media.currentTime));
+            }
         });
 
 
@@ -9323,6 +9752,14 @@ var OzPlayer = (function()
             //because they're also muted, so we can reduce the player's work
             if(player.audio && player.audiodesk.enabled)
             {
+                //if we have xad data then call the xadTracking function
+                //nb. we don't play audio in regular sync with video if we have xad data
+                //because xad cues are handled differently (see xadTracking for details)
+                if(player.tracks.xad)
+                {
+                    xadTracking(player, player.media.currentTime);
+                }
+
                 //however in safari and opera syncing the audio causes momentarily loss of sound
                 //so if we synchronise continually then the descriptions will never be heard
                 //while in firefox continual synchronising causes a jittery aliased sound
@@ -9330,7 +9767,7 @@ var OzPlayer = (function()
                 //each time we sync, and then compare that saved time with the current time
                 //then only synchronise if the modulus of that division is zero and the sync and
                 //lastsync are not the same, which effectively means 1 synchronisation every x seconds
-                //(where x is the config sync-frequency value, which defaults to 10s)
+                //(where x is the config sync-frequency value, which defaults to 9s)
                 //nb. we also bolster this with additional sync calls from the play and seeked events,
                 //and from setMediaTime, and from the events that control the loading indicator,
                 //and from the audio's own loading and buffering events where applicable
@@ -9345,10 +9782,13 @@ var OzPlayer = (function()
                 //*** seek forwards in safari from a loaded region to an unloaded region
                 //*** the video's audio continues to sound in the background until seeked
                 //*** so maybe that's related to whatever the fuck is going here?
-                var sync = Math.floor(player.media.currentTime);
-                if(sync % config['sync-frequency'] == 0 && sync != player.audiodesk.lastsync)
+                else
                 {
-                    audioSynchronise(player);
+                    var sync = Math.floor(player.media.currentTime);
+                    if(sync % config['sync-frequency'] == 0 && sync != player.audiodesk.lastsync)
+                    {
+                        audioSynchronise(player);
+                    }
                 }
             }
 
@@ -9480,8 +9920,7 @@ var OzPlayer = (function()
                     //then if the timeout is still running, reset it now
                     if(player.timeout)
                     {
-                        __.clearTimeout(player.timeout);
-                        player.timeout = null;
+                        player.timeout = nullifyTimer(player.timeout);
                     }
 
                     /*** DEV LOG (video timeout) ***//*
@@ -9663,7 +10102,10 @@ var OzPlayer = (function()
             //ignore this event if the video is not playing, because
             //there's no point showing the indicator for background loading
             //nb. waiting shouldn't fire while paused, but just in case
-            if(player.media.paused)
+            //also don't do this if the media playback rate is zero, which caters
+            //for android when playing an xad audio cue, because the video seek
+            //we do at the start of the cue also triggers a waiting event
+            if(player.media.paused || Math.round(player.media.playbackRate) < 1)
             {
                 return true;
             }
@@ -9744,15 +10186,15 @@ var OzPlayer = (function()
         //we don't get subsequent waiting/canplay when seeking triggers loading
         //however we can monitor other media events to know when to show the loading
         //spinner, by checking whether current time is inside a loaded time range
-        //but we do this for all, not just for flash, because it allows for browsers quirks
-        //such as native implementations that don't fire enough waiting/canplay events (eg. IE9-11)
+        //but we do this for all, not just for flash, because it allows for browser quirks
+        //such as native implementations that don't fire enough waiting/canplay events (eg. IE9-11 and Edge)
         //and for low-bandwidth situations where the video might freeze while loading data
         //even though checking the buffer shows that the time is inside a loaded range
         //and there are two different ways a browser might respond: either continuing to fire
         //timeupdate events with the same currentTime, or not firing timeupdate events while frozen,
         //and this difference in behaviour determines which event we have to use for monitoring:
         //=> progress is used for those that freeze without firing timeupdate (chrome, opera)
-        //=> timeupdate is used for those that keep firing same-time timeupdate (IE, firefox flash)
+        //=> timeupdate is used for those that keep firing same-time timeupdate (IE, Edge, firefox flash)
         //   (and with flash we can't rely on the existence of progress events anyway)
         //=> safari is really weird, jumping in a kind of loop when video freezes, eg. going from
         //   25 to 26 to 27 back to 25, and so on for as long as the freeze state persists
@@ -9789,7 +10231,7 @@ var OzPlayer = (function()
         //but we do need to do it for the ipad since iOS(8) doesn't fire the necessary waiting/canplay events
         if(!((defs.agent.firefox && player.mode == 'native') || defs.agent.android || defs.agent.iphone || defs.agent.winphone))
         {
-            etc.listen(player.media, (defs.agent.ie || defs.agent.firefox || player.mode == 'youtube' ? 'timeupdate' : 'progress'), function(e)
+            etc.listen(player.media, (defs.agent.ie || defs.agent.edge || defs.agent.firefox || player.mode == 'youtube' ? 'timeupdate' : 'progress'), function(e)
             {
                 //ignore this event if the video is not playing, because
                 //there's no point showing the indicator for background loading
@@ -10105,9 +10547,12 @@ var OzPlayer = (function()
         /*** DEV TMP ***//*
         etc.delay(1000, function()
         {
-            etc.each(player.buttonkeys, function(key)
+            etc.each(player.buttonkeys, function(row)
             {
-                updateControlDisabled(player, key, true);
+                etc.each(row, function(key)
+                {
+                    updateControlDisabled(player, key, true);
+                });
             });
         }); */
 
@@ -10118,6 +10563,11 @@ var OzPlayer = (function()
         //but for the subscription version it validates this player instance
         //then aborts and locks playback if it's found to be unlicensed
         xphonehome(player, screentype);
+
+
+
+        //*** DEV TMP
+        //etc.delay(10000, function() { abortMedia(player); });
 
 
 
@@ -10333,8 +10783,8 @@ var OzPlayer = (function()
     //### PHP ###// <?php endif; ?>
 
 
-    //create a span-wrapped button inside the controls fieldset
-    function addControlButton(player, key, enabled, statekey, labelkey, buttonprops)
+    //create a span-wrapped button inside one of the controls fieldsets
+    function addControlButton(player, parent, key, enabled, statekey, labelkey, buttonprops)
     {
         //define the core button DOM, including the state class
         //plus the disabled attribute if the button is disabled by default
@@ -10356,7 +10806,13 @@ var OzPlayer = (function()
             //(which also fixes JAWS+Firefox not announcing changes in aria-label)
             //unless this is the AD button and we have audio links data, in which
             //case it shouldn't have aria-pressed because it's a link not a button
-            'aria-pressed'  : (key === 'ad' && player.audiolinks ? null : statekey == 'on' ? 'true' : 'false'),
+            //or unless it's the rewind or forward buttons which are stateless
+            'aria-pressed'  :
+            (
+                (key === 'ad' && player.audiolinks || key == 'rewind' || key == 'forward')
+                ? null
+                : statekey == 'on' ? 'true' : 'false'
+            ),
 
             //also define a state flag, which is more efficient
             //to refer to than checking the button's attributes each time
@@ -10386,7 +10842,7 @@ var OzPlayer = (function()
             dom[key] = value;
         });
 
-        //now create the span-wrapped button inside the controls fieldset
+        //now create the span-wrapped button inside on of the controls fieldsets
         //including the generic and specific field wrapper classes
         //plus the disabled state class if the button is disabled by default
         //defining a name so we can refer to it in the control form collection
@@ -10395,7 +10851,7 @@ var OzPlayer = (function()
         //for viewing the page without CSS, which won't otherwise be seen
         etc.build('span',
         {
-            '=parent'       : player.controlform.firstChild,
+            '=parent'       : parent,
             'class'         : config.classes['field-wrapper']
                             + ' '
                             + config.classes['field-' + key]
@@ -11000,6 +11456,8 @@ var OzPlayer = (function()
         //and define the auto-hiding and auto-showing events
         //nb. we don't want to do this until the video actually plays, so that
         //the controls remain visible all the time until it starts playing
+        //nb. by syncing this with events rather than controls interactions
+        //we ensure that they work via programmatic and native interactions too
         player.autohiding.primers.play = etc.listen(player.media, 'play', function()
         {
             primeAutoHiding(player);
@@ -11112,8 +11570,7 @@ var OzPlayer = (function()
         {
             if(timer)
             {
-                __.clearTimeout(timer);
-                player.autohiding.timers[key] = null;
+                player.autohiding.timers[key] = nullifyTimer(timer);
             }
         });
 
@@ -11476,15 +11933,18 @@ var OzPlayer = (function()
     //update the label and inner text of a control by name (eg. "playpause")
     //which also re-applies the slider widths if images are disabled and it's necessary
     //nb. to update just the label or text pass a falsey value for the other
-    function updateControlText(player, name, label, text)
+    //nb. the noupdate flag can be used to prevent updateSliderStretch so that
+    //we can call this function when the sliders and spacer haven't been built yet
+    function updateControlText(player, name, label, text, noupdate)
     {
         //if we don't have the specified field, just ignore this
         //(eg. some platforms don't have the volume and mute controls)
         if(!player.controlform[name]) { return; }
 
-        //if images are disabled and a text value is present
+        //if the noupdate flag is false or undefined
+        //and images are disabled and a text value is present
         //store the current offset width of the button to compare with
-        if(!player.images && text)
+        if(!noupdate && !player.images && text)
         {
             var width = player.controlform[name].offsetWidth;
         }
@@ -11501,11 +11961,12 @@ var OzPlayer = (function()
             player.controlform[name].firstChild.firstChild.nodeValue = text;
         }
 
+        //if the noupdate flag is false or undefined
         //if images are disabled and a text value is present
         //and the new value has caused a change in the button width
         //then re-apply the dynamic widths of the seek and volume siders
         //nb. this qualification avoids unecessary redraws
-        if(!player.images && text && width != player.controlform[name].offsetWidth)
+        if(!noupdate && !player.images && text && width != player.controlform[name].offsetWidth)
         {
             updateSliderStretch(player);
         }
@@ -11568,9 +12029,9 @@ var OzPlayer = (function()
     }
 
 
-    //refresh the seek controls's data with the media duration
+    //refresh the seek controls' data with the media duration
     //defining a step resolution appropriate to the length
-    //then enable the control and refresh the custom slider
+    //then enable the controls and refresh the custom slider
     function refreshSeekData(player)
     {
         //first calculate the size (in seconds) of each slider step
@@ -11610,8 +12071,10 @@ var OzPlayer = (function()
         sliders[player.controlform.seek.id].__updating = false;
 
 
-        //now re-enable the seek control
+        //now (re-)enable the seek and rewind/forward controls
         updateControlDisabled(player, 'seek', false);
+        updateControlDisabled(player, 'rewind', false);
+        updateControlDisabled(player, 'forward', false);
 
         //then refresh the slider with the updated control data
         //and that will re-compile and enable it, ready to use
@@ -11619,58 +12082,68 @@ var OzPlayer = (function()
     }
 
 
-    //apply dynamic widths to the seek and volume field wrappers, so they
+    //apply dynamic widths to the sliders and spacer, so that they
     //take up the space remaining after all the buttons have been added
     function updateSliderStretch(player)
     {
         //*** DEV TMP
-        //var spaceinfo = '';
+        //var spaceinfo = { firstChild : '', lastChild : '' };
 
-        //run through the buttonkeys, and add up the width of each
+        //run through the buttonkeys arrays, and add up the width of each
         //field it refers to, then subtract that from the controls form
-        //width to get the total amount of space remaining inside it
-        var space = 0;
-        etc.each(player.buttonkeys, function(key)
+        //width to get the total amount of space remaining inside this row
+        var
+        formwidth = player.controlform.offsetWidth,
+        controlspace =
         {
-            space += player.controlform[key].parentNode.offsetWidth;
+            firstChild : 0,
+            lastChild  : 0
+        };
+        etc.each(player.buttonkeys, function(row, rowkey)
+        {
+            etc.each(row, function(key)
+            {
+                controlspace[rowkey] += player.controlform[key].parentNode.offsetWidth;
+
+                //*** DEV TMP
+                //spaceinfo[rowkey] += '"' + key + '" = ' + player.controlform[key].parentNode.offsetWidth + '\n';
+            });
+            controlspace[rowkey] = formwidth - controlspace[rowkey];
 
             //*** DEV TMP
-            //spaceinfo += '"' + key + '" = ' + player.controlform[key].parentNode.offsetWidth + '\n';
+            //spaceinfo[rowkey] += '====================\n'
+            //    + 'formwidth = ' + formwidth + '\n'
+            //    + 'controlspace.' + rowkey + ' = ' + controlspace[rowkey] + '\n';
         });
-        space = player.controlform.offsetWidth - space;
 
-        //*** DEV TMP
-        //spaceinfo += '====================\n'
-        //    + 'formwidth = ' + player.controlform.offsetWidth + '\n'
-        //    + 'space = ' + space + '\n';
-
-        //then distribute the space among seek and volume in a 5:3 proportion
-        //which gives us usable min-widths at the smallest default video size
-        //(unless the other buttons are significantly wider than usual!)
-        //but then limit the volume slider's space to 4 x the form height
+        //for the first row, give the seek slider 100% of the available space
+        //for the second row, give the volume slider 100% of the space by default
+        //but then limit its width to a maximum of twice the form height
         //(or rather, 4 times the width of a standard square button, but we
         // don't refer to that width in case we have to show them as text)
-        //or if we have no volume control then the seek field takes all the space
-        //(when using a handheld device which defers all media to the system volume)
-        //and this is also what happens if the player has the smallscreen class
-        //(when using the responsive layout which hides the mute and volume control)
+        //with any remanining space after that limit assigned to the spacer
+        //this will ensure that the volume slider takes all the available space
+        //at the smallest video size, but then the spacer kicks in at larger widths
+        //(unless the other buttons are significantly wider than usual!)
+        //or if we have no volume control then the spacer takes all the space
         var
         control,
-        seekwidth = 0.625 * space,
-        volumewidth = 0.375 * space,
-        volumemax = (player.controlform.offsetHeight * 4);
-        if(!player.controlform.volume || etc.hasClass(player.container, config.classes['smallscreen']))
+        seekwidth = controlspace.firstChild,
+        volumewidth = controlspace.lastChild,
+        spacerwidth = 0,
+        volumemax = (player.controlform.offsetHeight * 2);
+        if(!player.controlform.volume)
         {
-            seekwidth = space;
+            spacerwidth = controlspace.lastChild;
             volumewidth = 0;
         }
         else if(volumewidth > volumemax)
         {
             volumewidth = volumemax;
-            seekwidth = (space - volumewidth);
+            spacerwidth = (controlspace.lastChild - volumewidth);
         }
 
-        //if images are disabled then reduce the seekwidth by 1 pixel
+        //if images are disabled then reduce the seekwidth and spacewidth by 1 pixel
         //to avoid cases where the final control gets pushed over to a new line
         //which can happen in IE9 when the button values change, and also in
         //chrome and firefox when jumping in and out of fullscreen mode,
@@ -11681,12 +12154,14 @@ var OzPlayer = (function()
         if(!player.images)
         {
             seekwidth --;
+            spacerwidth --;
 
             //and if we're using responsive layout, reduce it by another one again
             //to avoid cases where resize rounding errors could cause the same problem
             if(player.options.responsive)
             {
                 seekwidth --;
+                spacerwidth --;
             }
         }
 
@@ -11696,18 +12171,22 @@ var OzPlayer = (function()
         if(defs.agent.firefox)
         {
             seekwidth --;
+            spacerwidth --;
         }
 
         //*** DEV TMP
-        //spaceinfo += '====================\n'
-        //    + 'seekwidth = ' + seekwidth + '\n'
-        //    + 'volumewidth = ' + volumewidth + '\n';
-        //console.log(spaceinfo);
+        //spaceinfo.firstChild += '====================\n'
+        //    + 'seekwidth = ' + seekwidth + '\n';
+        //spaceinfo.lastChild += '====================\n'
+        //    + 'volumewidth = ' + volumewidth + '\n'
+        //    + 'spacerwidth = ' + spacerwidth + '\n';
+        //console.log(spaceinfo.firstChild);
+        //console.log(spaceinfo.lastChild);
 
-        //now apply the specified widths to the applicable field wrappers
-        //and then if the slider for that field has already been created
-        //dispatch an event with the index it already has, just so that the
-        //rendered position of the slider thumb is updated to match its new width
+        //now apply the calculated widths to each of the field wrappers
+        //and then if a slider for that field has been created
+        //dispatch an event with its current index, so that the rendered
+        //position of the slider thumb is updated to match its new width
         (control = player.controlform.seek).parentNode.style.width = seekwidth + 'px';
         if(control.theslider)
         {
@@ -11721,39 +12200,9 @@ var OzPlayer = (function()
                 dispatchMediaSliderEvent(control, control.theslider.index);
             }
         }
-
-
-        //*** DEV TMP
-        //if(__.console){console.log(
-        //    player.controlform.offsetWidth + ' - ( ' + buttonwidth + ' * ' + player.buttonkeys.length + ' = ' + (buttonwidth * player.buttonkeys.length) + ' ) = ' + space
-        //    + '\n\nseekwidth = ' + seekwidth + '  [ ' + (Math.round((seekwidth / space) * 1000) / 10) + '% ]'
-        //    + '\nvolumewidth = ' + volumewidth + '  [ ' + (Math.round((volumewidth / space) * 1000) / 10) + '% ]'
-        //    );}
+        player.controlform.spacer.style.width = spacerwidth + 'px';
     }
 
-
-    //increment or decrement the current volume by a single unit
-    //nb. this abstraction is called by the global volume change keystrokes
-    function adjustVolume(player, inc)
-    {
-        //get the current volume then increment it as specified (which will be
-        //+0.1 or -0.1 depending on the key) and limit the value at either extreme
-        //then only if they're different, pass both values to the update abstraction
-        //specifying true for the slider argument so the slider is also updated
-        //and returning back the value returned by the update function,
-        //so the caller knows whether or not the volume change occurred
-        //nb. none of this will happen at all if the volume control isn't present
-        //because in that situation you can't change the media volume anyway
-        var vol = (vol = player.media.volume + inc) > 1 ? 1 : vol < 0 ? 0 : vol;
-        if(vol != player.media.volume)
-        {
-            //*** DEV TMP
-            //_.title += ' \u2192 volume = ' + player.media.volume.toFixed(2);
-            //_.title = new Date().getMilliseconds() + ' - ' + player.media.volume.toFixed(2);
-
-            return updateVolume(player, player.media.volume, vol, true);
-        }
-    }
 
     //set a new media volume and update all the relevant controls and states
     //nb. this abstraction is called directly by the volume slider's index event
@@ -11834,6 +12283,87 @@ var OzPlayer = (function()
 
         //return true for success
         return true;
+    }
+
+
+    //load xad meta-data, which happens during initialisation
+    function loadXADTrackData(player)
+    {
+        //set the xad readyState flag to 2 while we make the request
+        player.tracks.xad.en.readyState = 2;
+
+        //*** DEV TMP
+        //if(__.console) { console.log('loadXADTrackData(readyState='+player.tracks.xad.en.readyState+')'); }
+
+        //load and parse the VTT data specified by the specified track's src
+        //nb. pass null for the cue id prefix and "xad" as the cue kind
+        //also passing the language code which is always "en" for xad data
+        getTrackVTT(
+            player.tracks.xad.en,
+            null,
+            'xad',
+            'en',
+
+        //if that completes successfully we'll get a cues array in return
+        function(cues)
+        {
+            //so save that to the cues array in the xad object
+            player.tracks.xad.en.cues = cues;
+
+            //*** DEV TMP
+            //if(console.table) { console.table(player.tracks.xad.en.cues); }
+
+            //then set the readyState flag to 4, to say we've done this
+            player.tracks.xad.en.readyState = 4;
+        },
+
+        //or if we failed to load the captions, or the SRC was broken,
+        //or the specified VTT file was empty or invalid
+        function(status)
+        {
+            //if the status is 415 then the VTT file was empty
+            //so show a console warning with the no usable cues message
+            //else show the console warning with the general loading failure message
+            etc.console(etc.sprintf(config.lang[status == 415 ? 'vtt-no-usable-cues' : 'vtt-load-failure'],
+            {
+                status  : status,
+                src     : player.tracks.xad.en.src
+
+            }), 'warn');
+
+            //now set the readyState flag to 0, to say we failed here
+            player.tracks.xad.en.readyState = 0;
+
+            //if we've added the controls by now
+            if(player.controlform)
+            {
+                //disable the ad button and update it to the "off" state
+                //(so it's both grayed and dimmed, and clearly out of it!)
+                updateControlDisabled(player, 'ad', true);
+                updateControlState(player, 'ad', 'off');
+
+                //set aria-live on the button so that the error message is announced
+                //then update the button's aria-label with a short general error message
+                etc.render(player.controlform.ad,
+                {
+                    'aria-live'     : 'assertive',
+                    'aria-label'    : getLang(player, 'button-ad-error')
+                });
+            }
+
+            //*** DEV LOG (delay so our log function has an error reference)
+            //etc.delay(200, function(){
+
+            //nullify the player audio reference so we don't keep
+            //trying to play and pause it, or keep having to
+            //test its readyState to see if we can synchronise
+            //we can also use this to detect existing failure
+            //when we build the form if it isn't there already
+            player.audio = null;
+
+            //*** DEV LOG
+            //});
+        });
     }
 
 
@@ -12207,6 +12737,257 @@ var OzPlayer = (function()
         //start it straight away
         }).start();
     }
+
+
+
+    //track xad cues by video time select and play xad audio
+    //nb. this is triggered by timeupdate events, which can be fired by
+    //custom seeking, native seeking, pausing, as well as regular playback
+    //so the conditions within this function need to account for all of that
+    function xadTracking(player, time)
+    {
+        //check that the audio exists and that the xad metadata has loaded and parsed
+        if(!(player.audio && player.tracks.xad.en.readyState === 4)) { return; }
+
+        //*** DEV TMP
+        //console.clear();
+        //console.warn('xadTracking(time=' + time + ')\n'
+        //         + '\nstarted : ' + player.started
+        //         + '\nended   : ' + player.ended
+        //         + '\npaused  : ' + player.media.paused
+        //         + '\nseeking : ' + player.controlform.seek.seeking
+        //         );
+
+        //if we're currently seeking or paused
+        //nb. the paused condition also handles seeking via the native controls
+        //since they don't update the custom seek slider's seeking flag
+        if(player.controlform.seek.seeking || player.media.paused)
+        {
+            //if an xad cue is currently playing
+            if(player.audiodesk.xad.playing)
+            {
+                //stop any playing xad audio and reset xad tracking
+                //setting lastcue to null so it can be selected again
+                xadReset(player, null);
+
+                //*** DEV TMP
+                //console.error('SEEKING-RESET\n'
+                //    + '\nplaying   = ' + player.audiodesk.xad.playing
+                //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+                //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+                //    + '');
+           }
+
+            //*** DEV TMP
+            //else
+            //{
+            //    console.error('SEEKING-IGNORED\n'
+            //        + '\nplaying   = ' + player.audiodesk.xad.playing
+            //        + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+            //        + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+            //        + '');
+            //}
+        }
+
+        //if we have no activecue and xad audio isn't currently playing
+        //(ie. we're not currently or just about to start playing xad audio)
+        //proceed to evaluate all xad cues to determine which is the closest
+        if(!player.audiodesk.xad.activecue && !player.audiodesk.xad.playing)
+        {
+            //iterate through the xad cues
+            etc.each(player.tracks.xad.en.cues, function(cue, index)
+            {
+                //if the current time is earlier than this cue time
+                //then the cue is in the future and we can ignore it
+                //setting playstate to 0 to denote that state
+                if(time < cue.startTime)
+                {
+                    cue.playstate = 0;
+                }
+
+                //else if this is the last cue, or [it's an earlier cue and]
+                //the current time is before the start of the next cue
+                //then this is the closest cue to the current video time
+                //however we only proceed to selection if the video has started
+                //and isn't currently paused or seeking, so that cues are only
+                //ever selected for playback while the video is actually playing
+                else if
+                (
+                    (
+                        index == player.tracks.xad.en.cues.length - 1
+                        ||
+                        time < player.tracks.xad.en.cues[index + 1].startTime
+                    )
+                    &&
+                    (
+                        player.started
+                        &&
+                        !player.media.paused
+                        &&
+                        !player.controlform.seek.seeking
+                    )
+                )
+                {
+                    //if the cue does not match the last cue (so that we're not
+                    //selecting a cue that we've only just finished playing)
+                    //and we're within sync-resolution of the start of the cue
+                    //nb. we have to check within sync resolution, otherwise seeking
+                    //to any point in the video and then pressing play would move the
+                    //pointer back to the last unplayed audio description, so we have
+                    //to ensure that we only select a cue if the pointer is close to it
+                    if
+                    (
+                        cue !== player.audiodesk.xad.lastcue
+                        &&
+                        time - cue.startTime < config['sync-resolution']
+                    )
+                    {
+                        //set the playstate to 1 to denote that this is ready to be played
+                        cue.playstate = 1;
+
+                        //copy this cue to the activecue flag
+                        player.audiodesk.xad.activecue = cue;
+                    }
+
+                    //else [if the cue does match the last cue or is not within
+                    //sync-resolution of the start] then set the playstate to 3
+                    //to denote that this is the cue we've just played
+                    else
+                    {
+                        cue.playstate = 3;
+                    }
+                }
+
+                //otherwise set the playstate to 4
+                //to denote that this cue is in the past
+                else
+                {
+                    cue.playstate = 4;
+                }
+            });
+
+            //*** DEV TMP
+            //console.error('SELECTING\n'
+            //    + '\nplaying   = ' + player.audiodesk.xad.playing
+            //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+            //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+            //    + '');
+        }
+
+        //if we have an active cue (ie. the video is currently playing,
+        //and we've selected an xad cue which is ready for playback)
+        //and the video playbackrate has not yet been set to zero
+        //nb. ignore this if the playback rate is already zero, because changing the
+        //playback rate may cause an additional timeupdate event to be triggered
+        //which would otherwise cause the start of each cue to be fired twice
+        //this also covers us in IE11 which continues to fire timeupdate events
+        //at the same interval (and the same currentTime) while the audio cue happens
+        //nb. we test the rate against round(rate) just in case any implementation
+        //produces a value that's not quite zero when the rate is set to zero
+        if(player.audiodesk.xad.activecue && Math.round(player.media.playbackRate) == 1)
+        {
+            //set the xad playing flag to denote that we're playing a cue
+            player.audiodesk.xad.playing = true;
+
+            //set the cue playstate to 2 to denote that it's being playing
+            player.audiodesk.xad.activecue.playstate = 2;
+
+            //set the video playback rate to zero so it's effectively paused
+            //nb. but we don't actually pause it, so that we don't have to
+            //mess around creating fake states in the pause button to allow
+            //you to pause the whole thing while the video is already paused
+            player.media.playbackRate = 0;
+
+            //set the video time to the cue's start time
+            //nb. this allows for discrepancies between the cue's specified
+            //start time and the current time at which this happens, which will
+            //arise because of the resolution of timeupdate events, ie. there could
+            //be up to ~1/3s between the start time and when the event actually fires
+            //*** don't do this because it's visually jerky, although that means that
+            //*** there will be small discrepancies between the cue time and the video time
+            //*** that much discrepancy is allowable as it is for regular AD
+            //player.media.setCurrentTime(player.audiodesk.xad.activecue.startTime);
+
+            /*** DEV LOG ***//*
+            if($this.logs.video)
+            {
+                videolog([['PLAYBACKRATE', 18],['',26],['' + player.media.playbackRate, 0]],['<mark>','</mark>']);
+            }
+            if($this.logs.audio)
+            {
+                audiolog([['XAD-CUE-START', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
+            } */
+
+            //set the audio time to the start audio time specified in the cue
+            player.audio.currentTime = player.audiodesk.xad.activecue.startAudio;
+
+            //then play the audio
+            player.audio.play();
+
+            //start a timer for the length of the cue to resume normal playback
+            //nb. I did try this using audio timeupdate events, but this is much
+            //more accurate given the unpredictable resolution of timeupdate events
+            player.audiodesk.xad.timer = etc.delay((player.audiodesk.xad.activecue.endAudio - player.audiodesk.xad.activecue.startAudio) * 1000, function()
+            {
+                //stop any playing xad audio and reset xad tracking
+                //setting lastcue to this cue so it can't be immediately selected again
+                xadReset(player, player.audiodesk.xad.activecue);
+            });
+
+            //*** DEV TMP
+            //console.error('PLAYING\n'
+            //    + '\nplaying   = ' + player.audiodesk.xad.playing
+            //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
+            //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
+            //    + '');
+        }
+
+        //**** DEV TMP
+        //etc.each(player.tracks.xad.en.cues, function(cue, index)
+        //{
+        //    cue.text = 'xad()';
+        //});
+
+        //**** DEV TMP
+        //if(console.table) { console.table(player.tracks.xad.en.cues); }
+    }
+
+    //stop any playing xad audio and reset xad tracking
+    function xadReset(player, lastcue)
+    {
+        //stop and reset any running xad timer
+        player.audiodesk.xad.timer = nullifyTimer(player.audiodesk.xad.timer);
+
+        //stop audio playback
+        player.audio.pause();
+
+        //reset the video playback rate
+        player.media.playbackRate = 1;
+
+        /*** DEV LOG ***//*
+        if($this.logs.video)
+        {
+            videolog([['PLAYBACKRATE', 18],['',26],[player.media.playbackRate, 0]],['<mark>','</mark>']);
+        }
+        if($this.logs.audio)
+        {
+            audiolog([['XAD-CUE-STOP', 18],['',26],[player.audiodesk.xad.activecue.id, 0]],['<dfn>','</dfn>']);
+        } */
+
+        //set the lastcue flag according to input
+        //nb. whether we reset lastcue depends on whether xad playback
+        //was termindate by the end of the cue (in which case we set it to
+        //the last cue to prevent it being selected again) or by a seeking reset
+        //(in which case we reset it so that the cue can be selected agin)
+        player.audiodesk.xad.lastcue = lastcue;
+
+        //reset the active cue flag
+        player.audiodesk.xad.activecue = null;
+
+        //reset the xad playing flag
+        player.audiodesk.xad.playing = false;
+    }
+
 
 
     //update the captions to match a specific time, either
