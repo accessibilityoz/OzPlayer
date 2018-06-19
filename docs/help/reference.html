@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.3 Markup Reference</title>
+    <title>OzPlayer 3.5 Markup Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.3 Markup Reference</h1>
+        <h1>OzPlayer 3.5 Markup Reference</h1>
 
         <p>
             This is a detailed reference of every element that OzPlayer uses.
@@ -37,6 +37,7 @@
                                 <li><a href="#video-source-youtube">YouTube Source Element</a></li>
                                 <li><a href="#captions-track">Captions Track Elements</a></li>
                                 <li><a href="#transcript-track">Transcript Track Elements</a></li>
+                                <li><a href="#xad-track">Extended AD Metadata Track Element</a></li>
                                 <li><a href="#fallback">Fallback Content Container</a></li>
                             </ol>
                         </li>
@@ -713,8 +714,8 @@
                                             <em>
                                                 Captions files <strong>must be
                                                 on the same server</strong> as
-                                                the page itself, and served
-                                                with a mime-type of
+                                                the page itself, and should be
+                                                served with a mime-type of
                                                 <code>text/vtt</code> or
                                                 <code>text/plain</code>.
                                             </em>
@@ -966,8 +967,8 @@
                                             <em>
                                                 Transcript files <strong>must be
                                                 on the same server</strong> as
-                                                the page itself, and served
-                                                with a mime-type of
+                                                the page itself, and should be
+                                                served with a mime-type of
                                                 <code>text/vtt</code> or
                                                 <code>text/plain</code>.
                                             </em>
@@ -1061,6 +1062,95 @@
                         </li>
 
                     </ol>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="xad-track">
+
+                    <h4>Extended AD Metadata Track Element</h4>
+
+                    <p id="code-xad-track-description">
+                        A single metadata-track element can define
+                        commands for controlling Extended Audio Descriptions:
+                    </p>
+
+<figure class="code" id="code-xad-track">
+    <pre aria-describedby="code-xad-track-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;track</b><b> src=<u>"./media/xad.vtt"</u></b><b> kind=<u>"metadata"</u></b><b> data-kind=<u>"xad"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="xad-track-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        The path to a metadata file,
+                                        in WebVTT format.
+                                    </p>
+
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                Metadata files <strong>must be
+                                                on the same server</strong> as
+                                                the page itself, and should be
+                                                served with a mime-type of
+                                                <code>text/vtt</code> or
+                                                <code>text/plain</code>.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="xad-track-kind">
+                                <summary><code>"kind"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies what kind of track this is,
+                                        which must have the exact value
+                                        <code>"metadata"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="xad-track-data-kind">
+                                <summary><code>"data-kind"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies what kind of meta-data
+                                        this is, which must have the exact value
+                                        <code>"xad"</code>.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                    <figure class="note">
+                        <p>
+                            <em>
+                                Extended Audio Descriptions are not supported
+                                with YouTube or Flash videos.
+                            </em>
+                        </p>
+                    </figure>
 
                 </section>
 

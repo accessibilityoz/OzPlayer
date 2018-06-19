@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.3 WebVTT Reference</title>
+    <title>OzPlayer 3.5 WebVTT Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.3 WebVTT Reference</h1>
+        <h1>OzPlayer 3.5 WebVTT Reference</h1>
 
         <p>
             This reference describes WebVTT support in OzPlayer, and shows you
@@ -49,6 +49,7 @@
                         <li><a href="#styling-emphasis">Emphasis Elements</a></li>
                     </ol>
                 </li>
+                <li><a href="#xad">VTT Metadata for Extended Audio Descriptions</a></li>
             </ol>
         </nav>
 
@@ -338,7 +339,7 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
 <small>&lt;v Alfred Nobel&gt;</small><b>&lt;c.silly&gt;</b>Prize-A-Mite<b>&lt;/c&gt;</b><small>!</small>
 
 <small>00:03:02.560 --> 00:03:09.000</small>
-<small>&lt;v Sophie&gt;Darling, why don't you call it the </small><b>&lt;c.true&gt;</b>Nobel Peace Prize<b>&lt;/c&gt;</b><small>?</small></code></pre>
+<small>&lt;v Sophie&gt;Darling, why don't you call it the </small><b>&lt;c.truth&gt;</b>Nobel Peace Prize<b>&lt;/c&gt;</b><small>?</small></code></pre>
 </figure>
 
                 <figure class="note">
@@ -818,6 +819,62 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
 </figure>
 
             </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="xad">
+
+            <h2>VTT Metadata for Extended Audio Descriptions</h2>
+
+            <p>
+                OzPlayer uses a VTT metadata format to define playback commands
+                for Extended Audio Descriptions.
+            </p>
+
+            <p>
+                Unlike with regular AD, where the audio file plays continuously
+                in time with the video, Extended AD only plays in response to
+                playback commands. The video itself is paused while an extended
+                audio description is playing, so Extended AD can be used in
+                situations where there isn't enough space in the video
+                soundtrack to add regular audio descriptions.
+            </p>
+
+            <p id="code-xadcommand-description">
+                Each playback command is defined as part of a VTT cue. A single
+                command cue looks like this:
+            </p>
+
+<figure class="code" id="code-xadcommand">
+    <pre aria-describedby="code-xadcommand-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html">00:03.750 --> 00:03.750
+xad(00:00.000 --> 00:04.000)</code></pre>
+</figure>
+
+            <p>
+                The <strong>cue timing information</strong> defines the video
+                time at which the audio cue should play. The start-time and
+                end-time are the same, because Extended AD cues only refer to a
+                single time-point (rather than to a time-range like
+                captions and transcript data).
+            </p>
+
+            <p>
+                The <strong>cue content</strong> defines an <code>xad()</code>
+                command with audio timing information in the same format, and
+                specifies which portion of the audio file should be played
+                with this command.
+            </p>
+
+            <p>
+                So in the example above, when the video time reaches 3.75
+                seconds, the audio file will be played for 4 seconds starting
+                from zero, while the video is paused. At the end of the cue,
+                audio playback will stop and video playback will resume.
+            </p>
 
         </section>
 
