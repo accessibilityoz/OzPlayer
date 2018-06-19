@@ -876,6 +876,30 @@ xad(00:00.000 --> 00:04.000)</code></pre>
                 audio playback will stop and video playback will resume.
             </p>
 
+            <figure class="note">
+                <p>
+                    <em>
+                        Extended AD cues <strong>must</strong> be defined in
+                        chronological order by video time.
+                    </em>
+                </p>
+                <p>
+                    <em>
+                        Additionally, cues <strong>cannot</strong> be defined
+                        at the very end of the video. The very latest a cue can
+                        be defined is the last integer second
+                        (e.g. at <code>00:32.000</code> if the video is
+                         <code>00:32.250</code> in length).
+                    </em>
+                </p>
+                <p>
+                    <em>
+                        Cues which are mis-defined in either of these ways
+                        might not be played at all.
+                    </em>
+                </p>
+            </figure>
+
         </section>
 
 
