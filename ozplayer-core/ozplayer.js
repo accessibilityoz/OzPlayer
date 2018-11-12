@@ -8051,6 +8051,10 @@ var OzPlayer = (function()
                             //remove the smallscreen class from the player container if applicable
                             etc.removeClass(player.container, config.classes['smallscreen']);
 
+                            //apply role=dialog and aria-modal so that ATs keep the read cursor inside the player
+                            player.container.setAttribute('role', 'dialog');
+                            player.container.setAttribute('aria-modal', 'true');
+
                             //apply the container fullscreen class
                             etc.addClass(player.container, config.classes['container-fullscreen']);
 
@@ -8190,6 +8194,10 @@ var OzPlayer = (function()
                             //*** DEV TMP
                             //etc.get('#info').innerHTML = ('fullscreen[screenpermission=false](' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
 
+
+                            //remove the role and aria-modal
+                            player.container.removeAttribute('role');
+                            player.container.removeAttribute('aria-modal');
 
                             //remove the container fullscreen and large controls classes
                             //nb. the large controls class might not be present, but it's not
