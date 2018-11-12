@@ -656,10 +656,10 @@
     <div
         id="demo" class="ozplayer"
         data-transcript="demo-transcript"
-        data-controls="row"
+        data-controls="stack"
         >
         <!--
-        data-controls="stack"
+        data-controls="row"
         data-responsive="demo-figure"
         -->
         <!--
@@ -1077,6 +1077,22 @@
 
 
 
+    <!-- *** DEV TEST MARKUP *** -->
+    <!--
+    -->
+    <form action="#">
+        <fieldset>
+            <button type="button">First</button>
+            <button type="button">Second</button>
+            <button type="button">Third</button>
+            <button type="button">Fourth</button>
+            <button type="button">Fifth</button>
+        </fieldset>
+    </form>
+    <!-- *** / DEV TEST MARKUP *** -->
+
+
+
     <!-- *** DEV TEST QUALIFY URIS *** -->
     <script type="text/javascript">
     (function()
@@ -1250,9 +1266,7 @@
             }
             if(lightsheet)
             {
-                /***
-                lighthref = lighthref.replace('-pink', '-green');
-                ***/
+                //lighthref = lighthref.replace('-pink', '-green');
 
                 if(window.opera)
                 {

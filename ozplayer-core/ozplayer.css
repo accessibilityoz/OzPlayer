@@ -232,10 +232,10 @@
 }
 
 /* logo bug link => auto-hiding hidden state */
-.oz-auto-hiding .oz-logo-bug,
-.oz-auto-hiding .oz-logo-bug:visited,
-.oz-auto-hidden .oz-logo-bug,
-.oz-auto-hidden .oz-logo-bug:visited
+.oz-auto-hiding:not(.oz-pinned) .oz-logo-bug,
+.oz-auto-hiding:not(.oz-pinned) .oz-logo-bug:visited,
+.oz-auto-hidden:not(.oz-pinned) .oz-logo-bug,
+.oz-auto-hidden:not(.oz-pinned) .oz-logo-bug:visited
 {
     -moz-opacity:0 !important;
     -khtml-opacity:0 !important;
@@ -244,8 +244,8 @@
 }
 
 /* logo bug link => auto-hiding */
-.oz-auto-hiding .oz-logo-bug,
-.oz-auto-hiding .oz-logo-bug:visited
+.oz-auto-hiding:not(.oz-pinned) .oz-logo-bug,
+.oz-auto-hiding:not(.oz-pinned) .oz-logo-bug:visited
 {
     /* define a fade transition to switch to the hidden state
        (which is only for this state, so that switching to visible is instant) */
@@ -515,8 +515,8 @@
 }
 
 /* auto-hiding hidden state */
-.oz-auto-hiding .oz-skip-links,
-.oz-auto-hidden .oz-skip-links
+.oz-auto-hiding:not(.oz-pinned) .oz-skip-links,
+.oz-auto-hidden:not(.oz-pinned) .oz-skip-links
 {
     -moz-opacity:0 !important;
     -khtml-opacity:0 !important;
@@ -527,15 +527,15 @@
 /* filter removal hack for IE9 */
 @media only all
 {
-    .oz-auto-hiding .oz-skip-links,
-    .oz-auto-hidden .oz-skip-links
+    .oz-auto-hiding:not(.oz-pinned) .oz-skip-links,
+    .oz-auto-hidden:not(.oz-pinned) .oz-skip-links
     {
         filter:none !important;
     }
 }
 
 /* skip links auto-hiding */
-.oz-auto-hiding .oz-skip-links
+.oz-auto-hiding:not(.oz-pinned) .oz-skip-links
 {
     /* define a fade transition to switch to the hidden state
        (which is only for this state, so that switching to visible is instant) */
@@ -1444,7 +1444,7 @@
 
 /* captions => margin reset for hidden stack controls
    nb. this has enough specificity to reset large captions too */
-.oz-stack.oz-auto-hidden .oz-captions
+.oz-stack.oz-auto-hidden:not(.oz-pinned) .oz-captions
 {
     margin-bottom:0 !important;
 }
@@ -1703,7 +1703,7 @@
 }
 
 /* controls => auto-hiding stack */
-.oz-stack.oz-auto-hiding .oz-controls
+.oz-stack.oz-auto-hiding:not(.oz-pinned) .oz-controls
 {
     /* hide the controls below the fold using zero opacity */
     opacity:0 !important;
@@ -1719,7 +1719,7 @@
 /* controls => hidden stack for most browsers
    nb. all hiding properties must retain keyboard accessibility
    so you can still tab to hidden controls to make them visible again */
-.oz-stack.oz-auto-hidden .oz-controls
+.oz-stack.oz-auto-hidden:not(.oz-pinned) .oz-controls
 {
     /* fallback hidden state for browsers that don't support the transition
        which is also applied to those that do at the end of the transition
@@ -1732,7 +1732,7 @@
 }
 
 /* no-images controls => hidden stack for most browsers */
-.oz-stack.oz-auto-hidden.oz-no-images .oz-controls
+.oz-stack.oz-auto-hidden:not(.oz-pinned).oz-no-images .oz-controls
 {
     /* negate the delineation border since the bottom hiding doesn't account for it */
     border-top:none !important;
@@ -1883,6 +1883,13 @@
     box-shadow:inset -1px 0 0 0 rgba(32,32,32,0.88), 1px 0 0 0 rgba(48,48,48,0.88) !important;
     background:cyan !important;
     box-shadow:inset 0 0 0 2px darkcyan !important; */
+}
+
+/* hide the pin field unless stack controls are being used
+   since it has no function when using row controls */
+.ozplayer:not(.oz-stack) .oz-field.oz-pin
+{
+    display:none !important;
 }
 
 
@@ -2159,6 +2166,25 @@
 .oz-controls .oz-fullscreen button.oz-on:active
     { background-position:-320px -32px !important; }
 
+.oz-controls .oz-pin button.oz-off,
+.oz-controls .oz-pin.oz-disabled button.oz-off:hover,
+.oz-controls .oz-pin.oz-disabled button.oz-off:focus,
+.oz-controls .oz-pin.oz-disabled button.oz-off:active
+    { background-position:-480px 0 !important; }
+.oz-controls .oz-pin button.oz-off:hover,
+.oz-controls .oz-pin button.oz-off:focus,
+.oz-controls .oz-pin button.oz-off:active
+    { background-position:-480px -32px !important; }
+.oz-controls .oz-pin button.oz-on,
+.oz-controls .oz-pin.oz-disabled button.oz-on:hover,
+.oz-controls .oz-pin.oz-disabled button.oz-on:focus,
+.oz-controls .oz-pin.oz-disabled button.oz-on:active
+    { background-position:-512px 0 !important; }
+.oz-controls .oz-pin button.oz-on:hover,
+.oz-controls .oz-pin button.oz-on:focus,
+.oz-controls .oz-pin button.oz-on:active
+    { background-position:-512px -32px !important; }
+
 
 
 /* large controls => buttons */
@@ -2328,6 +2354,25 @@
 .oz-large .oz-fullscreen button.oz-on:active
     { background-position:-640px -64px !important; }
 
+.oz-large .oz-pin button.oz-off,
+.oz-large .oz-pin.oz-disabled button.oz-off:hover,
+.oz-large .oz-pin.oz-disabled button.oz-off:focus,
+.oz-large .oz-pin.oz-disabled button.oz-off:active
+    { background-position:-960px 0 !important; }
+.oz-large .oz-pin button.oz-off:hover,
+.oz-large .oz-pin button.oz-off:focus,
+.oz-large .oz-pin button.oz-off:active
+    { background-position:-960px -64px !important; }
+.oz-large .oz-pin button.oz-on,
+.oz-large .oz-pin.oz-disabled button.oz-on:hover,
+.oz-large .oz-pin.oz-disabled button.oz-on:focus,
+.oz-large .oz-pin.oz-disabled button.oz-on:active
+    { background-position:-1024px 0 !important; }
+.oz-large .oz-pin button.oz-on:hover,
+.oz-large .oz-pin button.oz-on:focus,
+.oz-large .oz-pin button.oz-on:active
+    { background-position:-1024px -64px !important; }
+
 
 
 /* background size for retina buttons (if the skin defines them) */
@@ -2340,11 +2385,11 @@
 {
     .oz-controls .oz-field button
     {
-        background-size:480px 64px !important;
+        background-size:544px 64px !important;
     }
     .oz-large .oz-controls .oz-field button
     {
-        background-size:960px 128px !important;
+        background-size:1088px 128px !important;
     }
 }
 

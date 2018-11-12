@@ -15,11 +15,11 @@
 }
 .oz-controls .oz-field button
 {
-    background-image:url("buttons-white.png?v=4") !important;
+    background-image:url("buttons-white.png?v=351") !important;
 }
 .oz-large .oz-controls .oz-field button
 {
-    background-image:url("buttons-white-large.png?v=4") !important;
+    background-image:url("buttons-white-large.png?v=351") !important;
 }
 .ozplayer .oz-poster span,
 .oz-indicator.oz-timeout strong
@@ -58,11 +58,11 @@
     }
     .oz-controls .oz-field button
     {
-        background-image:url("buttons-white-large.png?v=4") !important;
+        background-image:url("buttons-white-large.png?v=351") !important;
     }
     .oz-large .oz-controls .oz-field button
     {
-        background-image:url("buttons-white-large@2x.png?v=4") !important;
+        background-image:url("buttons-white-large@2x.png?v=351") !important;
     }
     .ozplayer .oz-poster span,
     .oz-indicator.oz-timeout strong
