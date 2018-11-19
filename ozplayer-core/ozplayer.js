@@ -4434,8 +4434,7 @@ var OzPlayer = (function()
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
             if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
             {
-                /*** DEV LOG ***//*'<dfn>','</dfn>']);
-                }
+                /*** DEV LOG ***//*
                 if($this.logs.audio)
                 {
                     audiolog([
@@ -4445,8 +4444,8 @@ var OzPlayer = (function()
                         [player.audio.currentTime, 0],
                         [' =&gt; ' + player.media.currentTime.toFixed(2), 0]
                         ],
-                        [ */
-
+                        ['<dfn>','</dfn>']);
+                } */
                 player.audio.currentTime = player.media.currentTime;
             }
 
@@ -10556,6 +10555,9 @@ var OzPlayer = (function()
         //(which we won't necessarily get with native youtube, but that's okay anyway)
         //or in IE10 using native video, because pressing play before then
         //sometimes fails to establish a connection, so it just stays loading forever
+        //(but that now causes IE11 to fail to initialise since it doesn't fire the
+        // alternative canplay event until after playback has begun, so we have to
+        // specifically except IE11 from this otherwise the player is unuseable)
         //or connection might be delayed so that AD starts playing before the video
         //or in iOS it still doesn't work until you've actually started to play
         //and in iOS with stack controls the native icon covers the buttons
@@ -10572,7 +10574,7 @@ var OzPlayer = (function()
             !(
                 (player.mode == 'youtube' && player.plugin == 'shockwave')
                 ||
-                (defs.agent.ie10p && player.mode == 'native')
+                (!defs.agent.ie11p && defs.agent.ie10p && player.mode == 'native')
                 ||
                 (defs.agent.ios && !player.isaudio)
             )
