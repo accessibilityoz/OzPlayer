@@ -23,16 +23,13 @@
 * `"ozplayer-core/ozplayer.min.js"`
 * `"ozplayer-core/ozplayer.subs.debug.js"`
 * `"ozplayer-core/ozplayer.subs.js"`
-
 * `"ozplayer-skin/buttons-black.png"`
 * `"ozplayer-skin/buttons-black-large.png"`
 * `"ozplayer-skin/buttons-black-large@2x.png"`
 * `"ozplayer-skin/buttons-white.png"`
 * `"ozplayer-skin/buttons-white-large.png"`
 * `"ozplayer-skin/buttons-white-large@2x.png"`
-
 * `"ozplayer-lang/en.js"`
-
 * `"ozplayer-skin/highlights-blue.css"`
 * `"ozplayer-skin/highlights-green.css"`
 * `"ozplayer-skin/highlights-orange.css"`
