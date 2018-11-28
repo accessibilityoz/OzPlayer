@@ -4,11 +4,11 @@
 
 * Added a new "Pin controls" function.
 
-  This provides a button that allows users to control whether the player controls auto-hide, or remain permanently visible. This is primarily for the benefit of Android TalkBack users, for whom hidden controls may not be discoverable with some navigation modes, and is enabled by default.
+  This provides a button that allows users to control whether the player controls auto-hide (off), or remain permanently visible (on). This is primarily for the benefit of Android TalkBack users, for whom hidden controls may not be discoverable with some navigation modes, and is on by default.
 
 ## Bug Fixes
 
-* Fixed an issue in some builds of IE11 for Windows 10 whereby the "Play" button was permanently disabled
+* Fixed an issue in some builds of IE11 for Windows 10 whereby the "Play" button was permanently disabled.
 
 ## Other changes
 
