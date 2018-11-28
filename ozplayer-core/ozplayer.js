@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.5] => player core
+ OzPlayer [3.5.1] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -1169,6 +1169,7 @@ var OzPlayer = (function()
         //additional user data persistence keys for specific values
         //nb. this is added to the base key to store individual values
         'user-volume'             : '-volume',
+        'user-pin'                : '-pin',
 
         //video and audio default volume (float from 0 to 1)
         'default-volume'          : 0.7,
@@ -1308,13 +1309,16 @@ var OzPlayer = (function()
             'no-images'               : 'oz-no-images',
 
             //additional container classes for large controls and stack layout
+            //and also for pinned controls when activated by the pin button
             //nb. "large" and "stack" only affect the controls and captions
             //but we need them on the container for descendent selectors
             //nb. we also need separate hiding and hidden classes, because
             //the former triggers a transition to hide the stack, while
             //the latter is added for other adjustments after it's gone
+            //nb. the pinned class is used to negate control hiding classes
             'large-controls'          : 'oz-large',
             'stack-controls'          : 'oz-stack',
+            'pinned-controls'         : 'oz-pinned',
 
             //auto-hiding and hidden classess for stack controls and skip links
             //nb. this is either an additional container class or a controlform class
@@ -1390,6 +1394,7 @@ var OzPlayer = (function()
             'field-spacer'            : 'oz-spacer',
             'field-rewind'            : 'oz-rewind',
             'field-forward'           : 'oz-forward',
+            'field-pin'               : 'oz-pin',
 
             //controls => field state classes
             //eg. playpause is "on" when it's playing or "off" when it's paused
@@ -1447,6 +1452,8 @@ var OzPlayer = (function()
             "button-fullscreen-on"    : "Exit Fullscreen",
             "button-rewind-off"       : "Back\ %2 seconds",
             "button-forward-off"      : "Forward\ %2 seconds",
+            "button-pin-off"          : "Pin the controls",
+            "button-pin-on"           : "Unpin the controls",
 
             //controls => fallback text (eg. for styled no-images)
             "text-playpause-off"      : "Play",
@@ -1467,6 +1474,8 @@ var OzPlayer = (function()
             "text-fullscreen-on"      : "Exit",
             "text-rewind-off"         : "-%2",
             "text-forward-off"        : "+%2",
+            "text-pin-off"            : "Pin",
+            "text-pin-on"             : "Unpin",
 
             //controls => menu labels
             "menu-cc-off"             : "Off",
@@ -1915,7 +1924,7 @@ var OzPlayer = (function()
             basekey += key;
 
             //*** DEV TMP
-            //etc.get('#info').innerHTML += ('ADD storage key = "'+basekey+'"<br>');
+            //if(__.console) { console.log('addStorageValue(basekey="'+basekey+'", key="'+key+'", value="'+value+'")'); }
 
             //then if local storage is supported, try to save the value with the specified key
             //and if that's okay then return the value, or return null for failure if not
@@ -1966,7 +1975,7 @@ var OzPlayer = (function()
             basekey += key;
 
             //*** DEV TMP
-            //etc.get('#info').innerHTML += ('GET storage key = "'+basekey+'"<br>');
+            //if(__.console) { console.log('getStorageValue(basekey="'+basekey+'", key="'+key+'")'); }
 
             //then if local storage is supported, look for a value with the specified key
             //and that will either return the value, or null if there is no such value
@@ -3268,7 +3277,7 @@ var OzPlayer = (function()
                 }
 
                 //also trim and encode the individual value keys
-                etc.each(['user-volume'], function(key)
+                etc.each(['user-volume','user-pin'], function(key)
                 {
                     config[key] = encodeURIComponent(etc.trim(config[key]));
                 });
@@ -4425,8 +4434,7 @@ var OzPlayer = (function()
             //** events and than add or substract (whatever) the length of 1 event as well as the difference?
             if(Math.abs(player.audio.currentTime - player.media.currentTime) > config['sync-resolution'])
             {
-                /*** DEV LOG ***//*'<dfn>','</dfn>']);
-                }
+                /*** DEV LOG ***//*
                 if($this.logs.audio)
                 {
                     audiolog([
@@ -4436,8 +4444,8 @@ var OzPlayer = (function()
                         [player.audio.currentTime, 0],
                         [' =&gt; ' + player.media.currentTime.toFixed(2), 0]
                         ],
-                        [ */
-
+                        ['<dfn>','</dfn>']);
+                } */
                 player.audio.currentTime = player.media.currentTime;
             }
 
@@ -6334,6 +6342,8 @@ var OzPlayer = (function()
         //(which is better semantics than using javascript:void(null))
         //so then we need an onsubmit event to block native submission and bubbling
         //which is all we need as long as the form has no submit button
+        //also add a pinned property which controls whether autohiding should be
+        //honoured (false) or should be ignored in favour of user settings (true)
         //nb. originally we had to set a style.width for the benefit of IE6
         //but now the specified width is something other browsers rely on
         //nb. the form has no padding, margin or borders, so that
@@ -6359,12 +6369,20 @@ var OzPlayer = (function()
         //even though the issue in that article is unrelated, it gave a clue to a potential fix
         //which, wouldn't you know, turned out to work and solve the problem completely!
         //after several days of headscratching, that was quite a relief I can tell you :-)
+        //nb. the pinned property is for the benefit of Android TalkBack, which can't
+        //easily navigate to the controls when they're visually hidden; the true setting
+        //will prevent them from ever being visually hidden, and true is later set as the
+        //default when we create the pin button, since the benefit may not be immediately
+        //clear to users but the lack of it is definitely noticeable, so it's safer
+        //to assume that we shouldn't hide the controls unless users change this setting
+        //the setting itself persists like volume, so they don't have to do it every time
         player.controlform = etc.build('form',
         {
             'class'         : config.classes['controls'],
             'action'        : '#' + player.wrapper.id,
             'role'          : 'form',
-            'onsubmit'        : function(){ return null },
+            'onsubmit'      : function(){ return null },
+            '.pinned'       : false,
             '#style'        :
             {
                 'width'     : player.wrapper.offsetWidth + 'px'
@@ -7753,6 +7771,97 @@ var OzPlayer = (function()
         }
 
 
+        //*** DEV TMP
+        //__.localStorage.removeItem(player.basekey + config['user-pin']);
+
+        //look for a pinned setting in user config, or default to true
+        //then if pinned is true, apply the container pinned class
+        //nb. see controlform '.pinned' definition for more notes about this
+        var p = library.getStorageValue(player.basekey, config['user-pin']) || 'on';
+        if(player.controlform.pinned = (p == 'on'))
+        {
+            etc.addClass(player.container, config.classes['pinned-controls']);
+        }
+
+        //*** DEV TMP
+        //console.warn('stored = ' + library.getStorageValue(player.basekey, config['user-pin']) + '\npinned = ' + player.controlform.pinned);
+
+        //create a span-wrapped pin button inside the second fieldset
+        //with its state matching .pinnned and the button enabled by default
+        //nb. the open-bracket must be on the same line for function name compression
+        addControlButton(
+            player,
+            player.controlform.lastChild,
+            'pin',
+            true,
+            (player.controlform.pinned ? 'on' : 'off'),
+            (player.controlform.pinned ? 'on' : 'off'),
+            {
+                //then define an abstraction for the button's command handler
+                //so we can call it programatically (eg. from the global key handler)
+                '.command'  : function()
+                {
+                    //*** DEV TMP
+                    //if(__.console) { console.log('player.controlform.pin.command()'); }
+
+                    //invert the current pinned state, then if we're setting it to true
+                    //add the container pinned class, otherwise remove the class
+                    if(player.controlform.pinned = !player.controlform.pinned)
+                    {
+                        etc.addClass(player.container, config.classes['pinned-controls']);
+                    }
+                    else
+                    {
+                        etc.removeClass(player.container, config.classes['pinned-controls']);
+
+                        //then if we've defined the autohiding management object
+                        //and the media is currently playing, immediately hide the controls
+                        //nb. this will make it more obvious what the button's function is
+                        if
+                        (
+                            etc.def(player.autohiding)
+                            &&
+                            !player.media.paused
+                        )
+                        {
+                            //we'll have to unprime the auto-show events first to prevent conflict
+                            unprimeAutoHiding(player);
+
+                            //now pause for a fraction so it doesn't seem too sudden
+                            etc.delay(500, function()
+                            {
+                                //then apply the hiding state
+                                autoHidingState(player);
+
+                                //then re-prime autohiding without re-showing the controls
+                                primeAutoHiding(player, true);
+                            });
+                        }
+                    }
+
+                    //update the button state
+                    updateControlState(player, 'pin', player.controlform.pinned ? 'on' : 'off');
+
+                    //then pass the basekey and user-pin key to the add storage function
+                    //along with the current state value ("on" or "off)
+                    //which will save the updated value to local storage, unless the basekey is null
+                    //(which it only will be if config has explicitly disabled user persistence)
+                    library.addStorageValue(
+                        player.basekey,
+                        config['user-pin'],
+                        player.controlform.pin.state
+                        );
+                }
+            }
+        );
+
+        //bind the button's click handler to its command abstraction
+        addControlClick(player, 'pin');
+
+        //then add it to the lastChild buttonkeys
+        player.buttonkeys.lastChild.push('pin');
+
+
         //detect the supported fullscreen model
         //nb. this is based on the fullscreen code from MediaElement's player
         //but extended so it also supports the standard (non-prefixed) model
@@ -7941,6 +8050,10 @@ var OzPlayer = (function()
                             //remove the smallscreen class from the player container if applicable
                             etc.removeClass(player.container, config.classes['smallscreen']);
 
+                            //apply role=dialog and aria-modal so that ATs keep the read cursor inside the player
+                            player.container.setAttribute('role', 'dialog');
+                            player.container.setAttribute('aria-modal', 'true');
+
                             //apply the container fullscreen class
                             etc.addClass(player.container, config.classes['container-fullscreen']);
 
@@ -8080,6 +8193,10 @@ var OzPlayer = (function()
                             //*** DEV TMP
                             //etc.get('#info').innerHTML = ('fullscreen[screenpermission=false](' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
 
+
+                            //remove the role and aria-modal
+                            player.container.removeAttribute('role');
+                            player.container.removeAttribute('aria-modal');
 
                             //remove the container fullscreen and large controls classes
                             //nb. the large controls class might not be present, but it's not
@@ -10439,6 +10556,9 @@ var OzPlayer = (function()
         //or in IE10 using native video, because pressing play before then
         //sometimes fails to establish a connection, so it just stays loading forever
         //or connection might be delayed so that AD starts playing before the video
+        //(but that now causes IE11 to fail to initialise since it doesn't fire the
+        // alternative canplay event until after playback has begun, so we have to
+        // specifically except IE11 from this otherwise the player is unuseable)
         //or in iOS it still doesn't work until you've actually started to play
         //and in iOS with stack controls the native icon covers the buttons
         //and in iOS with row controls pressing the play button causes the
@@ -10454,7 +10574,7 @@ var OzPlayer = (function()
             !(
                 (player.mode == 'youtube' && player.plugin == 'shockwave')
                 ||
-                (defs.agent.ie10p && player.mode == 'native')
+                (!defs.agent.ie11p && defs.agent.ie10p && player.mode == 'native')
                 ||
                 (defs.agent.ios && !player.isaudio)
             )
@@ -11474,12 +11594,13 @@ var OzPlayer = (function()
 
     //apply the showing state and define the auto-hiding and auto-showing events,
     //when the media plays, or when entering fullscreen mode during playback
-    function primeAutoHiding(player)
+    //nb. the second argument overrides applying the showing state
+    //so we can call this from the pin function to re-init without showing
+    function primeAutoHiding(player, noshow)
     {
         //nb. this isn't strictly necessary when the controls options is "row"
         //and there are no skip links, but it's too convolted to prevent
         //without also preventing it for fullscreen mode stack controls
-
 
         //*** DEV TMP
         //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
@@ -11489,8 +11610,12 @@ var OzPlayer = (function()
         //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
 
 
+        //if the nowshow argument is false or undefined
         //apply the showing state and start the timer to auto-hide
-        autoShowingState(player);
+        if(!noshow)
+        {
+            autoShowingState(player);
+        }
 
         //then define each of the interaction events that restarts that behavior, if not already defined
         etc.each(player.autohiding.autoshow, function(handler, type)
