@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.5] => interface language
+ OzPlayer [3.5.1] => interface language
  ------------------------------------------------------------------------------
 *******************************************************************************/
 (function(){var lang={
@@ -30,6 +30,8 @@
     ,"button-fullscreen-on"     : "Exit Fullscreen"
     ,"button-rewind-off"        : "Back %2 seconds"
     ,"button-forward-off"       : "Forward %2 seconds"
+    ,"button-pin-off"           : "Pin the controls"
+    ,"button-pin-on"            : "Unpin the controls"
 
     //button fallback text (e.g. when images are disabled)
     //n.b. the % tokens represents dynamic text:
@@ -53,6 +55,8 @@
     ,"text-fullscreen-on"       : "Exit"
     ,"text-rewind-off"          : "-%2"
     ,"text-forward-off"         : "+%2"
+    ,"text-pin-off"             : "Pin"
+    ,"text-pin-on"              : "Unpin"
 
     //menu labels
     ,"menu-cc-off"              : "Off"

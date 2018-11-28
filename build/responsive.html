@@ -74,11 +74,12 @@
              "data-responsive"          optionally specifies the ID of a responsive container
                                         the width of which will be monitored to maintain responsive layout
                                         or omit the attribute entirely to disable responsive layout
+             "data-responsive-mode"     can be "min", "max" or "initial" (default)
              "data-transcript"          optionally specifies the ID of the transcript container
                                         or omit the attribute entirely for no transcript
              "data-controls"            either "stack" for superimposed controls, or "row" for a separate row
         -->
-        <div id="demo" class="ozplayer" data-responsive="container" data-transcript="demo-transcript" data-controls="stack">
+        <div id="demo" class="ozplayer" data-responsive="container" data-responsive-mode="initial" data-transcript="demo-transcript" data-controls="stack">
 
             <!-- video element
                  "width"                can be anything, or defaults to 400 if omitted
