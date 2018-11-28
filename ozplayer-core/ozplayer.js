@@ -1923,8 +1923,8 @@ var OzPlayer = (function()
             //nb. re-using the basekey var because its name gets compressed
             basekey += key;
 
-            //*** DEV VERY TMP
-            if(__.console) { console.log('addStorageValue(basekey="'+basekey+'", key="'+key+'", value="'+value+'")'); }
+            //*** DEV TMP
+            //if(__.console) { console.log('addStorageValue(basekey="'+basekey+'", key="'+key+'", value="'+value+'")'); }
 
             //then if local storage is supported, try to save the value with the specified key
             //and if that's okay then return the value, or return null for failure if not
@@ -1974,8 +1974,8 @@ var OzPlayer = (function()
             //nb. re-using the basekey var because its name gets compressed
             basekey += key;
 
-            //*** DEV VERY TMP
-            if(__.console) { console.log('getStorageValue(basekey="'+basekey+'", key="'+key+'")'); }
+            //*** DEV TMP
+            //if(__.console) { console.log('getStorageValue(basekey="'+basekey+'", key="'+key+'")'); }
 
             //then if local storage is supported, look for a value with the specified key
             //and that will either return the value, or null if there is no such value
@@ -2407,7 +2407,9 @@ var OzPlayer = (function()
                 player.video = clone;
             }
 
-            /*** DEV VERY TMP COMMENTED OUT ***//***
+            /*** DEV TMP COMMENTED OUT ***//***
+
+            ***/
 
             //then bind a contextmenu event to prevent them being enabled again
             //filtered by target so it doesn't block the logo-bug link contextmenu
@@ -2429,8 +2431,6 @@ var OzPlayer = (function()
                     return null;
                 }
             });
-
-            ***/
 
             //nb. we also do the same thing to block any native dblclick action
             //which is implemented later in the script (see "global mouse shortcuts")
@@ -7783,8 +7783,8 @@ var OzPlayer = (function()
             etc.addClass(player.container, config.classes['pinned-controls']);
         }
 
-        //*** DEV VERY TMP
-        console.warn('stored = ' + library.getStorageValue(player.basekey, config['user-pin']) + '\npinned = ' + player.controlform.pinned);
+        //*** DEV TMP
+        //console.warn('stored = ' + library.getStorageValue(player.basekey, config['user-pin']) + '\npinned = ' + player.controlform.pinned);
 
         //create a span-wrapped pin button inside the second fieldset
         //with its state matching .pinnned and the button enabled by default
@@ -7801,8 +7801,8 @@ var OzPlayer = (function()
                 //so we can call it programatically (eg. from the global key handler)
                 '.command'  : function()
                 {
-                    //*** DEV VERY TMP
-                    if(__.console) { console.log('player.controlform.pin.command()'); }
+                    //*** DEV TMP
+                    //if(__.console) { console.log('player.controlform.pin.command()'); }
 
                     //invert the current pinned state, then if we're setting it to true
                     //add the container pinned class, otherwise remove the class
@@ -10555,10 +10555,10 @@ var OzPlayer = (function()
         //(which we won't necessarily get with native youtube, but that's okay anyway)
         //or in IE10 using native video, because pressing play before then
         //sometimes fails to establish a connection, so it just stays loading forever
+        //or connection might be delayed so that AD starts playing before the video
         //(but that now causes IE11 to fail to initialise since it doesn't fire the
         // alternative canplay event until after playback has begun, so we have to
         // specifically except IE11 from this otherwise the player is unuseable)
-        //or connection might be delayed so that AD starts playing before the video
         //or in iOS it still doesn't work until you've actually started to play
         //and in iOS with stack controls the native icon covers the buttons
         //and in iOS with row controls pressing the play button causes the
