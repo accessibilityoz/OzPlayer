@@ -5184,7 +5184,7 @@ var OzPlayer = (function()
 
             //extract any <c.foo> tags and convert them to <span class="foo">
             //replacing any dots with spaces to allow for multiple classes
-            line = line.replace(/<\/c>/g, '</span>').replace(/<c\.([\.-\w]+)>/ig, function(all, value)
+            line = line.replace(/<\/c>/g, '</span>').replace(/<c\.([\.\w]+)>/ig, function(all, value)
             {
                 return '<span class="' + value.replace(/\./g, ' ') + '">';
             });
