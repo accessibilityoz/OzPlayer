@@ -1638,8 +1638,8 @@
     /* default auto width (which is then set by scripting) */
     width:auto;                                           /* [STYLE MODIFIED] */
 
-    /* default overall height (for two rows of buttons) */
-    height:64px !important;
+    /* default overall height (for one row of buttons) */
+    height:32px !important;
 
     /* nb. use transparency on the form so the fieldset
        can use margin to create a space around the controls */
@@ -1670,8 +1670,8 @@
 /* large controls */
 .oz-large .oz-controls
 {
-    /* large overall height (for two rows of buttons) */
-    height:128px !important;
+    /* large overall height (for one row of buttons) */
+    height:64px !important;
 
 
 
@@ -1876,7 +1876,8 @@
     line-height:0 !important;
 
     /* nb. this prevents some kind of weird displacement in safari */
-    vertical-align:top !important;
+    /* vertical-align:top !important; */
+    vertical-align:top;
 
 
     /*** DEV TMP ***//*
@@ -1975,6 +1976,10 @@
        but increase line-height to prevent text clipping in older IE */
     font-size:1em !important;
     line-height:1.4 !important;
+}
+
+.oz-time-info {
+    vertical-align: middle !important;
 }
 
 /* controls => disabled buttons */

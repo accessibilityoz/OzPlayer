@@ -1422,7 +1422,10 @@ var OzPlayer = (function()
             //general purpose state classes
             'state-visible'           : 'oz-visible',
             'state-hidden'            : 'oz-hidden',
-            'state-disabled'          : 'oz-disabled'
+            'state-disabled'          : 'oz-disabled',
+
+            //current time and duration information
+            'time-info'                : 'oz-time-info'
         },
 
         //programatic language
@@ -6376,19 +6379,60 @@ var OzPlayer = (function()
         //clear to users but the lack of it is definitely noticeable, so it's safer
         //to assume that we shouldn't hide the controls unless users change this setting
         //the setting itself persists like volume, so they don't have to do it every time
+        player.buttonkeys = { firstChild : [], lastChild : [] };
+
+        //create the controls form inside the container
+        //including an action that points to the media wrapper ID
+        //(which is better semantics than using javascript:void(null))
+        //so then we need an onsubmit event to block native submission and bubbling
+        //which is all we need as long as the form has no submit button
+        //also add a pinned property which controls whether autohiding should be
+        //honoured (false) or should be ignored in favour of user settings (true)
+        //nb. originally we had to set a style.width for the benefit of IE6
+        //but now the specified width is something other browsers rely on
+        //nb. the form has no padding, margin or borders, so that
+        //we can size it without any added box-model complications
+        //nb. originally this had aria-controls pointing to the media wrapper ID
+        //however aria-controls is not well implemented among screenreaders
+        //and created confusing interaction prompts as a results, eg. in JAWS + Firefox
+        //the prompt to "Press JAWS key plus Alt plus M to move to controlled element"
+        //which then always resulted in the message "Failed to move to controlled element"
+        //nb. we have to add role=form here to fix a nonsensical bug with JAWS, whereby
+        //the Play button wasn't being announced at all when navigating using "f"
+        //and either wasn't announced, or was announced without its toggle state,
+        //when navigating using Tab, and in both cases failed to work when actuated
+        //furthermore the time slider had a similar problem, whereby it wasn't always
+        //being announced when navigated to via Tab or the "f" key, only sometimes
+        //there's nothing in the markup of those controls that suggested a problem,
+        //and the problem has only recently manifested (between 3.1 and 3.2) yet none
+        //of the intermediate changes to the script appeared to have any relationship
+        //and all of the other buttons and controls within the form worked just fine
+        //the only tangible thing was that when moving the controls to a different place
+        //(eg. between the CC and AD buttons) the button and slider then worked fine
+        //so eventually this article gave a clue: https://tink.uk/jaws-ie-the-forms-region-bug/
+        //even though the issue in that article is unrelated, it gave a clue to a potential fix
+        //which, wouldn't you know, turned out to work and solve the problem completely!
+        //after several days of headscratching, that was quite a relief I can tell you :-)
+        //nb. the pinned property is for the benefit of Android TalkBack, which can't
+        //easily navigate to the controls when they're visually hidden; the true setting
+        //will prevent them from ever being visually hidden, and true is later set as the
+        //default when we create the pin button, since the benefit may not be immediately
+        //clear to users but the lack of it is definitely noticeable, so it's safer
+        //to assume that we shouldn't hide the controls unless users change this setting
+        //the setting itself persists like volume, so they don't have to do it every time
         player.controlform = etc.build('form',
-        {
-            'class'         : config.classes['controls'],
-            'action'        : '#' + player.wrapper.id,
-            'role'          : 'form',
-            'onsubmit'      : function(){ return null },
-            '.pinned'       : false,
-            '#style'        :
             {
-                'width'     : player.wrapper.offsetWidth + 'px'
-            },
-            '#dom'          : etc.build('fieldset')
-        });
+                'class'         : config.classes['controls'],
+                'action'        : '#' + player.wrapper.id,
+                'role'          : 'form',
+                'onsubmit'      : function(){ return null },
+                '.pinned'       : false,
+                '#style'        :
+                    {
+                        'width'     : player.wrapper.offsetWidth + 'px'
+                    },
+                '#dom'          : etc.build('fieldset')
+            });
 
         //if we're using the audio-only player
         if(player.isaudio)
@@ -6483,214 +6527,12 @@ var OzPlayer = (function()
         var slidertype = etc.build('input', { 'type' : 'range' }).type == 'range' ? 'range' : 'hidden';
 
 
-        //create a span-wrapped rewind button inside the first fieldset
-        //with its state set to "off" and the button disabled by default
-        //nb. the open-bracket must be on the same line for function name compression
-        addControlButton(
-            player,
-            player.controlform.firstChild,
-            'rewind',
-            false,
-            'off',
-            'off',
-            {
-                //then define an abstraction for the button's command handler
-                //so we can call it programatically (eg. from the global key handler)
-                '.command'  : function()
-                {
-                    //*** DEV TMP
-                    //if(__.console) { console.log('player.controlform.rewind.command()'); }
-
-                    //get the media's currentTime and subtract the config seek duration
-                    //then pass the new value straight to setMediaTime
-                    //nb. we don't need to worry about out-of-range values because setMediaTime
-                    //takes of that; we also don't need to worry about the updating the seek slider,
-                    //because setting the media time will cause a reciprocal timeupdate
-                    //event to be fired, which in turn will update theslider and its input
-                    setMediaTime(player, Math.floor(player.media.currentTime - config['seek-duration']));
-
-                    //then set the ended flag to false, so that if you play to the end
-                    //then seek to an earlier point, it will carry on playing from there
-                    player.ended = false;
-
-                    //if we have xad data and an xad cue is currently playing
-                    //nb. there's no need to check the ready states
-                    //of the audio and xad data, because the playing flag
-                    //wouldn't be true unless all of that was already checked
-                    if(player.tracks.xad && player.audiodesk.xad.playing)
-                    {
-                        //stop any playing xad audio and reset xad tracking
-                        //setting lastcue to null so it can be selected again
-                        xadReset(player, null);
-
-                        //*** DEV TMP
-                        //console.error('REWIND-RESET\n'
-                        //    + '\nplaying   = ' + player.audiodesk.xad.playing
-                        //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                        //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                        //    + '');
-                    }
-
-                    //*** DEV TMP
-                    //if(__.console) { console.log('rewind(' + Math.floor(player.media.currentTime) + ' => ' + Math.floor(player.media.currentTime - config['seek-duration']) +')'); }
-                }
-            }
-        );
-
-        //update the button's aria-label and text parsed with the seek duration
-        //nb. this process may trigger updateSliderStretch, but we haven't
-        //built all the sliders and spacer yet so that would cause an error,
-        //so pass the explicit noupdate flag to prevent that from happening
-        updateControlText(player, 'rewind',
-            etc.sprintf(getLang(player, 'button-rewind-off'), { '2' : config['seek-duration'] }),
-            etc.sprintf(getLang(player, 'text-rewind-off'), { '2' : config['seek-duration'] }),
-            true
-            );
-
-        //bind the button's click handler to its command abstraction
-        //which we have to do separately since we can't rely on the order of
-        //iteration through the properties object passed to the build function
-        //nb. since this is a proper button, it will work for touch and keyboard
-        addControlClick(player, 'rewind');
-
-        //then add it to the firstChild buttonkeys
-        player.buttonkeys.firstChild.push('rewind');
-
-
-        //create a span-wrapped forward button inside the first fieldset
-        //with its state set to "off" and the button disabled by default
-        //nb. the open-bracket must be on the same line for function name compression
-        addControlButton(
-            player,
-            player.controlform.firstChild,
-            'forward',
-            false,
-            'off',
-            'off',
-            {
-                //then define an abstraction for the button's command handler
-                //so we can call it programatically (eg. from the global key handler)
-                '.command'  : function()
-                {
-                    //*** DEV TMP
-                    //if(__.console) { console.log('player.controlform.forward.command()'); }
-
-                    //get the media's currentTime and add the config seek duration
-                    //then pass the new value straight to setMediaTime
-                    //nb. we don't need to worry about out-of-range values because setMediaTime
-                    //takes of that; we also don't need to worry about the updating the seek slider,
-                    //because setting the media time will cause a reciprocal timeupdate
-                    //event to be fired, which in turn will update theslider and its input
-                    setMediaTime(player, Math.floor(player.media.currentTime + config['seek-duration']));
-
-                    //if we have xad data and an xad cue is currently playing
-                    //nb. there's no need to check the ready states
-                    //of the audio and xad data, because the playing flag
-                    //wouldn't be true unless all of that was already checked
-                    if(player.tracks.xad && player.audiodesk.xad.playing)
-                    {
-                        //stop any playing xad audio and reset xad tracking
-                        //setting lastcue to null so it can be selected again
-                        xadReset(player, null);
-
-                        //*** DEV TMP
-                        //console.error('FORWARD-RESET\n'
-                        //    + '\nplaying   = ' + player.audiodesk.xad.playing
-                        //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                        //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                        //    + '');
-                    }
-
-                    //*** DEV TMP
-                    //if(__.console) { console.log('forward(' + Math.floor(player.media.currentTime) + ' => ' + Math.floor(player.media.currentTime + config['seek-duration']) +')'); }
-                }
-            }
-        );
-
-        //update the button's aria-label and text parsed with the seek duration
-        //nb. this process may trigger updateSliderStretch, but we haven't
-        //built all the sliders and spacer yet so that would cause an error,
-        //so pass the explicit noupdate flag to prevent that from happening
-        updateControlText(player, 'forward',
-            etc.sprintf(getLang(player, 'button-forward-off'), { '2' : config['seek-duration'] }),
-            etc.sprintf(getLang(player, 'text-forward-off'), { '2' : config['seek-duration'] }),
-            true
-            );
-
-        //bind the button's click handler to its command abstraction
-        //which we have to do separately since we can't rely on the order of
-        //iteration through the properties object passed to the build function
-        //nb. since this is a proper button, it will work for touch and keyboard
-        addControlClick(player, 'forward');
-
-        //then add it to the firstChild buttonkeys
-        player.buttonkeys.firstChild.push('forward');
-
-
-        //create a span-wrapped seek input inside the first fieldset, of the specified type
-        //including the field wrapper classes (but we don't need a state class)
-        //plus a default field disabled class and the button disabled attribute
-        //defining a name so we can refer to it in the control form collection
-        //but also explicitly creating that reference just to be on the safe side
-        //and we also have to define an ID because the slider script requires one
-        //set the default range from zero to zero, until we know the duration
-        //and set the default step to one second, until we know it should be greater
-        //as well as defining a timestep property, which is simply a numeric version of that
-        //but is easier and more efficient to refer to than parseInt(getAttribute)
-        //also define aria-hidden so that screenreaders should ignore it
-        //then they'll use the aria data encoded in the custom slider instead
-        //(and it also has display:none which should help in that respect)
-        //nb. the custom sliders function will add and maintain its title
-        //nb. when the max is zero the slider thumb and this input will be disabled
-        //and the thumb will be hidden with opacity (so it's invisible but accessible)
-        //nb. also add a single space after button, just to create basic spacing
-        etc.build('span',
-        {
-            '=parent'           : player.controlform.firstChild,
-            'class'             : config.classes['field-wrapper']
-                                + ' '
-                                + config.classes['field-seek']
-                                + ' '
-                                + config.classes['state-disabled'],
-            '#dom'              : (player.controlform.seek = etc.build('input',
-            {
-                'type'          : slidertype,
-                'name'          : 'seek',
-                'id'            : etc.sprintf(config.ids['slider'],
-                {
-                    'id'        : player.container.id,
-                    'field'     : config.classes['field-seek']
-                }),
-                'disabled'      : 'disabled',
-                'aria-hidden'   : 'true',
-                'min'           : '0',
-                'max'           : '0',
-                'step'          : '1',
-                '.timestep'     : 1,
-                'value'         : '0',
-
-                //add a mouseup focuser for the benefit of webkit
-                //which otherwise doesn't focus the input when you click it
-                'onmouseup'     : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
-
-                //also define a seeking flag, that we'll set and clear in the
-                //slider event to indicate whether we're currently seeking
-                '.seeking'      : false
-            })),
-            '#text' : ' '
-        });
-
-
-        //now create a second fieldset for the rest of the controls
-        etc.build('fieldset', { '=parent' : player.controlform });
-
-
         //create a span-wrapped play/pause button inside the second fieldset
         //with its state set to "off" and the button disabled by default
         //nb. the open-bracket must be on the same line for function name compression
         addControlButton(
             player,
-            player.controlform.lastChild,
+            player.controlform.firstChild,
             'playpause',
             false,
             'off',
@@ -6804,28 +6646,12 @@ var OzPlayer = (function()
         addControlClick(player, 'playpause');
 
         //then add it to the lastChild buttonkeys
-        player.buttonkeys.lastChild.push('playpause');
+        player.buttonkeys.firstChild.push('playpause');
 
 
-        //add a spacer element to create a gap before the next group of buttons
-        player.controlform.spacer = etc.build('span',
-        {
-            '=parent'    : player.controlform.lastChild,
-            'class'      : config.classes['field-wrapper']
-                         + ' '
-                         + config.classes['field-spacer']
-        });
-
-        //add a cheeky <br> to provide some basic formatting when CSS is unavailable
-        //(ie. so the volume button and input are on a line of their own)
-        //nb. it would be better to do this with fieldsets, but that's too much
-        //complication, as it's much simpler if the controls all have the same parent
-        etc.build('br', { '=parent' : player.controlform.lastChild });
-
-
-        //if we have any captions tracks data or embedded youtube captions
-        //unless this is an audio-only player and we don't have multiple languages
-        //(in which case we don't need the button since there's no language selection)
+//if we have any captions tracks data or embedded youtube captions
+//unless this is an audio-only player and we don't have multiple languages
+//(in which case we don't need the button since there's no language selection)
         if
         (
             player.tracks.youtube_captions
@@ -6846,8 +6672,8 @@ var OzPlayer = (function()
             if(player.tracks.youtube_captions)
             {
                 var
-                statekey = player.tracks.youtube_captions.enabled ? 'on' : 'off',
-                labelkey = statekey;
+                    statekey = player.tracks.youtube_captions.enabled ? 'on' : 'off',
+                    labelkey = statekey;
             }
 
             //or for regular track captions, define the default button state
@@ -6859,15 +6685,15 @@ var OzPlayer = (function()
             {
                 statekey = player.tracks.captions.enabled ? 'on' : 'off';
                 labelkey = player.tracks.captions.enabled
-                         ? (player.tracks.captions[player.tracks.captions.selected.captions].readyState == 2 ? 'loading' : 'on')
-                         : 'off';
+                    ? (player.tracks.captions[player.tracks.captions.selected.captions].readyState == 2 ? 'loading' : 'on')
+                    : 'off';
             }
 
             //create a span-wrapped cc button inside the second fieldset
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
-                player.controlform.lastChild,
+                player.controlform.firstChild,
                 'cc',
                 true,
                 statekey,
@@ -6916,7 +6742,7 @@ var OzPlayer = (function()
                                 updateControlText(player, 'cc',
                                     etc.sprintf(getLang(player, 'button-cc-lang'), { '1' : player.tracks.captions[player.tracks.captions.selected.captions].label }),
                                     etc.sprintf(getLang(player, 'text-cc-lang'), { '1' : player.tracks.captions.selected.captions.toUpperCase() })
-                                    );
+                                );
 
                                 //if we have a transcript
                                 if(player.transcript)
@@ -7067,13 +6893,13 @@ var OzPlayer = (function()
                                 //if CSS is enabled
                                 if(haveCSS(menu))
                                 {
-                                    //get the button's right edge position to use as an anchor point
-                                    var anchor = player.controlform.cc.offsetLeft + player.controlform.cc.offsetWidth;
+                                    //get the button's left edge position to use as an anchor point
+                                    var anchor = player.controlform.cc.offsetLeft;
 
-                                    //limit the max-width to the anchor so it can't overhang the left edge of the video
+                                    //limit the max-width to the anchor so it can't overhang the right edge of the video
                                     //nb. apply this even if not required in case of text size increases while menu is open
                                     //nb. this is unlikely to be needed except for unusually long labels with small videos
-                                    menu.style.maxWidth = anchor + 'px';
+                                    menu.style.maxWidth = (player.container.clientWidth - anchor) + 'px';
 
                                     //don't limit the height for the audio-only player because we have no constraining element
                                     //the menu opens beneath the controlform and flows downward, so any viewport overflow
@@ -7088,11 +6914,12 @@ var OzPlayer = (function()
                                         menu.style.maxHeight = (player.controlform.offsetTop - 5) + 'px';
                                     }
 
-                                    //then position the menu so its right edge is at the anchor
+                                    //then position the menu so its left edge is at the anchor
                                     //nb. using right positioning so that width increases caused
                                     //by text-size increases will flow to the left not the right
                                     //so that the menu retains the same anchor point throughout
-                                    menu.style.right = (player.container.clientWidth - anchor) + 'px';
+                                    menu.style.left = anchor + 'px !important';
+                                    menu.style.right = 'auto';
 
                                     //now toggle aria-hidden to show it
                                     menu.setAttribute('aria-hidden', 'false');
@@ -7184,9 +7011,9 @@ var OzPlayer = (function()
 
                     //update the button's aria-label to show a short general error message
                     etc.render(player.controlform.cc,
-                    {
-                        'aria-label' : getLang(player, 'button-cc-error')
-                    });
+                        {
+                            'aria-label' : getLang(player, 'button-cc-error')
+                        });
                 }
 
                 //else if we have multiple languages
@@ -7205,7 +7032,7 @@ var OzPlayer = (function()
                         updateControlText(player, 'cc',
                             etc.sprintf(getLang(player, 'button-cc-lang'), { '1' : player.tracks.captions[player.tracks.captions.selected.captions].label }),
                             etc.sprintf(getLang(player, 'text-cc-lang'), { '1' : player.tracks.captions.selected.captions.toUpperCase() })
-                            );
+                        );
                     }
 
                     //nb. we can't show a language-specific error message here
@@ -7217,22 +7044,22 @@ var OzPlayer = (function()
                     //nb. by using the language array to build this data
                     //we're only including items which haven't already failed to load
                     var menudata =
-                    {
-                        'off' :
                         {
-                            'label' : getLang(player, 'menu-cc-off')
-                        }
-                    };
+                            'off' :
+                                {
+                                    'label' : getLang(player, 'menu-cc-off')
+                                }
+                        };
                     //nb. only the members which correspond with a language track
                     //will have a lang property, so that each of those menu items
                     //has its own lang attribute, but the off item doesn't
                     etc.each(player.tracks.captions.languages, function(srclang)
                     {
                         menudata[srclang] =
-                        {
-                            'lang'  : srclang,
-                            'label' : player.tracks.captions[srclang].label
-                        }
+                            {
+                                'lang'  : srclang,
+                                'label' : player.tracks.captions[srclang].label
+                            }
                     });
 
                     //then create a cc menu inside the controls fieldset
@@ -7457,204 +7284,96 @@ var OzPlayer = (function()
             //bind the button's click handler to its command abstraction
             addControlClick(player, 'cc');
 
-            //then add it to the lastChild buttonkeys
-            player.buttonkeys.lastChild.push('cc');
+            //then add it to the firstChild buttonkeys
+            player.buttonkeys.firstChild.push('cc');
         }
 
         //if we've added the cc button, add another cheeky <br>
         if(player.controlform.cc)
         {
-            etc.build('br', { '=parent' : player.controlform.lastChild });
+            etc.build('br', { '=parent' : player.controlform.firstChild });
         }
 
 
-        //if we have audio descriptions or audio links data
-        if(player.audiodesk || player.audiolinks)
-        {
-            //abstract the initial "on" state, which for actual audio
-            //is determined by whether the audio is currently enabled
-            if(player.audiodesk)
+        // add elapsed time
+        player.controlform.timeInfo = etc.build('span',
             {
-                var onstate = player.audiodesk.enabled ? 'on' : 'off';
-            }
+                '=parent'    : player.controlform.firstChild,
+                'class'      : config.classes['field-wrapper']
+                    + ' '
+                    + config.classes['time-info'],
+                '#text'      : '00:00 / 00:00',
+                'aria-hidden' : 'true',
+            });
 
-            //or for audio links it's determined by comparing
-            //the on and off URLs with the current page address
-            else
+
+        //add a spacer element to create a gap before the next group of buttons
+        // player.controlform.spacer = etc.build('span',
+        //     {
+        //         '=parent'    : player.controlform.firstChild,
+        //         'class'      : config.classes['field-wrapper']
+        //             + ' '
+        //             + config.classes['field-spacer']
+        //     });
+
+
+        //create a span-wrapped seek input inside the first fieldset, of the specified type
+        //including the field wrapper classes (but we don't need a state class)
+        //plus a default field disabled class and the button disabled attribute
+        //defining a name so we can refer to it in the control form collection
+        //but also explicitly creating that reference just to be on the safe side
+        //and we also have to define an ID because the slider script requires one
+        //set the default range from zero to zero, until we know the duration
+        //and set the default step to one second, until we know it should be greater
+        //as well as defining a timestep property, which is simply a numeric version of that
+        //but is easier and more efficient to refer to than parseInt(getAttribute)
+        //also define aria-hidden so that screenreaders should ignore it
+        //then they'll use the aria data encoded in the custom slider instead
+        //(and it also has display:none which should help in that respect)
+        //nb. the custom sliders function will add and maintain its title
+        //nb. when the max is zero the slider thumb and this input will be disabled
+        //and the thumb will be hidden with opacity (so it's invisible but accessible)
+        //nb. also add a single space after button, just to create basic spacing
+        etc.build('span',
             {
-                //we already have both URLs saved and qualified in the audiolinks object
-                //so we can determine whether we're in the "on" state by substring comparison
-                //of the on URL within the current document URL, and if not then default to "off"
-                //nb. we need to have a default state in case either of the URLs is broken
-                //so we may as well assume that everything which isn't "on" must be "off"
-                //then we get that default, and save on having to do more than one evaluation
-                //nb. we compare the URLs inside the current location so that the current
-                //location can contain additional query data without failing to match
-                onstate = _.location.href.indexOf(player.audiolinks.on) < 0 ? 'off' : 'on';
-            }
-
-            //create a span-wrapped ad button inside the second fieldset with the corresponding state
-            //nb. the open-bracket must be on the same line for function name compression
-            addControlButton(
-                player,
-                player.controlform.lastChild,
-                'ad',
-                true,
-                onstate,
-                onstate,
-                {
-                    //then define an abstraction for the button's command handler
-                    '.command'  : function()
+                '=parent'           : player.controlform.firstChild,
+                'class'             : config.classes['field-wrapper']
+                    + ' '
+                    + config.classes['field-seek']
+                    + ' '
+                    + config.classes['state-disabled'],
+                '#dom'              : (player.controlform.seek = etc.build('input',
                     {
-                        //*** DEV TMP
-                        //if(__.console) { console.log('player.controlform.ad.command()'); }
-
-                        //reset the keyclick flag
-                        player.keyclick = false;
-
-                        //ignore this event if the button is disabled
-                        if(player.controlform.ad.disabled) { return false; }
-
-                        //then if actual audio descriptions are available
-                        if(player.audiodesk)
-                        {
-                            //*** DEV TMP
-                            //var e = { type : 'AD' };
-                            //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'enabled = ' + player.audiodesk.enabled;str += '\t[ button pre-click handler ]';str += '<br />'; etc.get('#info').innerHTML += str;}
-
-                            //if we're enabling audio but haven't yet initialised it
-                            //nb. this will only happen if audio was turned off
-                            //by default and has now been turned on by the user
-                            if(!player.audiodesk.enabled && !player.audio)
+                        'type'          : slidertype,
+                        'name'          : 'seek',
+                        'id'            : etc.sprintf(config.ids['slider'],
                             {
-                                //initialise the audio now, constructing its audio element
-                                //and defining its initialisation events and "auto" preload
-                                audioConstruct(player, true);
+                                'id'        : player.container.id,
+                                'field'     : config.classes['field-seek']
+                            }),
+                        'disabled'      : 'disabled',
+                        'aria-hidden'   : 'true',
+                        'min'           : '0',
+                        'max'           : '0',
+                        'step'          : '1',
+                        '.timestep'     : 1,
+                        'value'         : '0',
 
-                                /*** DEV LOG ***//*
-                                if(player.audio) { doAudioLogging(player); } */
+                        //add a mouseup focuser for the benefit of webkit
+                        //which otherwise doesn't focus the input when you click it
+                        'onmouseup'     : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } },
 
-                                //then if the media is already playing,
-                                //call the play function to play the audio
-                                if(!player.media.paused)
-                                {
-                                    playMedia(player);
-                                }
-                            }
+                        //also define a seeking flag, that we'll set and clear in the
+                        //slider event to indicate whether we're currently seeking
+                        '.seeking'      : false
+                    })),
+                '#text' : ' '
+            });
 
-                            //invert the audio enabled flag
-                            player.audiodesk.enabled = !player.audiodesk.enabled;
-
-                            //then if we're [re-]enabling the audio, it won't have
-                            //been synchronising while it was disabled, so call the
-                            //synchronisation function now to bring it back into sync
-                            if(player.audiodesk.enabled)
-                            {
-                                audioSynchronise(player);
-                            }
-
-                            //else [if we're disabling audio and] we have xad data
-                            else if(player.tracks.xad)
-                            {
-                                //if an xad cue is currently playing
-                                //nb. there's no need to check the ready states
-                                //of the audio and xad data, because the playing flag
-                                //wouldn't be true unless all of that was already checked
-                                if(player.audiodesk.xad.playing)
-                                {
-                                    //stop any playing xad audio and reset xad tracking
-                                    //setting lastcue to null so it can be selected again
-                                    xadReset(player, null);
-
-                                    //*** DEV TMP
-                                    //console.error('AD-OFF-RESET\n'
-                                    //    + '\nplaying   = ' + player.audiodesk.xad.playing
-                                    //    + '\nactivecue = ' + (player.audiodesk.xad.activecue ? ('["' + player.audiodesk.xad.activecue.id + '"]') : 'NULL')
-                                    //    + '\nlastcue   = ' + (player.audiodesk.xad.lastcue ? ('["' + player.audiodesk.xad.lastcue.id + '"]') : 'NULL')
-                                    //    + '');
-                                }
-                            }
-
-                            //and then set audio muted to the opposite of enabled
-                            //or set it to true if the video itself is also muted
-                            //or if we're currently waiting for video to load
-                            //nb. our volumechange events won't respond to this
-                            //because they're only bound to the video
-                            player.audio.muted = player.media.muted || player.audiodesk.waiting ? true : !player.audiodesk.enabled;
-
-                            //update the button state
-                            updateControlState(player, 'ad', (player.audiodesk.enabled ? 'on' : 'off'));
-
-                            //then if the ready state is less than 2 after video playback
-                            //has started and we're enabling audio, then showing the loading
-                            //message to indicate we're still waiting for enough data to laod
-                            if(player.audio.readyState < 2 && player.started && player.audiodesk.enabled)
-                            {
-                                //update the button's aria-label to show the loading message
-                                etc.render(player.controlform.ad,
-                                {
-                                    'aria-label' : getLang(player, 'button-ad-loading')
-                                });
-
-                                //but bind a one-off canplay event to set it back to normal
-                                //just in case you disable AD during the initial media loading period
-                                //but the AD is already fully cached, in which case it will still
-                                //have a ready state of 1 when re-enabled until it starts to play
-                                var canplay = etc.listen(player.audio, 'canplay', function()
-                                {
-                                    //silence this event
-                                    canplay.silence();
-
-                                    //update the button's aria-label to show the text corresponding with its state
-                                    etc.render(player.controlform.ad,
-                                    {
-                                        'aria-label' : getLang(player, 'button-ad-' + (player.audiodesk.enabled ? 'on' : 'off'))
-                                    });
-                                });
-                            }
-                        }
-
-                        //else if the button is just for audio links
-                        else
-                        {
-                            //the button serves merely as a link to an alternative page URL
-                            //so if the state is "on" we want to go to the "off" URL, or vice versa
-                            _.location.href = player.audiolinks[onstate == 'on' ? 'off' : 'on'];
-                        }
-                    }
-                }
-            );
-
-            //then if we have enabled AD but it's already failed to load
-            if(player.audiodesk && player.audiodesk.enabled && !player.audio)
-            {
-                //disable the ad button and update it to the "off" state
-                //(so it's both grayed and dimmed, and clearly out of it!)
-                updateControlDisabled(player, 'ad', true);
-                updateControlState(player, 'ad', 'off');
-
-                //update the button's aria-label with a short general error message
-                etc.render(player.controlform.ad, { 'aria-label' : getLang(player, 'button-ad-error') });
-            }
-
-            //bind the button's click handler to its command abstraction
-            addControlClick(player, 'ad');
-
-            //then add it to the lastChild buttonkeys
-            player.buttonkeys.lastChild.push('ad');
-        }
-
-        //if we've added the ad button, add another cheeky <br>
-        if(player.controlform.ad)
-        {
-            etc.build('br', { '=parent' : player.controlform.lastChild });
-        }
-
-
-        //changing the volume doesn't work in iOS and Windows Phone, which must
-        //be deliberate so that media objects can't be different from the system volume
-        //(in fact its native video controls don't even have a volume control)
-        //so there's no point adding the controls since they won't do anything
+//changing the volume doesn't work in iOS and Windows Phone, which must
+//be deliberate so that media objects can't be different from the system volume
+//(in fact its native video controls don't even have a volume control)
+//so there's no point adding the controls since they won't do anything
         if(!(defs.agent.ios || defs.agent.winphone))
         {
             //create a span-wrapped mute button inside the second fieldset
@@ -7665,7 +7384,7 @@ var OzPlayer = (function()
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
-                player.controlform.lastChild,
+                player.controlform.firstChild,
                 'mute',
                 true,
                 (player.media.muted ? 'on' : 'off'),
@@ -7693,10 +7412,10 @@ var OzPlayer = (function()
                         //that defines the updated on/off state, as well as a
                         //high/low state corresponding with the current volume
                         updateControlState(player, 'mute',
-                        [
-                            (player.media.muted ? 'on' : 'off'),
-                            (player.media.volume < 0.5 ? 'low' : 'high')
-                        ]);
+                            [
+                                (player.media.muted ? 'on' : 'off'),
+                                (player.media.volume < 0.5 ? 'low' : 'high')
+                            ]);
 
                         //then update the volume slider, either setting it to zero if
                         //the media is muted, else converting the volume to an
@@ -7721,8 +7440,8 @@ var OzPlayer = (function()
             //bind the button's click handler to its command abstraction
             addControlClick(player, 'mute');
 
-            //then add it to the lastChild buttonkeys
-            player.buttonkeys.lastChild.push('mute');
+            //then add it to the firstChild buttonkeys
+            player.buttonkeys.firstChild.push('mute');
 
 
             //create a span-wrapped volume input inside the second fieldset
@@ -7742,56 +7461,56 @@ var OzPlayer = (function()
             //which would mean that the volume you set might not be exactly what you get
             //nb. also add a single space after button, just to create basic spacing
             etc.build('span',
-            {
-                '=parent'           : player.controlform.lastChild,
-                'class'             : config.classes['field-wrapper']
-                                    + ' '
-                                    + config.classes['field-volume'],
-                '#dom'              : (player.controlform.volume = etc.build('input',
                 {
-                    'type'          : slidertype,
-                    'name'          : 'volume',
-                    'id'            : etc.sprintf(config.ids['slider'],
-                    {
-                        'id'        : player.container.id,
-                        'field'     : config.classes['field-volume']
-                    }),
-                    'aria-hidden'   : 'true',
-                    'min'           : '0',
-                    'max'           : '10',
-                    'step'          : '1',
-                    'value'         : Math.round(player.media.volume * 10),
+                    '=parent'           : player.controlform.firstChild,
+                    'class'             : config.classes['field-wrapper']
+                        + ' '
+                        + config.classes['field-volume'],
+                    '#dom'              : (player.controlform.volume = etc.build('input',
+                        {
+                            'type'          : slidertype,
+                            'name'          : 'volume',
+                            'id'            : etc.sprintf(config.ids['slider'],
+                                {
+                                    'id'        : player.container.id,
+                                    'field'     : config.classes['field-volume']
+                                }),
+                            'aria-hidden'   : 'true',
+                            'min'           : '0',
+                            'max'           : '10',
+                            'step'          : '1',
+                            'value'         : Math.round(player.media.volume * 10),
 
-                    //add a mouseup focuser for the benefit of webkit
-                    //which otherwise doesn't focus the input when you click it
-                    'onmouseup'     : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } }
-                })),
-                '#text' : ' '
-            });
+                            //add a mouseup focuser for the benefit of webkit
+                            //which otherwise doesn't focus the input when you click it
+                            'onmouseup'     : function(e, thetarget){ if(!thetarget.disabled) { thetarget.focus(); } }
+                        })),
+                    '#text' : ' '
+                });
         }
 
 
-        //*** DEV TMP
-        //__.localStorage.removeItem(player.basekey + config['user-pin']);
+//*** DEV TMP
+//__.localStorage.removeItem(player.basekey + config['user-pin']);
 
-        //look for a pinned setting in user config, or default to true
-        //then if pinned is true, apply the container pinned class
-        //nb. see controlform '.pinned' definition for more notes about this
+//look for a pinned setting in user config, or default to true
+//then if pinned is true, apply the container pinned class
+//nb. see controlform '.pinned' definition for more notes about this
         var p = library.getStorageValue(player.basekey, config['user-pin']) || 'on';
         if(player.controlform.pinned = (p == 'on'))
         {
             etc.addClass(player.container, config.classes['pinned-controls']);
         }
 
-        //*** DEV TMP
-        //console.warn('stored = ' + library.getStorageValue(player.basekey, config['user-pin']) + '\npinned = ' + player.controlform.pinned);
+//*** DEV TMP
+//console.warn('stored = ' + library.getStorageValue(player.basekey, config['user-pin']) + '\npinned = ' + player.controlform.pinned);
 
-        //create a span-wrapped pin button inside the second fieldset
-        //with its state matching .pinnned and the button enabled by default
-        //nb. the open-bracket must be on the same line for function name compression
+//create a span-wrapped pin button inside the second fieldset
+//with its state matching .pinnned and the button enabled by default
+//nb. the open-bracket must be on the same line for function name compression
         addControlButton(
             player,
-            player.controlform.lastChild,
+            player.controlform.firstChild,
             'pin',
             true,
             (player.controlform.pinned ? 'on' : 'off'),
@@ -7850,46 +7569,46 @@ var OzPlayer = (function()
                         player.basekey,
                         config['user-pin'],
                         player.controlform.pin.state
-                        );
+                    );
                 }
             }
         );
 
-        //bind the button's click handler to its command abstraction
+//bind the button's click handler to its command abstraction
         addControlClick(player, 'pin');
 
-        //then add it to the lastChild buttonkeys
-        player.buttonkeys.lastChild.push('pin');
+//then add it to the firstChild buttonkeys
+        player.buttonkeys.firstChild.push('pin');
 
 
-        //detect the supported fullscreen model
-        //nb. this is based on the fullscreen code from MediaElement's player
-        //but extended so it also supports the standard (non-prefixed) model
-        //nb. iOS only supports video fullscreen, not container fullscreen
-        //which means it won't have custom controls in fullscreen mode
-        //and iOS6 won't have captions (since only iOS7+ supports native captions)
-        //I did consider disabling fullscreen entirely, but you do kinda need
-        //fullscreen on a tablet or handheld device, so in this case I think
-        //that that expectation has to take priority over the lack of captions in iOS6
+//detect the supported fullscreen model
+//nb. this is based on the fullscreen code from MediaElement's player
+//but extended so it also supports the standard (non-prefixed) model
+//nb. iOS only supports video fullscreen, not container fullscreen
+//which means it won't have custom controls in fullscreen mode
+//and iOS6 won't have captions (since only iOS7+ supports native captions)
+//I did consider disabling fullscreen entirely, but you do kinda need
+//fullscreen on a tablet or handheld device, so in this case I think
+//that that expectation has to take priority over the lack of captions in iOS6
         var screentype = library.getFullscreenModel(player.video);
 
-        //there are also cases where we need to explicitly disable fullscreen
-        //=> the video-only fullscreen model doesn't work with non-native video
-        //=> in safari with flash the resizing is broken
-        //   in that it fails to resize upwards when entering fullscreen
-        //   (me-plugin and the embed object do resize, but the flash content doesn't)
-        //   but then resizes to the screen dimensions when exiting fullscreen again!
-        //   nb. safari with youtube+native is fine so we use the plugin flag to differentiate
-        //=> in windows/safari it sometimes just fails to happen, but even when it does
-        //   it introduces a stacking context problem because of the new base z-index
-        //   whereby the transcript container ends up still visible above the fullscreen video
-        //   and this could happen more generally with positioned content at the same context
-        //   so it's safer and more reliable if we just get rid of fullscreen mode
-        //   (and windows versions of safari aren't officially supported anymore anyway)
-        //=> in firefox 10-15 it fails to resize the screen and controls properly
-        //   while in firefox 9 it just plain doesn't work even though it claims support
-        //   (and firefox 9-15 aren't officially supported anyway)
-        //nb. these conditions could be simplified but are easier to comprehend this way
+//there are also cases where we need to explicitly disable fullscreen
+//=> the video-only fullscreen model doesn't work with non-native video
+//=> in safari with flash the resizing is broken
+//   in that it fails to resize upwards when entering fullscreen
+//   (me-plugin and the embed object do resize, but the flash content doesn't)
+//   but then resizes to the screen dimensions when exiting fullscreen again!
+//   nb. safari with youtube+native is fine so we use the plugin flag to differentiate
+//=> in windows/safari it sometimes just fails to happen, but even when it does
+//   it introduces a stacking context problem because of the new base z-index
+//   whereby the transcript container ends up still visible above the fullscreen video
+//   and this could happen more generally with positioned content at the same context
+//   so it's safer and more reliable if we just get rid of fullscreen mode
+//   (and windows versions of safari aren't officially supported anymore anyway)
+//=> in firefox 10-15 it fails to resize the screen and controls properly
+//   while in firefox 9 it just plain doesn't work even though it claims support
+//   (and firefox 9-15 aren't officially supported anyway)
+//nb. these conditions could be simplified but are easier to comprehend this way
         if
         (
             (screentype == 'webkit-video' && player.mode != 'native')
@@ -7904,16 +7623,16 @@ var OzPlayer = (function()
             screentype = null;
         }
 
-        //also disable fullscreen if the config allow-fullscreen option is false
-        //nb. this provides a means for site owners to prevent a video playing fullscreen
-        //(except of course for the external player that mobile devices use)
+//also disable fullscreen if the config allow-fullscreen option is false
+//nb. this provides a means for site owners to prevent a video playing fullscreen
+//(except of course for the external player that mobile devices use)
         if(!config['allow-fullscreen'])
         {
             screentype = null;
         }
 
 
-        //then if we [still] have a supported fullscreen mode
+//then if we [still] have a supported fullscreen mode
         if(screentype !== null)
         {
             //define a fullscreen permissions flag that we'll use to record
@@ -7923,15 +7642,15 @@ var OzPlayer = (function()
             //they're set to block outright then we won't get an event at all
             var screenpermission = false,
 
-            //now get the fullscreen event name, if we have one
-            //nb. the video-only model doesn't have a screen event
-            //but it does have a video event that we'll handle separately
-            screenevent =
-                screentype == 'webkit-screen'    ? 'webkitfullscreenchange'
-                : screentype == 'moz-screen'    ? 'mozfullscreenchange'
-                : screentype == 'ms-screen'        ? 'MSFullscreenChange'
-                : screentype == 'screen'        ? 'fullscreenchange'
-                : null;
+                //now get the fullscreen event name, if we have one
+                //nb. the video-only model doesn't have a screen event
+                //but it does have a video event that we'll handle separately
+                screenevent =
+                    screentype == 'webkit-screen'    ? 'webkitfullscreenchange'
+                        : screentype == 'moz-screen'    ? 'mozfullscreenchange'
+                        : screentype == 'ms-screen'        ? 'MSFullscreenChange'
+                            : screentype == 'screen'        ? 'fullscreenchange'
+                                : null;
 
 
             //*** DEV TMP
@@ -7954,14 +7673,14 @@ var OzPlayer = (function()
 
 
             //now add another cheeky <br> so this button has a line of its own
-            etc.build('br', { '=parent' : player.controlform.lastChild });
+            etc.build('br', { '=parent' : player.controlform.firstChild });
 
             //create a span-wrapped fullscreen button inside the second fieldset
             //with its state set to "off" but the button enabled by default
             //nb. the open-bracket must be on the same line for function name compression
             addControlButton(
                 player,
-                player.controlform.lastChild,
+                player.controlform.firstChild,
                 'fullscreen',
                 true,
                 'off',
@@ -8781,10 +8500,22 @@ var OzPlayer = (function()
             //etc.get('#info').innerHTML += str;
 
 
-            //then add it to the lastChild buttonkeys
-            player.buttonkeys.lastChild.push('fullscreen');
+            //then add it to the firstChild buttonkeys
+            player.buttonkeys.firstChild.push('fullscreen');
         }
 
+
+        // //now create a second fieldset for the rest of the controls
+        // etc.build('fieldset', { '=parent' : player.controlform });
+
+
+
+        // //add a cheeky <br> to provide some basic formatting when CSS is unavailable
+        // //(ie. so the volume button and input are on a line of their own)
+        // //nb. it would be better to do this with fieldsets, but that's too much
+        // //complication, as it's much simpler if the controls all have the same parent
+        // etc.build('br', { '=parent' : player.controlform.lastChild });
+        //
 
         //now add the last-field wrapper class to whichever is the last
         //(ie. right-most) field, which can be used to apply style variations
@@ -9594,7 +9325,7 @@ var OzPlayer = (function()
             //seek-resolution for testing, and that's when it bugged me so I did this
             if(!player.controlform.seek.seeking)
             {
-                dispatchMediaSliderEvent(player.controlform.seek, Math.floor(player.media.currentTime));
+                dispatchMediaSliderEvent(player.controlform.seek, Math.round(player.media.currentTime));
             }
         });
 
@@ -9651,7 +9382,8 @@ var OzPlayer = (function()
                 //up with the media volume if you move the native slider really quickly
                 //and might be inherent to volumechange events, or just the native controls
                 volumechange();
-                etc.delay(200, volumechange);
+                // DEV
+                // etc.delay(200, volumechange);
             }
         });
 
@@ -9772,7 +9504,9 @@ var OzPlayer = (function()
         etc.listen(player.media, 'timeupdate', function(e)
         {
             //get the media's currentTime quantized to the seek slider's timestep
-            var time = Math.floor(player.media.currentTime / player.controlform.seek.timestep);
+            var time = Math.round(player.media.currentTime / player.controlform.seek.timestep);
+
+            updateCurrentTimeInfo(player, time);
 
             //*** DEV TMP
             //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
@@ -9794,6 +9528,7 @@ var OzPlayer = (function()
                 //rather than letting it move freely to the time you're seeking to
                 if(!player.controlform.seek.seeking)
                 {
+
                     //dispatch a seek slider event to update it to this time
                     //which will also retrospectively update the seek control
                     dispatchMediaSliderEvent(player.controlform.seek, time);
@@ -12254,9 +11989,9 @@ var OzPlayer = (function()
         var
         control,
         seekwidth = controlspace.firstChild,
-        volumewidth = controlspace.lastChild,
+        volumewidth = controlspace.firstChild / 5,
         spacerwidth = 0,
-        volumemax = (player.controlform.offsetHeight * 2);
+        volumemax = (player.controlform.offsetHeight * 4);
         if(!player.controlform.volume)
         {
             spacerwidth = controlspace.lastChild;
@@ -12325,8 +12060,10 @@ var OzPlayer = (function()
                 dispatchMediaSliderEvent(control, control.theslider.index);
             }
         }
-        player.controlform.spacer.style.width = spacerwidth + 'px';
-    }
+        if(player.controlform.spacer) {
+            player.controlform.style.width = spacerwidth + 'px';
+        };
+    };
 
 
     //set a new media volume and update all the relevant controls and states
@@ -12351,6 +12088,9 @@ var OzPlayer = (function()
         //** or maybe if it was previously muted but volume was not zero
         //** then pressing up-arrow should set it to 0.1 rather than (volume + 0.1)
         var muted = (player.media.muted || from == 0) ? false : player.media.muted;
+
+        //DEV
+        console.log("Volume: " + to);
 
         //update the video and audio volume, with the to value and the muted flag
         setMediaVolume(player, to, muted);
@@ -13685,11 +13425,13 @@ var OzPlayer = (function()
         applySliderValue(control.theslider, data, false);
     }
 
+    function updateCurrentTimeInfo(player, time)
+    {
+        var duration = player.media.duration;
+        duration = isNaN(duration) ? 0 : duration;
 
-
-
-
-
+        player.controlform.timeInfo.innerText = library.getTimeStamp(time) + ' / ' + library.getTimeStamp(duration);
+    }
 
     //-- private => slider construction, control and interaction functions --//
 
