@@ -9341,39 +9341,34 @@ var OzPlayer = (function()
         //so the native implementations must have internal logic to prevent that
         etc.listen(player.media, 'volumechange', function(e)
         {
-            //if this is not a fake volume change
-            if(!player.fakevolume)
+            //define a local abstraction for this functionality
+            function volumechange()
             {
-                //define a local abstraction for this functionality
-                function volumechange()
+                //update the video and audio volume, also passing the muted flag
+                //so we can mute it if applicable instead of changing the volume
+                //(since muted audio doesn't return a zero volume)
+                //nb. we do this even if we don't have the volume control
+                //so that synchronised audio volume will still be maintained
+                setMediaVolume(player, player.media.volume, player.media.muted);
+
+                //if we have the mute control, update the button state
+                //passing a state array that defines the updated on/off state,
+                //as well as a high/low state corresponding with the updated volume
+                if(player.controlform.mute)
                 {
-                    //update the video and audio volume, also passing the muted flag
-                    //so we can mute it if applicable instead of changing the volume
-                    //(since muted audio doesn't return a zero volume)
-                    //nb. we do this even if we don't have the volume control
-                    //so that synchronised audio volume will still be maintained
-                    setMediaVolume(player, player.media.volume, player.media.muted);
+                    updateControlState(player, 'mute',
+                    [
+                        (player.media.muted ? 'on' : 'off'),
+                        (player.media.volume < 0.5 ? 'low' : 'high')
+                    ]);
+                }
 
-                    //if we have the mute control, update the button state
-                    //passing a state array that defines the updated on/off state,
-                    //as well as a high/low state corresponding with the updated volume
-                    if(player.controlform.mute)
-                    {
-                        updateControlState(player, 'mute',
-                        [
-                            (player.media.muted ? 'on' : 'off'),
-                            (player.media.volume < 0.5 ? 'low' : 'high')
-                        ]);
-                    }
-
-                    //if we have the volume control, update the slider index
-                    //either setting it to zero if the media is muted, else converting
-                    //the volume to an integer in the volume slider's index range (0 - 10)
-                    //nb. this will also update the value in the underlying input
-                    if(player.controlform.volume)
-                    {
-                        dispatchMediaSliderEvent(player.controlform.volume, player.media.muted ? 0 : Math.round(player.media.volume * 10));
-                    }
+                //if we have the volume control, update the slider index
+                //either setting it to zero if the media is muted, else converting
+                //the volume to an integer in the volume slider's index range (0 - 10)
+                //nb. this will also update the value in the underlying input
+                if(player.controlform.volume) {
+                    dispatchMediaSliderEvent(player.controlform.volume, player.media.muted ? 0 : Math.round(player.media.volume * 10));
                 }
 
                 //now call the abstraction once straight away, then again after 200ms
@@ -9382,8 +9377,7 @@ var OzPlayer = (function()
                 //up with the media volume if you move the native slider really quickly
                 //and might be inherent to volumechange events, or just the native controls
                 volumechange();
-                // DEV
-                // etc.delay(200, volumechange);
+                etc.delay(200, volumechange);
             }
         });
 
@@ -9505,8 +9499,7 @@ var OzPlayer = (function()
         {
             //get the media's currentTime quantized to the seek slider's timestep
             var time = Math.round(player.media.currentTime / player.controlform.seek.timestep);
-
-            updateCurrentTimeInfo(player, time);
+            updateCurrentTimeInfo(player, player.media.currentTime);
 
             //*** DEV TMP
             //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
@@ -9682,6 +9675,15 @@ var OzPlayer = (function()
             });
         }
 
+        // TL - update duration once player is ready
+        var canplay = etc.listen(player.media, 'canplay', function(e)
+        {
+            //silence this event since we only need it once
+            canplay.silence();
+
+            // Update TimeInfo to show media duration
+            updateCurrentTimeInfo(player);
+        });
 
 
         //~~ media loading and buffering (and associated synchronisation) ~~//
@@ -12077,7 +12079,7 @@ var OzPlayer = (function()
         //because in that case you can't change the volume anyway
         //or if the control is disabled, which happens with the
         //youtube plugin until the default volume has been set
-        if(player.fakevolume || !player.controlform.volume || player.controlform.volume.disabled)
+        if(!player.controlform.volume || player.controlform.volume.disabled)
         {
             return false;
         }
@@ -12090,7 +12092,7 @@ var OzPlayer = (function()
         var muted = (player.media.muted || from == 0) ? false : player.media.muted;
 
         //DEV
-        console.log("Volume: " + to);
+        //console.log("Volume: " + to);
 
         //update the video and audio volume, with the to value and the muted flag
         setMediaVolume(player, to, muted);
@@ -13425,7 +13427,7 @@ var OzPlayer = (function()
         applySliderValue(control.theslider, data, false);
     }
 
-    function updateCurrentTimeInfo(player, time)
+    function updateCurrentTimeInfo(player, time = 0)
     {
         var duration = player.media.duration;
         duration = isNaN(duration) ? 0 : duration;
