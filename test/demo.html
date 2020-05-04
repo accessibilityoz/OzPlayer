@@ -94,8 +94,8 @@
                  "type"             specifies the mime-type e.g. "video/mp4"
                  n.b. for best browser support include both "mp4" and "webm"
             -->
-            <source src="http://static.a11yoz.com/media/video.mp4" type="video/mp4" />
-            <source src="http://static.a11yoz.com/media/video.webm" type="video/webm" />
+<!--            <source src="http://static.a11yoz.com/media/Saving_Favorites.mp4" type="video/mp4" />-->
+            <source src="https://youtu.be/FUgUoRhPBTU" type="video/x-youtube" />
 
             <!-- none or more caption/transcript language sources
                  "src"              specifies the path to a VTT or SRT file
@@ -110,8 +110,8 @@
                 for users to select which language to display (or to turn them off entirely)
                 while the default attribute specifies which language to show by default
             -->
-            <track src="../media/captions-en.vtt" kind="captions" data-sync="0" srclang="en" label="English" default="default" />
-            <track src="../media/captions-de.vtt" kind="captions" data-sync="0" srclang="de" label="Deutsch" />
+            <track src="../media/Saving_Favorite_Websites_CAPTION.vtt" kind="captions" data-sync="0" srclang="en" label="English" default="default" />
+<!--            <track src="../media/captions-de.vtt" kind="captions" data-sync="0" srclang="de" label="Deutsch" />-->
 
             <!-- none or more additional transcript data sources
                  "src"              specifies the path to a VTT or SRT file
@@ -122,8 +122,8 @@
                  n.b. if multiple languages are included then the transcript will
                  use whichever one matches the language of the selected captions track
             -->
-            <track src="../media/transcript-en.vtt" kind="metadata" data-kind="transcript" data-sync="0" srclang="en" />
-            <track src="../media/transcript-de.vtt" kind="metadata" data-kind="transcript" data-sync="0" srclang="de" />
+<!--            <track src="../media/transcript-en.vtt" kind="metadata" data-kind="transcript" data-sync="0" srclang="en" />-->
+<!--            <track src="../media/transcript-de.vtt" kind="metadata" data-kind="transcript" data-sync="0" srclang="de" />-->
 
             <!-- static fallback content (for when video sources are not supported)
                  "class"            must be "ozplayer-fallback"
@@ -134,10 +134,10 @@
             -->
             <div class="ozplayer-fallback">
                 <ul>
-                    <li><a href="../media/video.mp4">Download MP4</a></li>
-                    <li><a href="../media/video.webm">Download WebM</a></li>
-                    <li><a href="../media/captions-en.vtt">Download Captions <span lang="en">(English)</span></a></li>
-                    <li><a href="../media/captions-de.vtt">Download Captions <span lang="de">(Deutsch)</span></a></li>
+                    <li><a href="http://static.a11yoz.com/media/Saving_Favorites.mp4">Download MP4</a></li>
+<!--                    <li><a href="../media/video.webm">Download WebM</a></li>-->
+                    <li><a href="../media/Saving_Favorite_Websites_CAPTION.vtt">Download Captions <span lang="en">(English)</span></a></li>
+<!--                    <li><a href="../media/captions-de.vtt">Download Captions <span lang="de">(Deutsch)</span></a></li>-->
                 </ul>
             </div>
 
@@ -149,17 +149,17 @@
              "preload"              should be "none" to prevent preloading in unsupported browsers
                                     n.b. in supported browsers the video's preload setting will be used
         -->
-        <audio preload="none" data-default="default">
+<!--        <audio preload="none" data-default="default">-->
 
-            <!-- one or more audio sources
-                 "src"              specifies the path to an audio file
-                 "type"             specifies the mime-type e.g. "audio/mp3"
-                 n.b. for best browser support include both "mp3" and "ogg"
-            -->
-            <source src="http://static.a11yoz.com/media/descriptions.mp3" type="audio/mp3" />
-            <source src="http://static.a11yoz.com/media/descriptions.ogg" type="audio/ogg" />
+<!--            &lt;!&ndash; one or more audio sources-->
+<!--                 "src"              specifies the path to an audio file-->
+<!--                 "type"             specifies the mime-type e.g. "audio/mp3"-->
+<!--                 n.b. for best browser support include both "mp3" and "ogg"-->
+<!--            &ndash;&gt;-->
+<!--            <source src="http://static.a11yoz.com/media/descriptions.mp3" type="audio/mp3" />-->
+<!--            <source src="http://static.a11yoz.com/media/descriptions.ogg" type="audio/ogg" />-->
 
-        </audio>
+<!--        </audio>-->
 
     </div>
 
@@ -169,21 +169,21 @@
          "open"                     can be "open" to have the expander expanded by default,
                                     or omit the attribute entirely to have it collapsed
     -->
-    <details class="ozplayer-expander" open="open">
+<!--    <details class="ozplayer-expander" open="open">-->
 
-        <!-- transcript expander trigger
-             n.b. if the expander is present then this must be its first-child -->
-        <summary>Video Transcript</summary>
+<!--        &lt;!&ndash; transcript expander trigger-->
+<!--             n.b. if the expander is present then this must be its first-child &ndash;&gt;-->
+<!--        <summary>Video Transcript</summary>-->
 
 
-        <!-- optional player transcript container
-             "id"                   can be anything, but must be the same
-                                    as the player's "data-transcript" attribute
-             "class"                must be "ozplayer-transcript"
-        -->
-        <div id="demo-transcript" class="ozplayer-transcript"></div>
+<!--        &lt;!&ndash; optional player transcript container-->
+<!--             "id"                   can be anything, but must be the same-->
+<!--                                    as the player's "data-transcript" attribute-->
+<!--             "class"                must be "ozplayer-transcript"-->
+<!--        &ndash;&gt;-->
+<!--        <div id="demo-transcript" class="ozplayer-transcript"></div>-->
 
-    </details>
+<!--    </details>-->
 
 
 </div>
