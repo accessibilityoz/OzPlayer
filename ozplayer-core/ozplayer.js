@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-20 AccessibilityOz       http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.5.1] => player core
+ OzPlayer [4.0] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -519,9 +519,9 @@ var OzPlayer = (function()
         //as in "does primary node contain event target"
         , contains : function(a, b)
         {
-            if(b === a)        { return true; }
-            if(b === null)    { return false; }
-            else             { return this.contains(a, b.parentNode); }
+            if(b === a)     { return true; }
+            if(b === null)  { return false; }
+            else            { return this.contains(a, b.parentNode); }
         }
 
         //identify the current button from a mouse event object
@@ -598,7 +598,7 @@ var OzPlayer = (function()
             var n, j = { x : 0, y : 0 };
 
             //then calculate the necessary adjustments to constrain
-            //the target's left and top to each of the context edges
+            //the target's x and y edge to each of the context edges
             this.each(a.p, function(q, z)
             {
                 //constrain to the left and top edges
@@ -742,11 +742,10 @@ var OzPlayer = (function()
         }
 
 
-        //qualif a string href to form a complete URL
+        //qualify a string href to form a complete URL
         //using the current document location to evaluate relative paths
-        //*** this needs re-writing and optimizing to a proper etc function
-        //*** but I can't do that until there's time to test it all properly
-        //*** scruffy though it is, this code is very well tested and proven
+        //nb. this could be neated and simplified, but I'm reluctant to
+        //scruffy though this code is, it's very well tested and proven
         , qualify : function(f)
         {
             var
@@ -836,7 +835,7 @@ var OzPlayer = (function()
         //=> if a request can't be instantiated we return 501 (not implemented)
         //=> if ajax throws a network or security error we return 502 (bad gateway)
         //=> if ajax throws an error reading the response we return 406 (not acceptable)
-        //=> if the request is successul it returns 200 / 304 (ok / not modified)
+        //=> if the request is successful it returns 200 / 304 (ok / not modified)
         //=> if the request fails it returns the failure code, eg. 404 (not found)
         //btw. if the nocache flag is strictly true then the request
         //will include a timestamp so we don't get a cached response
@@ -1018,8 +1017,8 @@ var OzPlayer = (function()
         //flags we need, for cases where feature detection is not applicable
         //(see http://www.sitepoint.com/javascript-feature-detection-fails/)
         //nb. create all values as strict booleans for flexibility and safety
-        //nb. for our purposes, opera next is treated as google chrome
-        //since they use almost identical versions of blink (atm anyway!)
+        //nb. opera next and chromium edge are identified as google chrome
+        //they don't need to be treated separately since they use the same engines
         'agent' : (function()
         {
             var n = navigator, p = n.platform, a = n.userAgent, u =
@@ -1028,7 +1027,6 @@ var OzPlayer = (function()
                 iphone      : p == 'iPhone',
                 android     : /^(android|linux arm)/i.test(p) || (/android/i.test(a) && !/edge/i.test(a)),
                 windows     : p == 'Win32',
-                winphone    : /windows phone/i.test(a),
                 firefox     : !!__.InstallTrigger,
                 chrome      : n.vendor == 'Google Inc.' || n.vendor == 'Opera Software ASA',
                 webkit      : /webkit/i.test(a),
@@ -1036,8 +1034,6 @@ var OzPlayer = (function()
                 ie          : !!_.uniqueID
             };
 
-            u.ie9           = !!(u.ie && __.Audio && !__.Worker);
-            u.ie10p         = !!(u.ie && __.Worker);
             u.ie11p         = !!(u.ie && __.Intl);
 
             if(u.edge       = !u.ie && !!window.StyleMedia) { u.webkit = false; }
@@ -1047,7 +1043,6 @@ var OzPlayer = (function()
             u.opera12m      = !!__.opera;
             u.firefox15m    = !!(u.firefox && !Number.isFinite);
             u.firefox9m     = !!(u.firefox15m && !_.documentElement.mozRequestFullScreen);
-            u.ie7m          = !!(u.ie && !__.JSON);
 
             //*** DEV TMP
             //console.log('platform = "'+p+'"\nvendor = "'+n.vendor+'"\nua = "'+a+'"');
@@ -1077,8 +1072,8 @@ var OzPlayer = (function()
     //and that's delibarate, as a way of obfuscating the purpose of the function
     //just one of several ways in which the validation code is obscured
     //so that it's harder to find by searching through the codebase
-    //which should make it harder to circumvent for those who are not JS experts
-    //(although we accept that JS experts would still be able to work out what's what)
+    //which should make it harder to circumvent for those who are not JS proficient
+    //(although those who are would still be able to figure out what's what)
     $this = $$(this);
 
 
@@ -1090,6 +1085,9 @@ var OzPlayer = (function()
     //or if the browser doesn't have the necessary feature support
     //but return some public data so this flag remains available either way
     //and so that subsequent calls to public methods don't cause errors
+    //nb. even though this is a public property, authors can't just set it true
+    //to bypass validation, because usable constructors never get defined
+    //they'd have to hack the code of this script itself to bypass validation
     if(!($this.supported =
     (
         //*** DEV TMP
@@ -1098,15 +1096,22 @@ var OzPlayer = (function()
         //this checks the existing validation flag
         $this.supported
         &&
-        //this excludes specific browsers that aren't worth supporting anymore:
-        //=> IE6-7 will now only see the static fallback content
-        //=> Opera 12 and Firefox 3-8 will still see native video if they
-        //   support the codec; though if they don't support the codec
-        //   they'll get a broken native player, where ideally we'd give them
-        //   the fallback content, but that doesn't happen automatically
-        //   it's a complex scripted condition, and not really worth it
-        //nb. we still support IE8 so we can't just exclude non-native
-        !(defs.agent.ie7m || defs.agent.opera12m || defs.agent.firefox9m)
+        //this excludes specific browsers that we can't support anymore:
+        //=> IE6-8 will only see the static fallback content
+        //=> IE9-10 and Winphone will see native video with supported codecs
+        //=> Opera 12 and Firefox 3-8 will also see native/supported video
+        //nb. in cases where native video is supported but not that codec
+        //(eg. if the only source is WebM when the browser only supports MP4)
+        //those browsers will get a broken native player, where ideally we'd
+        //give them the fallback content, but that doesn't happen automatically
+        //and it would be semi-complex to handle, and it's not really worth it
+        !(
+            (defs.agent.ie && !defs.agent.ie11p)
+            ||
+            defs.agent.opera12m
+            ||
+            defs.agent.firefox9m
+        )
         &&
         //this excludes remaining browsers which don't have getBoundingClientRect
         //(eg. Safari <= 3 or equivalent webkit, and Firefox <= 2 or equivalent gecko)
@@ -1179,19 +1184,21 @@ var OzPlayer = (function()
         'allow-fullscreen'        : true,
 
         //default video size (px) when the width and height are not defined
-        //nb. this is similar to what webkit does natively in that situation
-        //(whereas firefox would use the native video size)
-        //nb. the width is designed to provide enough minimum space
+        //nb. this width is designed to provide enough minimum space
         //for all the supported controls when images are disabled
         //while the height maintains a widescreen aspect ratio of 16:9
-        //nb. this is also the threshold below which the smallscreen class is applied
         'default-width'           : 400,
         'default-height'          : 225,
+
+        //smallscreen and midscreen threshold widths (lt px)
+        //for application of "smallscreen" and "midscreen" classes
+        'smallscreen-threshold'   : 400,
+        'midscreen-threshold'     : 480,
 
         //absolute minimum width (px) when the smallscreen layout is used
         //nb. the css also defines a min-width and min-height which effectively
         //constrains the absolute minimum even if this value is set lower
-        'smallscreen-minwidth'    : 240,
+        'smallscreen-minwidth'    : 300,
 
 
         //progress timeout for flash video failure (integer seconds)
@@ -1331,11 +1338,12 @@ var OzPlayer = (function()
             //additional container classes when responsive layout is used
             //nb. "responsive" is added as soon as the responsive attribute is parsed
             //and overrides the static min-width and min-height to allow smaller defaults
-            //whereas "smallscreen" is only added when responsive events are called
-            //(the first of which is immediately after the controls have been built)
-            //and is used whenever the player size goes below the standard minimum
+            //whereas "smallscreen" or "midscreen" are added or removed when responsive events are called
+            //(and immediately after the controls have been built whether or not responsive is used)
+            //as applicable to the video width compared with the smallscreen and midscreen thresholds
             'responsive'              : 'oz-responsive',
             'smallscreen'             : 'oz-smallscreen',
+            'midscreen'               : 'oz-midscreen',
 
             //additional container class for the audio-only player
             'audio-only'              : 'oz-audio',
@@ -1353,9 +1361,6 @@ var OzPlayer = (function()
 
             //logo-bug
             'logo-bug'                : 'oz-logo-bug',
-
-            //player replacement container (defined by MediaElement)
-            'replacement'             : 'me-plugin',
 
             //poster overlay
             'poster'                  : 'oz-poster',
@@ -1547,7 +1552,7 @@ var OzPlayer = (function()
             'constructor-bad-id'      : 'There is no p\layer with the ID "%id".',
             'constructor-dupe-id'     : 'A p\layer with the ID "%id" has already been initialised.',
             'constructor-bad-class'   : 'The p\layer with the ID "%id" does not have the class "%name".',
-            'constructor-no-media'    : 'The p\layer with the ID "%id" has no m\edia element.',
+            'constructor-no-element'  : 'The p\layer with the ID "%id" has no m\edia element.',
             'constructor-not-new'     : 'The OzPlayer.Video function must be called with the "new" keyword.',
             'constructor-not-new-audio': 'The OzPlayer.Audio function must be called with the "new" keyword.',
 
@@ -1575,8 +1580,11 @@ var OzPlayer = (function()
             'option-wrong-responsive' : 'The "data-responsive" element for #%id must be outside the p\layer.',
             'option-bad-responsive-mode': 'The "data-responsive-mode" attribute for #%id must have the value "min",\ "max" or "initial".',
 
+            //mediaelement path error
+            'path-failure'            : 'Unable to determine path to \/ozplayer-core\/. Ensure that med\iaelement.min.js is loaded via\ <script src>.',
+
             //media wrapper failure warning
-            'wrapper-failure'         : 'OzPlayer failed to initialize the med\ia.',
+            'wrapper-failure'         : 'Failed to initialize the med\ia.',
 
             //vtt loading and parsing errors
             'vtt-load-failure'        : 'VTT file failed to load\ [%status].\n<%src>',
@@ -1626,12 +1634,13 @@ var OzPlayer = (function()
         //no possibility of seeing fallback text as well as images
         applyImageSupport : function(player)
         {
-            //safari, winphone and Edge don't have a user setting to disable images
+            //Safari and Edge don't have a user setting to disable images
             //(there is a dev setting for it in safari, but that's just a dev setting)
             //furthermore the process we're using is unreliable on iOS
             //and may require a double refresh to work on desktop safari
+            //and there's no longer any way of detecting it in firefox afail
             //so, if this is one of them, just assume image support and exit
-            if(defs.agent.safari || defs.agent.winphone || defs.agent.edge)
+            if(defs.agent.safari || defs.agent.edge || defs.agent.firefox)
             {
                 return (player.images = true);
             }
@@ -1660,59 +1669,11 @@ var OzPlayer = (function()
             //ie. to avoid the slashes being treated as part of a comment
             var datauri = 'data:image/gif;base64,R0lGODlhAQABAIAAAP\/\/\/wAAACH5BAEAAAAALAAAAAABAAEAQAICRAEAOw==';
 
-            //for IE10 or earlier
-            if(defs.agent.ie && !defs.agent.ie11p)
-            {
-                //for IE8, create an image with an "about:blank" URI, and that will have
-                //a width of zero if images are disabled, or of a standard placeholder
-                //if they're enabled (whether or not placeholders are enabled, in either case)
-                if(!etc.def(_.addEventListener))
-                {
-                    var img = new Image;
-                    img.src = 'about:blank';
-                    if(img.width > 0)
-                    {
-                        //set the images flag and remove the no-images class
-                        player.images = true;
-                        etc.removeClass(player.container, config.classes['no-images']);
-                    }
-                }
-
-                //or for IE9 or later, create an image with a data URI, and then
-                //wait for its onreadystatechange event to fire, which it never will
-                //if images are disabled, but will at least once if they're enabled
-                else
-                {
-                    var img = new Image;
-                    img.src = datauri;
-                    img.onreadystatechange = function()
-                    {
-                        //set the images flag and remove the no-images class
-                        player.images = true;
-                        etc.removeClass(player.container, config.classes['no-images']);
-
-                        //then if we've rendered the sliders in the meantime
-                        //(which we can detect from the presence of the seek slider)
-                        //udpate their dynamic widths with the stable button sizes
-                        if(player.controlform && player.controlform.seek && sliders[player.controlform.seek.id])
-                        {
-                            updateSliderStretch(player);
-                        }
-
-                        //then if we have the logo-bug, restore its backgroundImage
-                        if(player.logo)
-                        {
-                            player.logo.style.backgroundImage = 'url("data:image/png;base64,' + config['logo-bug-data'] + '")';
-                        }
-                    };
-                }
-            }
-
-            //or for webkit browsers or IE11, create an image with a data URI, and that will
+            //for webkit browsers or IE11, create an image with a data URI, and that will
             //have a width of zero if images are disabled, or greater if they're enabled
             //except that we have to pause for a moment before reading the properties
             //nb. 10ms wasn't enough, but 100ms always was, so let's double that for safety
-            else if(defs.agent.webkit || defs.agent.ie11p)
+            if(defs.agent.webkit || defs.agent.ie11p)
             {
                 var img = new Image;
                 img.src = datauri;
@@ -1771,65 +1732,31 @@ var OzPlayer = (function()
                     };
                 });
             }
-
-            //or for firefox (which is the only one left) none of those solutions work
-            //but what we can do is set an identical SRC and backgroundImage with a
-            //broken remote URI, then the SRC will generate an error event we can
-            //use to check the computed backgroundImage, and that will return either
-            //"none" if images are disabled, or the specified URI if they're enabled
-            //nb. this will also generate a server error, but that can't really be helped
-            //I tried everything else, and this is the only thing that worked
-            //which didn't also rely on a real document image to test with
-            //nb. I also noticed that when images are disabled the error event
-            //fires twice, but that didn't seem coherent enough to rely on
-            else
-            {
-                var img = new Image;
-                img.addEventListener('error', function()
-                {
-                    if(__.getComputedStyle(img, '').backgroundImage != 'none')
-                    {
-                        //set the images flag and remove the no-images class
-                        player.images = true;
-                        etc.removeClass(player.container, config.classes['no-images']);
-
-                        //then if we've rendered the sliders in the meantime
-                        //(which we can detect from the presence of the seek slider)
-                        //udpate their dynamic widths with the stable button sizes
-                        if(player.controlform && player.controlform.seek && sliders[player.controlform.seek.id])
-                        {
-                            updateSliderStretch(player);
-                        }
-
-                        //then if we have the logo-bug, restore its backgroundImage
-                        if(player.logo)
-                        {
-                            player.logo.style.backgroundImage = 'url("data:image/png;base64,' + config['logo-bug-data'] + '")';
-                        }
-                    }
-                }, false);
-                img.src = 'http://0';
-                img.style.backgroundImage = 'url(' + img.src + ')';
-            }
         }
 
 
         //check the type of a media element or its collection of sources
         //against the types that the browser supports, and return the first match
         //of if we fail to find any matching types, return null for failure
-        //nb. we also have a condition to match the fake youtube mime-type
-        //used for the MediaElement youtube plugin, which we return so we can
-        //identify when that plugin is used (since media.pluginType will be "flash" etc)
+        //nb. we also have a condition to match the fake mime-types used for
+        //youtube, facebook etc, and also the application mime-types for HLS and DASH
         //nb. if a media element has both an src and sources, the sources are ignored
         //nb. we can't test media elements or sources which have no type attribute
-        //and if there's no src or source elements then obvoiusly we return null
+        //and if there's no src or source elements then we return null
         , getSupportedType : function(media, type)
         {
             function yesCanPlay(attr)
             {
+                //*** DEV TMP
+                //console.log('yesCanPlay("' + attr + '") = ' + media.canPlayType(attr));
+
+                //return true for third-party or application types that ME4 can handle
+                //otherwise return according to the browser's reported support for that type
                 //nb. beware of semi-colon insertion :-O
                 return (
-                    (/^video\/(x-)?(youtube)$/i.test(attr))
+                    library.isThirdPartyMedia(attr)
+                    ||
+                    (/^application\/(x\-mpegURL|dash\+xml)/i.test(attr))
                     ||
                     (etc.def(media.canPlayType) && (/^(maybe|probably)$/i.test(media.canPlayType(attr))))
                     );
@@ -1870,19 +1797,25 @@ var OzPlayer = (function()
         //}
 
 
-        //replacement function for MediaElement.createErrorMessage, so that instead of
-        //creating an error message, it simply replaces the video with the fallback content
+        //replace the video with the fallback content in response to a terminal init failure
         //(ie. effectively bringing it out from inside the video, then removing the video)
-        , getVideoFallback : function(playback, options, poster)
+        , getVideoFallback : function(media)
         {
-            etc.each(etc.get('*', playback.htmlMediaElement), function(node)
+            etc.each(etc.get('*', media), function(node)
             {
                 if(etc.hasClass(node, config.classes['fallback']))
                 {
-                    etc.build(node, { '=replace' : playback.htmlMediaElement });
+                    etc.build(node, { '=replace' : media });
                     return false;
                 }
             });
+        }
+
+        //test a video type to determine whether it's a third-party embedded format
+        //such as youtube, facebook or vimeo, rather than a native or shim format
+        , isThirdPartyMedia : function(type)
+        {
+            return (/^(video\/(x-)?)?(youtube|facebook|vimeo)$/i.test(type));
         }
 
 
@@ -2011,7 +1944,6 @@ var OzPlayer = (function()
 
         //feature test the video for a supported fullscreen model
         //and return a reference key, or null for no support
-        //nb. see notes with the caller for more about this
         , getFullscreenModel : function(video)
         {
             //assume no support by default
@@ -2023,35 +1955,39 @@ var OzPlayer = (function()
                 screentype = 'webkit-video';
             }
 
-            //player fullscreen for webkit (safari, chrome)
-            //nb. recent versions of webkit support this as well as still
-            //supporting the video-only fullscreen from earlier versions
+            //player fullscreen for webkit (safari, legacy chrome, legacy edge)
+            //nb. more recent versions of webkit support this in addition to
+            //still supporting the video-only fullscreen from earlier versions
             //which is why this has to be an if condition rather than else if
             if(etc.def(video.webkitRequestFullScreen))
             {
                 screentype = 'webkit-screen';
             }
 
-            //player fullscreen for moz (firefox)
-            else if(etc.def(video.mozRequestFullScreen))
-            {
-                screentype = 'moz-screen';
-            }
-
             //player fullscreen for ms (ie11)
-            //nb. IE11 does support a vendor fullscreen API
-            //but it crashes about the browser about 2/3 of the time
-            //so until that can be resolved, it's not available
             else if(etc.def(video.msRequestFullscreen))
             {
                 screentype = 'ms-screen';
             }
 
-            //player fullscreen with the standard model
-            else if(etc.def(video.requestFullscreen))
+            //player fullscreen for moz (legacy firefox)
+            else if(etc.def(video.mozRequestFullScreen))
+            {
+                screentype = 'moz-screen';
+            }
+
+            //player fullscreen with the standard model (firefox, chrome, chromium edge)
+            //nb. test for this at the end with an if condition, so that
+            //it's used by browsers which support it despite also supporting
+            //an older proprietary syntax; this is essential in recent versions
+            //of firefox, because they still report support for mozRequestFullScreen
+            //but if we actually try to use that it fails with a deprecation warning
+            if(etc.def(video.requestFullscreen))
             {
                 screentype = 'screen';
             }
+
+            //return the detected model (or null);
             return screentype;
         }
 
@@ -2091,57 +2027,22 @@ var OzPlayer = (function()
                 if(screentype == 'webkit-video')
                 {
                     video.webkitEnterFullscreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'webkitEnterFullscreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'webkit-screen')
                 {
                     container.webkitRequestFullScreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'webkitRequestFullScreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'moz-screen')
                 {
                     container.mozRequestFullScreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'mozRequestFullScreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'ms-screen')
                 {
                     container.msRequestFullscreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'msRequestFullScreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'screen')
                 {
                     container.requestFullscreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'requestFullscreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
             }
             catch(ex){}
@@ -2159,58 +2060,22 @@ var OzPlayer = (function()
                 if(screentype == 'webkit-video')
                 {
                     video.webkitExitFullscreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'webkitExitFullscreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'webkit-screen')
                 {
                     _.webkitCancelFullScreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'webkitCancelFullScreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'moz-screen')
                 {
                     _.mozCancelFullScreen();
-
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'mozCancelFullScreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'ms-screen')
                 {
                     _.msExitFullscreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'msExitFullscreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
                 else if(screentype == 'screen')
                 {
                     _.exitFullscreen();
-
-                    /*** DEV TMP ***//*
-                    var e = { type : 'exitFullscreen' };
-                    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    str += '\tfull = '+library.isFullscreen(video, screentype);
-                    str += '<br />';
-                    etc.get('#info').innerHTML += str; */
                 }
             }
             catch(ex){}
@@ -2280,14 +2145,12 @@ var OzPlayer = (function()
         //or if none of the formats or players are supported
         this.mode = 'fallback';
 
-        //define the default plugin flag, likewise
-        this.plugin = 'none';
-
         //default the default video type, which will be
         //the final value if a video element isn't found
         //or if none of the formats or players are supported
         //and the default audio type likewise, which will
         //stay none if audio descriptions aren't included
+        //or if an audio player isn't a supported format
         this.videoType = 'none';
         this.audioType = 'none';
 
@@ -2303,15 +2166,17 @@ var OzPlayer = (function()
         {
             if(!(player.video = etc.get('audio', player.container)[0]))
             {
-                return etc.console(etc.sprintf(config.lang['constructor-no-media'], { id : this.id }), 'error');
+                return etc.console(etc.sprintf(config.lang['constructor-no-element'], { id : this.id }), 'error');
             }
         }
 
-        //else update the instance video type, which we have to do first
+        //else update the video type, which we have to do first
         //because MediaElement will set an "src" on the video element
         //which won't necessarily match the format the browser is actually using
         //(I guess that's part of the way it manages source data for its shims)
-        player.instance.videoType = library.getSupportedType(player.video);
+        //nb. for the audio-only player this will return the audio type at this point
+        //but we can later hotswap the value to audioType and set instance.videoType to null
+        player.videoType = player.instance.videoType = library.getSupportedType(player.video);
 
         //set a flag that indicates whether the media is audio-only, then if that's true
         if(player.isaudio = player.video.nodeName.toLowerCase() == 'audio')
@@ -2354,7 +2219,7 @@ var OzPlayer = (function()
         //=> if preload is set to "metadata", set it to "auto" for native/flash consistency
         //nb. when preload is "auto" most browsers will preload the entire video
         //but chrome and opera will only preload the first bit (somewhere between 25s and 1m)
-        //and mobile browsers (ios, android and winphone) will ignore the preload setting entirely
+        //and mobile browsers (ios and android) will ignore the preload setting entirely
         //treating it as though it's always "none" and not preloading until playback begins
         //nnb. once playback has begun, iPad will continue to load in the background even
         //if subsequently paused, but iPhone will only load while you're actually playing
@@ -2370,15 +2235,22 @@ var OzPlayer = (function()
         //remove native controls now that we have JS support
         //nb. but don't do this for iOS because we'll lose the native
         //click to play icon, which would mess with user expectations
-        //except for the youtube plugin, because its red play icon will still show
-        //and except for the audio-only player because there is no native click-to-play
-        //icon, only the native audio interface which is no good for us in this case
+        //unless this is iOS with third-party media, in which case we have to
+        //otherwise we'll still get the embedded controls for inline youtube
+        //(but this won't make any difference to vimeo which is controlled elsewhere)
+        //and unless this is the audio-only player because there is no native icon
+        //only the native audio interface which is no good for us in this case
         //since we need our interface for transcript language selection and responsive sizing
-        //nnb. the native icon in Windows Phone isn't affected by this
-        //but for some reason that makes me nervous, so exclude it for safety!
         //nnb. and since this won't happen for all, we still have to
         //monitor all events that could come from the native controls
-        if(!(defs.agent.ios || defs.agent.winphone) || player.mode == 'youtube' || player.isaudio)
+        if
+        (
+            !defs.agent.ios
+            ||
+            library.isThirdPartyMedia(player.videoType)
+            ||
+            player.isaudio
+        )
         {
             //if this is the audio-only version, hide the underlying audio element
             //otherwise it will still take up container space on the iphone
@@ -2406,46 +2278,82 @@ var OzPlayer = (function()
                 player.container.replaceChild(clone, player.video);
                 player.video = clone;
             }
-
-            /*** DEV TMP COMMENTED OUT ***//***
-
-            ***/
-
-            //then bind a contextmenu event to prevent them being enabled again
-            //filtered by target so it doesn't block the logo-bug link contextmenu
-            //nb. I hesitate to do this, but going into full screen using the native
-            //controls will only show the video, not the captions or custom controls,
-            //so we have to keep that functionality tied to our custom button
-            //because then we can control exactly what it is that goes fullscreen
-            //nb. this also stops looping from being re-instated via contextmenu
-            //nb. for consistency we'll bind this to the whole container, so there's
-            //no discrepancy between the poster and the video (which would have different context menus)
-            //and cancel bubble as well as preventing default to make that robust
-            //nnb. this won't work for the flash contextmenu, but that doesn't matter
-            //since all that menu has is standard flash options (quality, zoom etc)
-            //nnb. in firefox3.6 with flash the link doesn't have contextmenu anyway
-            etc.listen(player.container, 'contextmenu', function(e, thetarget)
-            {
-                if(!etc.contains(player.logo, thetarget))
-                {
-                    return null;
-                }
-            });
-
-            //nb. we also do the same thing to block any native dblclick action
-            //which is implemented later in the script (see "global mouse shortcuts")
         }
 
-        //if the video type is youtube, then remove any poster attribute
-        //nb. we don't add a poster image for youtube, for the sake of maintaining
-        //user expectation, because people expect to see the familiar youtube icon
+        /*** DEV TMP COMMENTED OUT ***//***
+        ***/
+        //either way, bind a contextmenu event to prevent them being enabled again
+        //filtered by target so it doesn't block the logo-bug link contextmenu
+        //nb. I hesitate to do this, but going into full screen using the native
+        //controls will only show the video, not the captions or custom controls,
+        //so we have to keep that functionality tied to our custom button
+        //because then we can control exactly what it is that goes fullscreen
+        //nb. this also stops looping from being re-instated via contextmenu
+        //nb. for consistency we'll bind this to the whole container, so there's
+        //no discrepancy between the poster and the video (which would have different context menus)
+        //and cancel bubble as well as preventing default to make that robust
+        //nb. we also do the same thing to block any native dblclick action
+        //which is implemented later in the script (see "global mouse shortcuts")
+        //nnb. this won't work for the flash contextmenu, but that doesn't matter
+        //since all that menu has is standard flash options (quality, zoom etc)
+        //nnb. this also won't prevent iframe context menus for third-party media
+        //youtube has its own contextmenu, while facebook and vimeo show the native one
+        etc.listen(player.container, 'contextmenu', function(e, thetarget)
+        {
+            if(!etc.contains(player.logo, thetarget))
+            {
+                return null;
+            }
+        });
+
+        //if the video is third-party media, then remove any poster
+        //nb. we don't add a poster image for these, for the sake of maintaining
+        //user expectation, because people expect to see the familiar default
         //nnb. Android may show a flash of the poster on the video element, for as
         //long as it takes this script to load and the instance to be initialised
-        //so it's already too late by now, and it will be covered by the youtube
-        //plugin anyway, but we should still remove it asap for overall consistency
-        if(/^video\/(x-)?(youtube)$/i.test(player.instance.videoType))
+        //so it's already too late by now, and it will be covered by the plugin
+        //output anyway, but we should still remove it asap for overall consistency
+        if(library.isThirdPartyMedia(player.videoType))
         {
             player.video.removeAttribute('poster');
+        }
+
+        //ME doesn't have configuration options for vimeo, but we can add
+        //query-string values and it will extract and pass them on to the API
+        //so add controls=0 to remove the embedded controls and interface
+        //(unfortunately this also means we lose the loading spinner)
+        //but don't do that for iOS because there's no other way to initiate
+        //playback, since our play button doesn't work until first playback
+        //so for the iphone and ipad the embedded controls have to show,
+        //also for iphone we have to set playsinline according to our attribute
+        //nb. take this opportunity to remove any existing query string
+        if(/^video\/(x-)?(vimeo)$/i.test(player.videoType))
+        {
+            etc.each(etc.get('source', player.video), function(node)
+            {
+                var src = node.src.split('?')[0];
+                if(!defs.agent.ios)
+                {
+                    src += '?controls=0';
+                }
+                else
+                {
+                    src += '?playsinline=' + (player.video.getAttribute('playsinline') ? '1' : '0');
+                }
+                node.setAttribute('src', src);
+            });
+        }
+
+        //for youtube on the iphone we have to remove playsinline as it's no longer
+        //possible to remove the video title information or the "watch later"
+        //and "share" buttons (the "showinfo=0" paramater was deprecated in 2018)
+        //and the title info completely obscures the native fullscreen and mute buttons
+        //which is not cool, making it impossible to enter full-screen or mute the video
+        //so for the sake of usability we have to disable playsinline for youtube
+        //nb. remove it for all browsers just for markup consistency
+        if(/^video\/(x-)?(youtube)$/i.test(player.videoType))
+        {
+            player.video.removeAttribute('playsinline');
         }
 
         //remove any loop attribute, because we can't
@@ -2462,11 +2370,34 @@ var OzPlayer = (function()
         //and its default is 0.8, so we unify both to 1, then later we'll set them together
         player.video.volume = 1;
 
-        //normalize the video playback rate jic
+        //normalize the video playback rate
         player.video.playbackRate = 1;
 
+        //if the video doesn't have a defined width and height then apply defaults
+        //although this isn't strictly necessary for standard HTML video
+        //(because the video will use the native dimensions it's encoded at)
+        //it is necessary for HLS and DASH since that's not rendered natively
+        //(possibly because these aren't available to ME's javascript shim, dk)
+        //nb. don't do this for audio-only because it doesn't have those attributes
+        //nb. for facebook video we only need the width because the height is ignored
+        if(!player.isaudio)
+        {
+            if(/^(video\/(x-)?)?(facebook)$/i.test(player.videoType))
+            {
+                if(!player.video.getAttribute('width'))
+                {
+                    player.video.setAttribute('width', config['default-width']);
+                }
+            }
+            else if(!(player.video.getAttribute('width') && player.video.getAttribute('height')))
+            {
+                player.video.setAttribute('width', config['default-width']);
+                player.video.setAttribute('height', config['default-height']);
+            }
+        }
 
-        //if the media is audio
+
+        //if the media is audio-only
         if(player.isaudio)
         {
             //look for additional audio elements inside the player container
@@ -2488,20 +2419,20 @@ var OzPlayer = (function()
         //but what better way to configure the audio than using <audio> markup!
         else if((player.audio = etc.get('audio', player.container)[0] || null))
         {
-            //pause the audio if natively supported, which was necessary
-            //in Firefox 3 in case it has an autoplay attribute,
-            //else it continues to play even after the element is removed
-            //(and in that case its paused flag is also still true!)
+            //pause the audio if natively supported, which used to be
+            //necessary in Firefox 3 in case it had an autoplay attribute
+            //else it continued to play even after the element is removed
+            //(and in that case its paused flag was also still true!)
             //and although we don't support Firefox 3 anymore
-            //we may as well keep this just to be extra sure
+            //we may as well keep condition just to be on the safe side
             if(etc.def(player.audio.pause))
             {
                 player.audio.pause();
             }
 
-            //in iOS, trying to play audio at the same time stops the video from playing
-            //while in Windows Phone it generates an error when we try to play the audio
-            if(defs.agent.ios || defs.agent.winphone)
+            //in iOS, trying to play audio descriptions stops the video from playing
+            //because it doesn't support multiple media sources playing at the same time
+            if(defs.agent.ios)
             {
                 player.audiodesk = null;
             }
@@ -2840,9 +2771,18 @@ var OzPlayer = (function()
         //### PHP ###// <?php if(isset($_GET['fork']) && $_GET['fork'] == 'free'): ?>
 
         //if the media is video and logo-bug href is not empty, add the logo-bug link
+        //but don't add it for ios because it obscures third-party or native interfaces
+        //(so it would be fine for ipad with custom controls, but it's simpler just to say no)
         //nb. we can't do this until we've begun to test for image support
         //because older versions of IE will need to know if they're enabled
-        if(!player.isaudio && config['logo-bug-href'])
+        if
+        (
+            !player.isaudio
+            &&
+            !defs.agent.ios
+            &&
+            config['logo-bug-href']
+        )
         {
             addLogoBug(player);
         }
@@ -2850,416 +2790,126 @@ var OzPlayer = (function()
         //### PHP ###// <?php endif; ?>
 
 
-        //re-define MediaElement's HtmlMediaElementShim.createErrorMessage
-        //which is called if the media element can't be initialized
-        //(eg. for no supported mime-type, or plugins are disabled)
-        //nb. this is entirely different from the original function
-        mejs.HtmlMediaElementShim.createErrorMessage = function()
+        //define a path to the flash shims and renderers relative to this script
+        //nb. get the path relative to mediaelement.js because that's
+        //what ME2 did automatically to get its own path to the original shim
+        //so if it worked (or didn't work lol) for that then this will be the same
+        //and also because that script is in the head so we'll find it sooner
+        //nnb. it can only fail if mediaelement isn't loaded by a <script>
+        //or if there's another instance or script with the same name that
+        //occurs before our instance script and is in a different folder
+        var pluginPath = null;
+        etc.each('script', function(s)
         {
-            //replace the video with the fallback content
-            //(instead of creating an error message)
-            library.getVideoFallback.apply(this, arguments);
-
-            //reset the player video and audio types to "none"
-            player.instance.videoType = 'none';
-            player.instance.audioType = 'none';
-
-            //remove the skip links if present, because there's no longer
-            //any significant content to skip past, and they seem incongruous
-            if(player.skiplinks)
+            if(s.src.indexOf('mediaelement.') >= 0)
             {
-                player.skiplinks = etc.remove(player.skiplinks);
+                pluginPath = s.src.substring(0, s.src.lastIndexOf('/') + 1);
             }
+        });
 
-            //remove the logo bug if it's present, in order to avoid the
-            //player's branding being diluted by lack of browser support
-            if(player.logo)
-            {
-                player.logo = etc.remove(player.logo);
-            }
-
-            //then if we have an onfail callback, call it now in the scope
-            //of the player instance (so the callback can refer to it as "this")
-            if(player.options.onfail)
-            {
-                player.options.onfail.call(player.instance);
-            }
-        };
-
-        //re-define MediaElement's HtmlMediaElementShim.createPlugin
-        //which creates the flash or youtube replacement media element as required
-        //nb. this is only different from the original function where commented
-        mejs.HtmlMediaElementShim.createPlugin = function(playback, options, poster, autoplay, preload, controls)
+        //if that does fail, throw the path failure error and exit
+        if(!pluginPath)
         {
-            //if the URL matches youtube then set the playback method to youtube
-            //so that we can fork plugin creation to prefer native youtube over flash
-            //without this condition the method would always be "flash" when supported
-            if(/\/\/(www\.)?(youtube\.com|youtu\.be)/.test(playback.url))
-            {
-                playback.method = 'youtube';
-            }
+            return etc.console(etc.sprintf(config.lang['path-failure']), 'error');
+        }
 
-            var
-                htmlMediaElement = playback.htmlMediaElement,
-                width = 1,
-                height = 1,
-                pluginid = 'me_' + playback.method + '_' + (mejs.meIndex++),
-                pluginMediaElement = new mejs.PluginMediaElement(pluginid, playback.method, playback.url),
-                container = document.createElement('div'),
-                specialIEContainer,
-                node,
-                initVars;
 
-            //nb. added terminating semi-colon for safe compression
-            pluginMediaElement.tagName = htmlMediaElement.tagName;
-
-            for(var i = 0; i < htmlMediaElement.attributes.length; i++)
-            {
-                var attribute = htmlMediaElement.attributes[i];
-                if(attribute.specified == true)
-                {
-                    pluginMediaElement.setAttribute(attribute.name, attribute.value);
-                }
-            }
-
-            //nb. we don't need to check for placement inside a <p> tag
-            //node = htmlMediaElement.parentNode;
-            //while (node !== null && node.tagName.toLowerCase() !== 'body' && node.parentNode != null)
-            //{
-            //    if (node.parentNode.tagName.toLowerCase() === 'p')
-            //    {
-            //        node.parentNode.parentNode.insertBefore(node, node.parentNode);
-            //        break;
-            //    }
-            //    node = node.parentNode;
-            //}
-
-            //nb. we don't need these conditions since we always have a video
-            //if(playback.isVideo)
-            //{
-                width = (options.pluginWidth > 0) ? options.pluginWidth : (options.videoWidth > 0) ? options.videoWidth : (htmlMediaElement.getAttribute('width') !== null) ? htmlMediaElement.getAttribute('width') : options.defaultVideoWidth;
-                height = (options.pluginHeight > 0) ? options.pluginHeight : (options.videoHeight > 0) ? options.videoHeight : (htmlMediaElement.getAttribute('height') !== null) ? htmlMediaElement.getAttribute('height') : options.defaultVideoHeight;
-
-                width = mejs.Utility.encodeUrl(width);
-                height = mejs.Utility.encodeUrl(height);
-            //}
-            //else
-            //{
-            //    if(options.enablePluginDebug)
-            //    {
-            //        width = 320;
-            //        height = 240;
-            //    }
-            //}
-
-            pluginMediaElement.success = options.success;
-            mejs.MediaPluginBridge.registerPluginElement(pluginid, pluginMediaElement, htmlMediaElement);
-
-            container.className = 'me-plugin';
-            container.id = pluginid + '_container';
-
-            //nb. we don't need these conditions since we always have a video
-            //if(playback.isVideo)
-            //{
-                htmlMediaElement.parentNode.insertBefore(container, htmlMediaElement);
-            //}
-            //else
-            //{
-            //    document.body.insertBefore(container, document.body.childNodes[0]);
-            //}
-
-            initVars = [
-                'id=' + pluginid,
-                'jsinitfunction=' + "mejs.MediaPluginBridge.initPlugin",
-                'jscallbackfunction=' + "mejs.MediaPluginBridge.fireEvent",
-                'isvideo=' + ((playback.isVideo) ? "true" : "false"),
-                'autoplay=' + ((autoplay) ? "true" : "false"),
-                'preload=' + preload,
-                'width=' + width,
-                'startvolume=' + options.startVolume,
-                'timerrate=' + options.timerRate,
-                'flashstreamer=' + options.flashStreamer,
-                'height=' + height,
-                'pseudostreamstart=' + options.pseudoStreamingStartQueryParam];
-
-            if(playback.url !== null)
-            {
-                if(playback.method == 'flash')
-                {
-                    initVars.push('file=' + mejs.Utility.encodeUrl(playback.url));
-                }
-                else
-                {
-                    initVars.push('file=' + playback.url);
-                }
-            }
-
-            //nb. we don't need these options
-            //if(options.enablePluginDebug)
-            //{
-            //    initVars.push('debug=true');
-            //}
-            //if(options.enablePluginSmoothing)
-            //{
-            //    initVars.push('smoothing=true');
-            //}
-            //if(options.enablePseudoStreaming)
-            //{
-            //    initVars.push('pseudostreaming=true');
-            //}
-
-            if(controls)
-            {
-                initVars.push('controls=true');
-            }
-            if(options.pluginVars)
-            {
-                initVars = initVars.concat(options.pluginVars);
-            }
-
-            switch(playback.method)
-            {
-                //nb. we don't need silverlight code
-                //case 'silverlight':
-                //    container.innerHTML =
-                //    '<object data="data:application/x-silverlight-2," type="application/x-silverlight-2" id="' + pluginid + '" name="' + pluginid + '" width="' + width + '" height="' + height + '" class="mejs-shim">' +
-                //    '<param name="initParams" value="' + initVars.join(',') + '" />' +
-                //    '<param name="windowless" value="true" />' +
-                //    '<param name="background" value="black" />' +
-                //    '<param name="minRuntimeVersion" value="3.0.0.0" />' +
-                //    '<param name="autoUpgrade" value="true" />' +
-                //    '<param name="source" value="' + options.pluginPath + options.silverlightName + '" />' +
-                //    '</object>';
-                //    break;
-
-                case 'flash':
-
-                    if(mejs.MediaFeatures.isIE)
-                    {
-                        specialIEContainer = document.createElement('div');
-                        container.appendChild(specialIEContainer);
-                        specialIEContainer.outerHTML =
-                        //nb. codebase URL slashes are concatenated to avoid comment compression
-                        '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" codebase="/'+'/download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab" ' +
-                        'id="' + pluginid + '" width="' + width + '" height="' + height + '" class="mejs-shim">' +
-                        //nb. self-closing delimiters are concatenated to avoid symbol compression
-                        '<param name="movie" value="' + options.pluginPath + options.flashName + '?x=' + (new Date()) + '" '+'/>' +
-                        '<param name="flashvars" value="' + initVars.join('&amp;') + '" '+'/>' +
-                        '<param name="quality" value="high" '+'/>' +
-                        '<param name="bgcolor" value="#000000" '+'/>' +
-                        '<param name="wmode" value="transparent" '+'/>' +
-                        '<param name="allowScriptAccess" value="always" '+'/>' +
-                        '<param name="allowFullScreen" value="true" '+'/>' +
-                        '<param name="scale" value="default" '+'/>' +
-                        '</object>';
-                    }
-                    else
-                    {
-                        container.innerHTML =
-                        '<embed id="' + pluginid + '" name="' + pluginid + '" ' +
-                        'play="true" ' +
-                        'loop="false" ' +
-                        'quality="high" ' +
-                        'bgcolor="#000000" ' +
-                        'wmode="transparent" ' +
-                        'allowScriptAccess="always" ' +
-                        'allowFullScreen="true" ' +
-                        //nb. pluginspage URL slashes are concatenated to avoid comment compression
-                        'type="application/x-shockwave-flash" pluginspage="/'+'/www.macromedia.com/go/getflashplayer" ' +
-                        'src="' + options.pluginPath + options.flashName + '" ' +
-                        'flashvars="' + initVars.join('&') + '" ' +
-                        'width="' + width + '" ' +
-                        'height="' + height + '" ' +
-                        'scale="default"' +
-                        'class="mejs-shim"></embed>';
-                    }
-                    break;
-
-                case 'youtube':
-
-                    var videoId;
-                    if (playback.url.lastIndexOf("youtu.be") != -1)
-                    {
-                        videoId = playback.url.substr(playback.url.lastIndexOf('/')+1);
-                        if (videoId.indexOf('?') != -1)
-                        {
-                            videoId = videoId.substr(0, videoId.indexOf('?'));
-                        }
-                    }
-                    else
-                    {
-                        videoId = playback.url.substr(playback.url.lastIndexOf('=')+1);
-                    }
-                    youtubeSettings =
-                    {
-                        container: container,
-                        containerId: container.id,
-                        pluginMediaElement: pluginMediaElement,
-                        pluginId: pluginid,
-                        videoId: videoId,
-                        height: height,
-                        width: width
-                    };
-
-                    //nb. this was the original flash/native selection code
-                    //if (mejs.PluginDetector.hasPluginVersion('flash', [10,0,0]) )
-                    //{
-                    //    mejs.YouTubeApi.createFlash(youtubeSettings);
-                    //}
-                    //else
-                    //{
-                    //    mejs.YouTubeApi.enqueueIframe(youtubeSettings);
-                    //}
-
-                    //this uses the youtube iframe for everyone, which returns
-                    //native video for all supported browsers apart from IE
-                    //(which returns flash embedded within the iframe)
-                    //*** why isn't IE9-11 getting native video returned?
-                    mejs.YouTubeApi.enqueueIframe(youtubeSettings);
-
-                    break;
-            }
-
-            htmlMediaElement.style.display = 'none';
-            htmlMediaElement.removeAttribute('autoplay');
-
-            return pluginMediaElement;
-        };
-
-        //re-define MediaElement's YouTubeApi.createIframe, which creates
-        //the youtube iframe for browsers which use the native implementation
-        //nb. this is only different from the original function where commented
-        mejs.YouTubeApi.createIframe = function(settings)
+        //now pass the video to MediaElement, which handles external APIs like youtube
+        //to provide compatible events and methods, creates a flash or JS shim for
+        //unsupported native formats, and rounds off some browser quirks with native
+        new MediaElement(player.video,
         {
-            var
-            pluginMediaElement = settings.pluginMediaElement,
-            player = new YT.Player(settings.containerId,
+            //element name for the MediaElement replacement container
+            //so it doesn't use an invalid custom <mediaelementwrapper>
+            fakeNodeName : 'div',
+
+            //plugin path for flash shims and renderers
+            pluginPath : pluginPath,
+
+            //define some parameter overrides for youtube videos in iOS
+            //enabling native controls so you can resume playback after pausing
+            //(because the big play button is gone when you play then exit fullscreen)
+            //also disable playsinline, although this doesn't actually seem to make
+            //any difference, it's consistent with removing the playsinline attribute
+            //which we have to remove for youtube for the sake of usability
+            //then for everyone, set cc_load_policy to show any embedded captions
+            //which we can then hide again if necessary using unloadModule
+            youtube : (function()
             {
-                height: settings.height,
-                width: settings.width,
-                videoId: settings.videoId,
-
-                //nb. this was the original playerVars
-                //playerVars: {controls:0},
-
-                //define additional options for the youtube iframe
-                //=> "controls" disables the embedded controls
-                //=> "wmode" ensures that our controls, tooltips and captions
-                //   go above the flash object if used; it could also be
-                //   "transparent" but "opaque" should have better performance
-                //=> "showinfo" disables the black title strip that shows before playback
-                //   which visually conflicts with the skip links and ozplayer logo
-                //=> "iv_load_policy" disables annotations
-                //=> "rel" disables related videos post-roll content
-                //=> "cc_load_policy" enables embedded captions by default if present
-                //   (which we can later turn off and on using the API un/loadModule functions)
-                playerVars: {
-                    controls:0,
-                    wmode:'opaque',
-                    showinfo:0,
-                    iv_load_policy:3,
-                    rel:0,
-                    cc_load_policy:1
-                },
-
-                events:
+                if(defs.agent.iphone)
                 {
-                    'onReady': function()
-                    {
-                        settings.pluginMediaElement.pluginApi = player;
-                        mejs.MediaPluginBridge.initPlugin(settings.pluginId);
-                        setInterval(function()
-                        {
-                            mejs.YouTubeApi.createEvent(player, pluginMediaElement, 'timeupdate');
-
-                        //nb. this was the original timeout
-                        //}, 250);
-
-                        //but it's reduced to this for the benefit of iOS, which otherwise
-                        //triggers too many instances of "time matches previous event" within
-                        //isTimeBuffered that would give rise to continual indicator show calls
-                        }, 500);
-                    },
-                    'onStateChange': function(e)
-                    {
-                        mejs.YouTubeApi.handleStateChange(e.data, player, pluginMediaElement);
-                    }
+                    return { controls : 1, playsinline : 0, cc_load_policy : 1 };
                 }
-            });
-        };
+                return { cc_load_policy : 1 };
+            })(),
 
+            //if the media fails to initialise
+            //nb. this only happens if it fails to load a required renderer
+            //but we don't need to do anything here because we already handle
+            //that by returning an error state from addMediaInterface
+            error : function(media)
+            {
+            },
 
-        //now pass the video to MediaElement, which will create a flash replacement
-        //if native video is not supported (that extends a corresponding set of methods
-        //and properties) as well as rounding-off many browser quirks with native video
-        //nb. the constructor has both success and error callbacks, however the latter
-        //will never fire because we've overriden its call from createErrorMessage
-        MediaElement(player.video,
-        {
-            //list the plugins (ie. scripting shims) for MediaElement to use
-            //(out of "silverlight","flash","youtube","vimeo", in order of attempted execution)
-            //nb. we're not including silverlight because it hasn't been tested at all
-            //in theory it should work the same as flash, but there's always the possibility
-            //of quirks and feature restrictions, and it's not worth the time to find out
-            //(cos this is silverlight we're talking about -- it's not like anybody cares!)
-            //nb. we did include vimeo for a while, but its plugin is basic and so lacking
-            //in accessibility, that it's better not to allow it and enforce Vimeo Pro
-            //since Vimeo Pro just gives the URL of an MP4 like a normal video
-            plugins               : ['flash','youtube'],
-
-            //normalize the flash player volume
-            startVolume           : 1,
-
-            //reduce timeupdate frequency for the flash player
-            //since we don't really need greater precision than this
-            //(and this value matches what we use for youtube)
-            timerRate             : 500,
-
-            //set the flash player default size from config
-            defaultVideoWidth     : config['default-width'],
-            defaultVideoHeight    : config['default-height'],
-
-            //when the media successfully initialises
+            //when MediaElement successfully initialises
+            //nb. this is when the library successfully intialises, not the media,
+            //it still gets called if the media itself could not be loaded
             success : function(media)
             {
 
                 //save the media object to a player property
                 player.media = media;
 
-                //update the instance mode flag with the pluginType
+                //*** DEV TMP
+                //console.warn('player.media.rendererName');
+                //console.log(player.media.rendererName);
+
+                //update the instance mode flag with the rendererName
                 //nb. this will be "native" if native video is supported
                 //otherwise it will reflect the active shim, eg. "flash" or "youtube"
-                player.instance.mode = player.media.pluginType;
-
-                //however if the youtube plugin is being used, it still
-                //returns a pluginType of "flash" when flash is being used
-                //so we set our mode flag to consistently reflect the source
-                //and we can detect that because the videoType will currently be
-                //"video/(x-)?youtube", which is the fake mime-type MediaElement uses
-                //nb. we also have to leave the videoType with that setting
-                //because there's no simple way to find out what youtube is sending
-                //(it's usually flash or mp4, but may be eg. quicktime on iOS)
-                if(player.instance.videoType == 'video/youtube' || player.instance.videoType == 'video/x-youtube')
+                //nb. if there are no media sources then rendererName will be null
+                //and in that case we want the keep the mode flag at its "fallback" default
+                if(player.media.rendererName)
                 {
-                    player.instance.mode = 'youtube';
+                    player.instance.mode =
+                        player.media.rendererName.indexOf('flash') >= 0 ? 'flash' :
+                        player.media.rendererName.indexOf('youtube') >= 0 ? 'youtube' :
+                        player.media.rendererName.indexOf('facebook') >= 0 ? 'facebook' :
+                        player.media.rendererName.indexOf('vimeo') >= 0 ? 'vimeo' :
+                        'native';
                 }
 
                 //then we must copy the instance mode to a player flag, because the
                 //instance is public data, and we can't risk the problems that would
-                //arise if user changes it, so for internal use we only refer
-                //to the player mode flag, while all the instance data is just
-                //for the user's reference and makes no difference to anything
-                //so do that, and then if the mode is not native
-                if((player.mode = player.instance.mode) != 'native')
+                //arise if authors change it, so for internal use we only refer
+                //to the player mode flag, while the instance data is purely for
+                //the author's reference and makes no practical difference to anything
+                //so do that, and then if the mode is flash set the videoType manually
+                //because getSupportedType returns null under those circumstances
+                //nb. technically it's not really using these types, but they reflect the source
+                //and we can't leave the value as null or we'll trigger fallback content
+                if((player.mode = player.instance.mode) == 'flash')
                 {
-                    //if the player mode is "flash" then update the videoType to mp4
-                    //or if this is the audio-only player then set it to mp3
-                    //because the flash player uses those formats exclusively
-                    //(and getSupportedType is only correct for native video)
-                    if(player.mode == 'flash')
-                    {
-                        player.instance.videoType = player.isaudio ? 'audio/mp3' : 'video/mp4';
-                    }
+                    player.videoType = player.instance.videoType =
+                        player.isaudio ? 'audio/mp3' :
+                        player.media.rendererName == 'flash_hls' ? 'application/x-mpegURL' :
+                        player.media.rendererName == 'flash_dash' ? 'application/dash+xml' :
+                        'video/mp4';
+                }
+
+                //*** DEV TMP
+                //console.warn('player.mode');
+                //console.log(player.mode);
+
+                //*** DEV TMP
+                //console.warn('player.videoType');
+                //console.log(player.videoType);
+
+                //if videoType is null then there are no video sources
+                //so call abandonMedia to show the fallback content, and we're done
+                if(player.videoType === null)
+                {
+                    return abandonMedia(player);
                 }
 
 
@@ -3282,9 +2932,6 @@ var OzPlayer = (function()
                     config[key] = encodeURIComponent(etc.trim(config[key]));
                 });
 
-                //*** DEV TMP
-                //etc.get('#info').innerHTML += ('basekey = "'+player.basekey+'"<br>');
-
                 //now look for a user volume value, saved with a combination of
                 //the base key and the individual value key, and if we have one
                 //then save it to the default volume so it gets set by default
@@ -3299,16 +2946,6 @@ var OzPlayer = (function()
                     config['default-volume']
                 );
 
-                /*** DEV TMP ***//*
-                config['default-volume'] = parseFloat
-                (
-                    (tmp = library.getStorageValue(player.basekey, config['user-volume']))
-                    ||
-                    config['default-volume']
-                );
-                etc.get('#info').innerHTML += ('GET storage ('+typeof(tmp)+') = ' + tmp + '<br>volume ('+typeof(config['default-volume'])+') = '+config['default-volume'] + '<br>');
-                */
-
 
                 //then if we have audio config
                 if(player.audiodesk !== null)
@@ -3320,9 +2957,11 @@ var OzPlayer = (function()
                     //which creates a new Audio source with the supported src
                     //normalizes the volume and playback rate, and then applies
                     //the same preload setting as was specified for the video
+                    //nb. always use "none" for the flash player for
+                    //because ME doesn't seem to support "auto" anymore
                     if(player.audiodesk.enabled)
                     {
-                        audioConstruct(player, player.video.getAttribute('preload'));
+                        audioConstruct(player, player.mode == 'flash' ? 'none' : player.video.getAttribute('preload'));
                     }
                 }
 
@@ -3330,46 +2969,10 @@ var OzPlayer = (function()
                 //*** DEV TMP
                 //console.log(player.audiodesk ? etc.dump(player.audiodesk) : 'NULL');
 
-                /*** DEV TMP CURRENT ***//*
-                var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;
-                for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-                str += 'video = "'+player.instance.videoType+'"';
-                str += '  \tmode = "'+player.instance.mode+'"';
-                str += '<br />';
-                etc.get('#info').innerHTML = str + etc.get('#info').innerHTML; */
-
-                /*** DEV TMP CURRENT ***//*
-                var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;
-                for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-                if(player.audiodesk)
-                {
-                    str += 'audio = "'+player.audiodesk.type;
-                    str += '"\ton = '+player.audiodesk.enabled;
-                    str += '\tsrc = "'+player.audiodesk.src.replace(/^.*[\/]/, '')+'"';
-                }
-                else
-                {
-                    str += 'audio = NULL';
-                }
-                str += '<br />';
-                etc.get('#info').innerHTML = str + etc.get('#info').innerHTML; */
-
-
                 //and now we can set the default video and audio volume
                 //nb. this usually fails in the youtube player, so we have to
                 //do it again when the video plays, at which point it's fine
                 setMediaVolume(player, config['default-volume']);
-
-                /*** DEV TMP CURRENT ***//*
-                var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;
-                for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-                str += 'volume = '+player.media.volume;
-                if(player.audio)
-                {
-                    str += '\t\taudio = '+player.audio.volume;
-                }
-                str += '<br />';
-                etc.get('#info').innerHTML = str + etc.get('#info').innerHTML; */
 
 
                 //define the other player flags we're going to need:
@@ -3390,38 +2993,79 @@ var OzPlayer = (function()
                 player.ended = false;
                 player.fullscreen = false;
 
-                //now add the player interface and additional media events
-                //and if that returns true then everything was successful
-                if(addMediaInterface(player))
+                //when loading third-party content, the ME success callback
+                //fires before the content iframe has even been created, which
+                //is fucking stupid if you ask me, but regardless, for YouTube
+                //or Facebook we need those references, so we have to wait for
+                //the API to exist before we can initialise the media interface
+                //so, abstract the interface creation and return handling
+                function initMediaInterface()
                 {
-                    //if this is the audio-only player, hotswap videoType and audioType
-                    //so that the data they return corresponds with the actual media
-                    if(player.isaudio)
+                    //add the player interface and additional media events
+                    //and if that returns true then everything was successful
+                    if(addMediaInterface(player))
                     {
-                        player.instance.audioType = player.instance.videoType;
-                        player.instance.videoType = 'none';
+                        //if this is the audio-only player, hotswap the instance types
+                        //so that the data they return corresponds with the actual media
+                        //nb. we continue to use player.videoType internally
+                        if(player.isaudio)
+                        {
+                            player.instance.audioType = player.instance.videoType;
+                            player.instance.videoType = 'none';
+                        }
+
+                        //if we have an onsuccess callback, call it now in the instance scope
+                        if(player.options.onsuccess)
+                        {
+                            player.options.onsuccess.call(player.instance);
+                        }
                     }
 
-                    //if we have an onsuccess callback, call it now in the instance scope
-                    if(player.options.onsuccess)
+                    //but if it returns false then the media couldn't initialize
+                    else
                     {
-                        player.options.onsuccess.call(player.instance);
+                        //reset the instance types to none
+                        player.instance.videoType = 'none';
+                        player.instance.audioType = 'none';
+
+                        //set the mode to "fallback"
+                        player.instance.mode = 'fallback';
+
+                        //call abandonMedia to display the fallback content
+                        //which will also call the instance onfail callback if there is one
+                        abandonMedia(player);
                     }
                 }
 
-                //but if it returns false then the media couldn't initialize
+                //then if this is third-party media
+                if(library.isThirdPartyMedia(player.mode))
+                {
+                    //define a dictionary of API references indexed by mode
+                    var apis =
+                    {
+                        youtube     : 'youTubeApi',
+                        facebook    : 'fbPlayer',
+                        vimeo       : 'vimeoPlayer'
+                    };
+
+                    //then poll for the existence of that object
+                    //and initialise the media when it exists
+                    var initwait = __.setInterval(function()
+                    {
+                        if(etc.def(player.media[apis[player.mode]]))
+                        {
+                            __.clearInterval(initwait);
+                            initMediaInterface();
+                        }
+                    }, 250);
+                }
+
+                //else initialise the media interface straight away
                 else
                 {
-                    //reset the audio and video types to none
-                    player.instance.videoType = 'none';
-                    player.instance.audioType = 'none';
-
-                    //if we have an onfail callback, call it now in the instance scope
-                    if(player.options.onfail)
-                    {
-                        player.options.onfail.call(player.instance);
-                    }
+                    initMediaInterface();
                 }
+
             }
         });
     };
@@ -3456,7 +3100,7 @@ var OzPlayer = (function()
     //modify config properties, using a dot in the key to indicate sub-groups
     //ie. "foo" for a top-level option or "group.foo" for a sub-group option
     //and you can also put "config.foo" to refer to a top-level option
-    //nb. we validate and return false if the specified group or options
+    //nb. we validate and return false if the specified group or option
     //doesn't exist, or if the specified value is the wrong data type
     $this.define = function(keys, value)
     {
@@ -3683,6 +3327,41 @@ var OzPlayer = (function()
 
     //-- private => media functions --//
 
+    //abandon the media in responses to a terminal init failure
+    //nb. this is called if the media element can't be initialized
+    //eg. for no supported mime-type, or plugins are disabled
+    function abandonMedia(player)
+    {
+        //replace the video with the fallback content
+        //(instead of creating an error message)
+        library.getVideoFallback(player.media);
+
+        //reset the instance types to "none"
+        player.instance.videoType = 'none';
+        player.instance.audioType = 'none';
+
+        //remove the skip links if present, because there's no longer
+        //any significant content to skip past, and they seem incongruous
+        if(player.skiplinks)
+        {
+            player.skiplinks = etc.remove(player.skiplinks);
+        }
+
+        //remove the logo bug if it's present, in order to avoid the
+        //player's branding being diluted by lack of browser support
+        if(player.logo)
+        {
+            player.logo = etc.remove(player.logo);
+        }
+
+        //then if we have an onfail callback, call it now in the scope
+        //of the player instance (so the callback can refer to it as "this")
+        if(player.options.onfail)
+        {
+            player.options.onfail.call(player.instance);
+        }
+    }
+
     //play the video and audio if applicable
     //nb. we don't play audio in regular sync with video if we have xad data
     //because xad cues are handled differently (see xadTracking for details)
@@ -3696,22 +3375,20 @@ var OzPlayer = (function()
                 player.audio.play();
             }
         }
-
-        //*** DEV TMP
-        //var e = {type:'play-media'}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-        //str += 'fake = ' + player.fakepaused;
-        //str += '\tvp = ' + player.media.paused;
-        //if(player.audio) { str += '\tap = ' + player.audio.paused; }
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
     }
 
-    //pause the video and audio if applicable
+    //pause the video and audio as applicable
+    //=> pause video if the dopause flag is strictly true
+    //=> pause audio if it's present and we're not using xad
     //nb. we don't play audio in regular sync with video if we have xad data
     //because xad cues are handled differently (see xadTracking for details)
-    function pauseMedia(player)
+    function pauseMedia(player, dopause)
     {
-        player.media.pause();
+        if(dopause === true)
+        {
+            player.media.pause();
+        }
+
         if(player.audio)
         {
             if(!player.tracks.xad)
@@ -3719,14 +3396,6 @@ var OzPlayer = (function()
                 player.audio.pause();
             }
         }
-
-        //*** DEV TMP
-        //var e = {type:'pause-media'}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-        //str += 'fake = ' + player.fakepaused;
-        //str += '\tvp = ' + player.media.paused;
-        //if(player.audio) { str += '\tap = ' + player.audio.paused; }
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
     }
 
     //set the media to a specific time using the applicable method
@@ -3843,10 +3512,6 @@ var OzPlayer = (function()
             //nb. we pause in case this happens before the volumechange event has
             //fired, because these events have high latency, particularly in IE9
             etc.delay(100, function(){ player.fakevolume = false; });
-
-
-            //*** DEV TMP
-            //etc.get('#info').innerHTML += 'setMediaVolume(volume='+volume+', muted='+muted+')\t=>\tvolume="'+player.media.volume+'"\tmuted="'+player.media.muted+'"<br />';
         }
         catch(ex){}
     }
@@ -3909,15 +3574,6 @@ var OzPlayer = (function()
                 buffer[buffer.length - 1][1] = media.duration;
             }
             buffer[0][0] = 0;
-        }
-
-        //nb. in IE8 with youtube the end value of the first range may be NaN
-        //(from loadstart, canplay and timeupdate before playback has begun)
-        //where other browsers in that situation will have a single [0,0] range
-        //so we can detect that situation and normalize the end value to match
-        if(buffer.length == 1 && isNaN(buffer[0][1]))
-        {
-            buffer[0][1] = 0;
         }
 
         //return the populated (or possibly still empty) buffer array
@@ -3994,13 +3650,11 @@ var OzPlayer = (function()
 
 
     //abort media playback and progress monitoring and show the timeout indicator
-    function abortMedia(player)
+    function abortMedia(player, dopause)
     {
-        //*** DEV TMP
-        //var e = {type:'timeout-engaged'}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'time = ('+player.media.currentTime.toFixed(2)+')';str += '\tduration = ('+(isNaN(player.media.duration)?'NaN':player.media.duration.toFixed(2))+')';str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
         //silence all the progress events
+        //** this doesn't stop progress events in flash from load failure
+        //** and doens't stop timeupdate events in flash from manual abort
         etc.each(player.progressevents, function(handler)
         {
             handler.silence();
@@ -4015,7 +3669,7 @@ var OzPlayer = (function()
         //so we should also remove its handlers so they don't respond to this, since they're
         //only used to indicate the status of the audio, but first double-check that they
         //have already been added and not already cancelled (though I can't think how that
-        //could happen, but it did appear to once in IE9, but I couldn't replicate it!)
+        //could happen, but it did appear to happen once in IE9, then I couldn't replicate it!)
         if(player.audio)
         {
             if(player.audiodesk.onerror)
@@ -4031,17 +3685,12 @@ var OzPlayer = (function()
             player.audio.src = 'data:audio/x-stop;';
         }
 
-        //*** DEV TMP
-        //etc.get('#info').innerHTML = '['+new Date().getMilliseconds()+'] (-C)<br />' + etc.get('#info').innerHTML;
-
         //hide the loading indicator
         hideIndicator(player);
 
         //if the poster is still present, remove that too
-        //nb. which we have to do for IE9 in case this is triggered
-        //from an "error" event, which fires immediately like iOS
-        //rather than not until you press play, like most
-        //as it also does if you specified preload auto
+        //nb. which we also have to do in case this is triggered
+        //from an "error" event when preload was set to "auto"
         if(player.poster)
         {
             player.poster = etc.remove(player.poster);
@@ -4050,8 +3699,15 @@ var OzPlayer = (function()
         //also remove any video poster attribute, likewise
         player.video.removeAttribute('poster');
 
-        //pause the media
-        pauseMedia(player);
+        //pause the media, passing on the video dopause flag
+        //nb. when we call this from xphonehome we have to explicitly pause
+        //so that the video doesn't continue to play when validation fails
+        //but when we call this from load failure we don't need to pause
+        //since the video has failed to load and therefore isn't playing
+        //however the actual reason for not doing it is that in the Flash player
+        //(in older Firefox at least) calling media.pause() after load failure
+        //creates massive lag that freezes the whole browser for several seconds
+        pauseMedia(player, dopause);
 
         //then update the playpause button state to off
         updateControlState(player, 'playpause', 'off');
@@ -4112,9 +3768,6 @@ var OzPlayer = (function()
             }
         });
 
-        //*** DEV TMP
-        //etc.get('#info').innerHTML = '['+new Date().getMilliseconds()+'] (+C)<br />' + etc.get('#info').innerHTML;
-
         //finally show the timeout indicator, which overlays the
         //screen like the loading indicator, but with a big "X" icon
         showIndicator(player, 'timeout');
@@ -4161,6 +3814,7 @@ var OzPlayer = (function()
             //and therefore subsequent attempts to pause or control it would fail
             //resulting in cases where the audio keeps playing even though the video is paused
             //nb. although now we're silencing the error events onprogress and onloadedmetadata
+            //and also because we don't actually support IE10 at all anymore,
             //this set of circumstances shouldn't happen, but let's leave the condition jic
             //nb. check the audio in case xad metadata failure has created an audio error state
             if(player.audio && player.audio.readyState < 2)
@@ -4321,30 +3975,17 @@ var OzPlayer = (function()
 
         //now bind some additional and permanent audio events, that simply maintain
         //the audio paused state if it differs from the video paused state
-        //nb. this is needed in IE10 to cater for obscure circumstances, where
+        //nb. this was needed in IE10 to cater for obscure circumstances, where
         //seeking past the preloaded data then playing and then pausing again quickly
-        //can cause the audio object to keep playing; even though the known circumstances
-        //that gave rise to that error are now fixed, it still seems to keep happening, so FIIK
-        //** although it can still happen anyway, if you load the page then play then instantly
-        //** pause again using the global keystroke, the audio keeps playing, even though
-        //** these events are firing and the paused state of the audio is coming back true!
-        //** but could these problems be fixed by using the original <audio> element
-        //** instead of removing it and creating a new Audio object, as we do?
-        //** EXCEPT none of this might happen anymore now that we've lost the extra buffering
-        //but this should also help reduce the incidence of audio playing while video
-        //is natively buffering in cases where the buffer-size has been set to zero
+        //can cause the audio object to keep playing; although we don't actually
+        //support IE10 at all anymore, let's keep this conditon anyway, because
+        //it should also help reduce the incidence of audio playing while video
+        //is natively buffering, in cases where the buffer-size has been set to zero
+        //** though we should probably remove the ability to configure the buffer-size
         etc.each(['progress','timeupdate','error'], function(type)
         {
             etc.listen(player.audio, type, function(e)
             {
-                //*** DEV TMP
-                //var e = {type:'a-'+e.type}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                //str += 'fake = ' + player.fakepaused;
-                //str += '\tvp = ' + player.media.paused;
-                //if(player.audio) { str += '\tap = ' + player.audio.paused; }
-                //str += '<br />';
-                //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
                 //nb. we need to check that the audio object is still here
                 //in case a loading error has subsequently nullified it
                 //** so we should probably also silence these events if that happens
@@ -4356,11 +3997,6 @@ var OzPlayer = (function()
                     {
                         player.audio.pause();
                     }
-
-                    //*** DEV TMP
-                    //var e = {type:'a-'+e.type}, now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-                    //str += 'PAUSE!!!<br />';
-                    //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
                 }
             });
         });
@@ -4387,7 +4023,19 @@ var OzPlayer = (function()
         //ignore this entirely if we have xad data
         //nb. we don't play audio in regular sync with video if we have xad data
         //because xad cues are handled differently (see xadTracking for details)
-        if(player.tracks.xad)
+        //nb. we have to check that the tracks object is defined, because there
+        //are edge circumstances where the first sync can be called before that
+        //eg. media initialisation failures that don't define the interface
+        //in which case the track loading method never gets called at all
+        if(player.tracks && player.tracks.xad)
+        {
+            return;
+        }
+
+        //and since that edge case can happen, check that we actually have
+        //video data, because if we don't then there's nothing to sync to anyway
+        //and those circumstances would throw an error if we don't check first
+        if(!etc.def(player.media.currentTime, null))
         {
             return;
         }
@@ -4403,15 +4051,6 @@ var OzPlayer = (function()
             //(see media timing and synchronisation timeupdate event for more notes)
             player.audiodesk.lastsync = Math.floor(player.media.currentTime);
 
-            //*** DEV TMP
-            ////etc.get('#info').maxlength = 690;
-            //etc.get('#info').maxlength = 2000;
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-            //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-            //str += 'lastsync = '+player.audiodesk.lastsync;
-            //str += '\taudio = '+player.audio.currentTime.toFixed(2);
-            //str += '\t\tdrift = '+(player.audio.currentTime - player.media.currentTime).toFixed(3);
-
             //then compare the audio and video times, and if they drift more
             //than [sync-resolution] apart, update the audio time to keep it in sync
             //nb. originally this was done by comparing ceil whole seconds, i.e.
@@ -4419,11 +4058,11 @@ var OzPlayer = (function()
             //but that meant that even a tiny difference would register as one whole second
             //whereas (as I subsequently discovered, to some embarrassment) if we just leave
             //the audio alone it rarely drifts very far apart during normal conditions
-            //and in fact it's the adjustments that contribute to the drift, and require
-            //further adjustments! so by comparing this way we actually reduce the amount
-            //of adjustment we need to make, and that gives much better performance!
+            //and in fact the adjustments themselves contribute to the drift, requiring further
+            //adjustments, in a vicious circle! so by comparing this way we actually reduce the
+            //amount of adjustment we need to make, and that gives much better performance!
             //especially in win/firefox, in which the adjustments were causing audible artefacts
-            //resulting in a jittery sound, which doesn't happen so much when we do it this way
+            //resulting in a jittery sound, which doesn't happen so much when we do it this way,
             //or rather, it still happens once adjustments have to be made, but this way
             //we have a much better chance of never having to make those adjustments
             //this is also better for opera next and safari because they mute the audio
@@ -4496,7 +4135,7 @@ var OzPlayer = (function()
         //just in case any of the tracks don't have an srclang defined
         //nb. browsers vary in which of these two properties they support
         //some support both, and some only support one or the other
-        //but wherever both are defined they're obviously always
+        //but wherever both are defined they're reliably always
         //the same, so it doesn't matter which order we check them
         //nb. convert the code to lowercase for simplicity, because
         //some regional variants are canonically uppercase, eg. "en-US"
@@ -4506,7 +4145,7 @@ var OzPlayer = (function()
         //userlang = 'de',
 
         //create flags for the first captions track that has the default attribute
-        //(which specifies which captions to track to show by default, if any)
+        //(which specifies which captions track to show by default, if any)
         //and the first captions track that has the data-default-transcript attribute
         //(which specifies which to use for the default transcript if captions are off by default)
         defaultTrack = null,
@@ -4596,7 +4235,7 @@ var OzPlayer = (function()
                     //nb. if more than one track has the default attribute,
                     //then the native implementation will use the first one
                     //so we follow that by only paying attention to the first one
-                    //nb. we have to check the attribute against null because
+                    //nb. we have to check against null not just loosely false, because
                     //[default=""] and [default] are validly the same as [default="default"]
                     if(track.getAttribute('default') !== null && defaultTrack === null)
                     {
@@ -4625,8 +4264,8 @@ var OzPlayer = (function()
 
                 //then if the kind is captions and we have native track support
                 //nb. we'll need to interact with this in devices which use the
-                //webkit-video fullscreen model and support native tracks (eg. iOS7+)
-                //so that we can show native captions in fullscreen mode
+                //webkit-video fullscreen model and support native tracks (ie. iOS7+)
+                //so that we can show native captions in fullscreen mode or playsinline
                 if(kind == 'captions' && etc.def(player.video.textTracks))
                 {
                     //if this is anything except iOS, remove the track entirely
@@ -4645,10 +4284,32 @@ var OzPlayer = (function()
                         //save a native textTrack object reference to the dictionary
                         tracks[key].textTrack = track.track;
 
-                        //then immediately set the textTrack mode to "disabled"
-                        //so that the native captions never show by default
-                        //(else we'd get two sets of captions on the screen)
-                        track.track.mode = 'disabled';
+                        //*** DEV TMP
+                        //console.warn('tracks["' + key + '"].textTrack');
+                        //console.log(tracks[key].textTrack);
+
+                        //now set the textTrack mode to "showing" if it matches
+                        //the default and this is an iphone, otherwise to "disabled"
+                        //nb. this is so native captions show for playsinline on the iphone
+                        //but won't show as duplicates to custom captions on the ipad
+                        //nb. although the iphone's native inline interface has
+                        //no way of controlling them, that control is available
+                        //in the full-screen interface, so this sets the inline
+                        //default to matches whatever the author sets as default
+                        //then users can change enabled or language in full-screen
+                        //nb. if no track is set to default, the iphone might select
+                        //"Auto (recommended)" and show captions by default anyway
+                        //presumably using the track language matching the phone's language
+                        //this appears to be related to the "Closed Captions + SDH" option
+                        //(found in General > Accessibility > Subtitles & Captioning)
+                        //because when I turned that off and on again, it stopped happening
+                        //which is kinda hmm, I was expecting it would stop when that setting
+                        //was off and happen again when the setting was on again, so not sure
+                        //but anyway, I think that's probably it, so if users set that on
+                        //their phone then captions should/might always show by default
+                        //regardless of author default settings (which is desirable behaviour)
+                        //and if that's flaky or unreliable, well that's Apple's problem not mine
+                        track.track.mode = (defs.agent.iphone && defaultTrack === key) ? 'showing' : 'disabled';
 
                         //also save an owner node reference in case we need to remove the track
                         //ie. in the case of load failures so we can remove it from the native collection
@@ -4836,6 +4497,7 @@ var OzPlayer = (function()
                 //then this cue has been mis-defined, so continue to the next cue
                 //but first show a console info with the invalid cue message
                 //(therefore each invalid cue will generate a separate warning)
+                //** be nice if we could give line numbers for this, but not sure how
                 if(!lines[0] || lines[0].indexOf('-->') < 0)
                 {
                     etc.console(etc.sprintf(config.lang['vtt-invalid-cue'], { src : track.src }), 'warn');
@@ -4867,7 +4529,7 @@ var OzPlayer = (function()
                 //and round the resulting numbers to three significant digits,
                 //so we discard precision errors that produces timings like 7.00000001
                 //nb. the timestamp regex is very basic and will allow invalid numbers
-                //but it also allows the european "," instead of "." for the milliseconds
+                //it allows the european "," instead of "." for the milliseconds to support SRT
                 //nb. any cue settings (defined after the end timestamp) will be ignored
                 lines.shift().replace(/((?:[\d]+[\:\.\,]?){3,4})(?:\s+\-\->\s+)((?:[\d]+[\:\.\,]?){3,4})/,
                 function(all, start, end)
@@ -4923,6 +4585,7 @@ var OzPlayer = (function()
                 //then just ignore this cue and continue to the next one
                 //but first show a console info with the invalid cue message
                 //(therefore each invalid cue will generate a separate warning)
+                //** be nice if we could give line numbers for this, but not sure how
                 if(!etc.def(cue.startTime) || !etc.def(cue.endTime))
                 {
                     etc.console(etc.sprintf(config.lang['vtt-invalid-cue'], { src : track.src }), 'warn');
@@ -4932,6 +4595,10 @@ var OzPlayer = (function()
                 //[else] re-join the remaining lines (with a unix line-break for internal consistency)
                 //trim the result, and if it's not empty then save it to the cue text
                 //then parse any links to add (or replace) target="_blank"
+                //nb. links aren't formally supported, this is not documented anywhere
+                //because I'm not sure if it's a good idea, and it would violate focus order
+                //since the captions are inserted after the controls but are visual before them
+                //(they have to be inserted after to fix an obscure JAWS bug; see controlform defintion)
                 if((lines = etc.trim(lines.join('\n'))) !== '')
                 {
                     cue.text = lines;
@@ -4963,6 +4630,7 @@ var OzPlayer = (function()
                         //so there's no point creating a cue for it, so just continue to the next cue
                         //but first show a console info with the invalid xad message
                         //(therefore each invalid command will generate a separate warning)
+                        //** be nice if we could give line numbers for this, but not sure how
                         if(!(typeof(cue.startAudio) == 'number' && typeof(cue.endAudio) == 'number'))
                         {
                             etc.console(etc.sprintf(config.lang['vtt-invalid-xad'], { src : track.src }), 'warn');
@@ -5005,19 +4673,6 @@ var OzPlayer = (function()
                 //*** DEV TMP
                 //if(__.console) { console.log('id\t"'+cue.id+'"\n'+ 'startTime\t'+cue.startTime+'\n'+ 'endTime\t'+cue.endTime+'\n'+ 'text\t"'+cue.text+'"\n'+ ''); }
 
-                //*** DEV TMP
-                //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-                //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-                //str += 'id = "'+cue.id+'"';
-                //str += '\tstart = '+cue.startTime;
-                //str += '\tend = '+cue.endTime;
-                //str += '<br />                ';
-                //str += '"'+cue.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/[\r\n]+/g,'<br />                ')+'"';
-                //str += '<br />';
-                ////etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-                //etc.get('#info').innerHTML = str;
-
-
                 //else continue to process the next cue
                 return this.next();
             },
@@ -5046,7 +4701,7 @@ var OzPlayer = (function()
 
         //now try load the specified track src, and if that loads
         //then pass the response text to the parsing function
-        //nb. don't check the content type because that's causing problems for users
+        //nb. don't check the content type because that's causing problems for author
         //who don't have access to their server config, so just accept anything
         //and try to parse it (and parsing will fail if it's not VTT or SRT data)
         //nb. don't normally use the nocache flag because caching is a good thing!
@@ -5657,13 +5312,8 @@ var OzPlayer = (function()
                 ],
                 ['<dfn>','</dfn>']);
             videolog([
-                ['VIDEO-PLUGIN', 18],
-                [player.plugin, 0]
-                ],
-                ['<dfn>','</dfn>']);
-            videolog([
                 ['VIDEO-TYPE', 18],
-                [player.instance.videoType.replace('video/',''), 0]
+                [player.videoType.replace('video/',''), 0]
                 ],
                 ['<dfn>','</dfn>']);
             videolog([
@@ -5682,7 +5332,7 @@ var OzPlayer = (function()
                 {
                     videolog([
                         [e.type.toUpperCase(), 18],
-                        [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                        [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                         [player.media.duration, 10],
                         [player.media.currentTime, 10],
                         ['', 5],
@@ -5697,7 +5347,7 @@ var OzPlayer = (function()
                 {
                     videolog([
                         [e.type.toUpperCase(), 18],
-                        [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                        [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                         [player.media.duration, 10],
                         [player.media.currentTime, 10]
                         ],
@@ -5714,7 +5364,7 @@ var OzPlayer = (function()
                 {
                     videolog([
                         [e.type.toUpperCase(), 18],
-                        [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                        [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                         [player.media.duration, 10],
                         [player.media.currentTime, 10],
                         ['', 5],
@@ -5726,7 +5376,7 @@ var OzPlayer = (function()
             {
                 videolog([
                     [e.type.toUpperCase(), 18],
-                    [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                    [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                     [player.media.duration, 10],
                     [player.media.currentTime, 10],
                     ['', 5],
@@ -5738,7 +5388,7 @@ var OzPlayer = (function()
             {
                 videolog([
                     [e.type.toUpperCase(), 18],
-                    [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                    [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                     [player.media.duration, 10],
                     [player.media.currentTime, 10],
                     ['', 5],
@@ -5750,7 +5400,7 @@ var OzPlayer = (function()
             {
                 videolog([
                     [e.type.toUpperCase(), 18],
-                    [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                    [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                     [player.media.duration, 10],
                     [player.media.currentTime, 0]
                     ],
@@ -5764,7 +5414,7 @@ var OzPlayer = (function()
                     {
                         videolog([
                             [e.type.toUpperCase(), 18],
-                            [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                            [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                             [player.media.duration, 10],
                             [player.media.currentTime, 10],
                             //[isTimeBuffered(player.media) ? '<strong> Y </strong>' : '<small> N </small>', 5],
@@ -5783,7 +5433,7 @@ var OzPlayer = (function()
                     {
                         videolog([
                             [e.type.toUpperCase(), 18],
-                            [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
+                            [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState, null) ? player.media.networkState : '?'), 7],
                             [player.media.duration, 10],
                             [player.media.currentTime, 10],
                             //[isTimeBuffered(player.media) ? '<strong> Y </strong>' : '<small> N </small>', 5],
@@ -5997,54 +5647,48 @@ var OzPlayer = (function()
     //nb. this is triggered by the MediaElement success function
     function addMediaInterface(player)
     {
-        //get a reference to the media wrapper element, which is either
-        //the native <video> itself, or it's the "me-plugin" container
-        //(which is either a <div> or <iframe> but we shouldn't assume either)
-        if(player.mode == 'native')
-        {
-            player.wrapper = player.video;
-        }
-        else
-        {
-            etc.each(etc.get('*', player.container), function(node)
-            {
-                if(etc.hasClass(node, config.classes['replacement']))
-                {
-                    player.wrapper = node;
-                    return false;
-                }
-            });
-        }
+        //get a reference to the media wrapper element
+        //which might be an <iframe>, flash replacement object,
+        //or <video> replacement object depending on the ME renderer
+        //but in all cases is referenced by the player.media object
+        //nb. this reference is entirely redundant now, it's a hangover from ME2
+        //when it would be only be a replacement element for flash or youtube
+        //but ME4 always creates a replacement element, even for native
+        //might convert the references at some point, but it doesn't matter
+        player.wrapper = player.media;
 
-        //just in case the wrapper element isn't defined, show the console warning
+        //jic the wrapper element isn't defined, show the console warning
         //with the player media failure, which returns false for failure
-        //also youtube is not supported for the audio-only player
-        //so if that combination occurs then do the same thing
-        //nb. this can happen if you define youtube AND native video sources
-        //giving rise to circumstances where no media element is defined at all
-        //nb. interestingly, without this audio the video would actually work
-        //but the interface would be assuming audio-only so that's no good really
-        //curiously native video sources work just fine with the audio-only player
-        //and simply play the audio of the video (or at least, that happens in chrome)
-        if(!player.wrapper || (player.isaudio && player.mode == 'youtube'))
+        //and subsequently resets the types and mode and calls abandonMedia
+        //(although there are no longer any known circumstances of this, but jic)
+        //also do this if there's no rendererName, which can happen if the player
+        //tries to use a flash shim when the user doesn't have flash installed
+        //or can't support a JavaScript shim (like with MPEG-DASH in iOS)
+        //or uses optional third-party media without including its script
+        //also most third-party sources are not supported for the audio-only player
+        //nb. you can use actually native video in the audio-only player
+        //and it will still the play the audio track of the video file
+        if
+        (
+            !player.wrapper
+            ||
+            !player.wrapper.rendererName
+            ||
+            (
+                player.isaudio
+                &&
+                library.isThirdPartyMedia(player.mode)
+            )
+        )
         {
+            //nb. if we have no media sources at all then videoType will be null
+            //whereas if the browser can't use the type nor the replacement shim
+            //then videoType will still have the value of the original type
+            //but I'm not sure that it's really worth separate warnings
+            //since the former type is never gonna happen in production
+            //it would only happen due to author testing or obvious mistakes
             return etc.console(etc.sprintf(config.lang['wrapper-failure']), 'warn');
         }
-
-
-        //now set the player plugin flag according to the source element
-        //which is "shockwave" for flash or "html" for native
-        //(rather than "flash" and "native" so they can't be confused with mode)
-        //nb. this allows us to differentiate between flash and native youtube
-        //nnb. ideally we'd have done this before calling addMediaInterface
-        //but we don't have the wrapper reference then, and refactoring that means
-        //refactoring the no-wrapper error condition, which is not worth the hassle
-        //nnb. now that we have this plugin flag we could refactor the mode flag
-        //but again, it's not worth the hassle to change all the existing uses of it
-        player.plugin = player.wrapper.nodeName.toLowerCase() == 'div' ? 'shockwave' : 'html';
-
-        //then copy that value back to its instance property
-        player.instance.plugin = player.plugin;
 
 
         //if the wrapper doesn't have an ID, then assign one now
@@ -6058,24 +5702,23 @@ var OzPlayer = (function()
             });
         }
 
-        //if the video doesn't have a defined width and height
-        //then force the media wrapper to be the config defaults
-        //otherwise safari won't honour the minimum size we apply
-        //if the video's native size is different (which it usually will be)
-        //nb. we have to set these dimensions by defining new attributes
-        //since setting the video.width and height won't change the rendered size
-        //but wrapper.style.width and height breaks fullscreen resizing in webkit
-        //happily it also means we'll get the specified size even without CSS
-        if(!(player.video.getAttribute('width') && player.video.getAttribute('height')))
+        //for facebook video, the sizing method doesn't work
+        //but it does respond to changes in the container width
+        //so we can resize the video by setting the container width
+        //nb. setting the height doesn't affect it, the video always
+        //sizes itself according to its own aspect ratio, so if we set a
+        //non-matching height we'll just get black space under the controls
+        //*** how will that work for portrait videos?
+        //*** the height is too large with black space on iOS/Android
+        if(player.mode == 'facebook')
         {
-            player.wrapper.setAttribute('width', config['default-width']);
-            player.wrapper.setAttribute('height', config['default-height']);
+            player.container.style.width = player.video.getAttribute('width') + 'px';
         }
+
 
         //set negative tabindex on the video to remove it from the tab order
         //and the same for the plugin embed, object, or iframe, as defined
         //(if an iframe is present it will be the wrapper element itself)
-        //nb. although it's frustrating that spatial navigation can still reach it!
         //nb. use the property name to avoid cross-browser discrepancies
         //because setAttribute('tabindex') doesn't work in legacy IE, but
         //setAttribute('tabIndex') is an entirely different attribute in others
@@ -6092,9 +5735,8 @@ var OzPlayer = (function()
             ).tabIndex = '-1';
         }
 
-        //now remove any fallback content, which is still in the tab-order in IE9 (ffs!)
-        //plus of course the flash player would show them both if we didn't remove it
-        //nb. and if we've got this far then we know we don't need it
+        //now remove any fallback content else the flash player will show both
+        //and if we've got this far then we know we don't need it
         etc.each(etc.get('*', player.container), function(node)
         {
             if(etc.hasClass(node, config.classes['fallback']))
@@ -6159,18 +5801,23 @@ var OzPlayer = (function()
         {
             descriptions        : null,     //text descriptions (for future use)
             youtube_captions    : null,     //youtube embedded captions
+            vimeo_captions      : null,     //vimeo embedded captions
+            vimeo_captions_lang : null,     //vimeo embedded captions
             captions            : null,     //track captions
             transcript          : null,     //track transcript data
             xad                 : null      //track xad metadata
         };
 
-        //if this is a youtube video then check the source element for a data-captions attribute
-        //which denotes the presence of embedded captions and controls their default enabled state
-        //nb. we don't need much data about these captions, just enough to remember whether
-        //they're on or off, so that we can extend control of them using the CC button
-        //if present, treat them as enabled by default unless the attribute value is false
+        //if this is a youtube video then check the source element
+        //for a data-captions attribute, which denotes the presence of
+        //overriding embedded captions and controls their default enabled state
+        //treating them as enabled by default unless the attribute value is false
+        //however for vimeo we need a language code to turn captions on and off
+        //so we'll also have to check for an srclang, or default to "en" for simplicity
+        //and do this even if data-captions isn't present so we can use them on the iphone
+        //and define it in a separate member so we can still test for !vimeo_captions
         //nb. if multiple sources are present then the player uses the first one anyway
-        if(player.mode == 'youtube')
+        if(player.mode == 'youtube' || player.mode == 'vimeo')
         {
             var source = etc.get('source', player.container)[0];
             if(source)
@@ -6178,22 +5825,26 @@ var OzPlayer = (function()
                 var attr = source.getAttribute('data-captions');
                 if(attr !== null)
                 {
-                    player.tracks.youtube_captions =
+                    player.tracks[player.mode + '_captions'] =
                     {
                         enabled : attr != 'false'
                     };
                 }
+                if(player.mode == 'vimeo')
+                {
+                    player.tracks.vimeo_captions_lang = source.getAttribute('data-captions-srclang') || 'en';
+                }
             }
         }
 
-        //then if we don't have youtube captions
+        //then if we don't have overriding youtube or vimeo captions
         //define the captions and transcript members by looking in the player
         //for text tracks with corresponding data, and that will return either
         //an object of the tracks data, or null if there aren't any
         //nb. don't bother if we've already defined embedded youtube captions
         //and also don't bother looking for transcript data if we don't have a transcript container
         //since the data will never be used we can save ourselves the overhead
-        if(!player.tracks.youtube_captions)
+        if(!player.tracks.youtube_captions && !player.tracks.vimeo_captions)
         {
             player.tracks.captions = getTracksData(player, 'captions');
             if(player.transcript)
@@ -6223,21 +5874,40 @@ var OzPlayer = (function()
             loadTracksData(player, player.tracks.captions.selected.transcript);
         }
 
+        //if this is ios then assume that we always have youtube or vimeo captions
+        //so its fullscreen player can use them when everyone else uses local ones
+        //while simultaneously generating the transcript from those local ones
+        //set the default enabled state to match the state of local captions
+        //for which we may have to define the original object if it wasn't defined
+        //nb. youtube won't throw any errors if there are no embedded captions
+        //they'll simply be shown if they exist and nothing if they don't
+        //however vimeo will throw errors if we try to load captions in a language that
+        //isn't defined, so we'll have to catch that, and disable the CC button if necessary
+        if(defs.agent.ios && player.tracks.captions && (player.mode == 'youtube' || player.mode == 'vimeo'))
+        {
+            (player.tracks[player.mode + '_captions'] = player.tracks[player.mode + '_captions'] || {}).enabled
+                = player.tracks.captions.enabled;
+        }
+
+        //*** DEV TMP
+        //console.warn('player.tracks');
+        //console.dir(player.tracks);
+
 
         //if we have audio descriptions, look for xad track data
         if(player.audiodesk)
         {
             if(player.tracks.xad = getTracksData(player, 'xad'))
             {
-                //if this is a youtube video then xad is not supported because
-                //the youtube API doesn't support setting playbackrate to 0
+                //if this is not html5 then xad is not supported because
+                //the third-party APIs don't support setting playbackrate to 0
                 //and playing the AD normally would be pointless since they'd be out of sync
                 //so we set the ad error state the same as if the data had failed to load
-                //nb. also don't support it for flash video for simplicity
+                //also there's no point trying to support it for flash video
                 //since the only possible browser that could support native
-                //audio but not native video is old Firefox when the video is MP4
-                //and since we're about to drop support for that it's not worth testing
-                if(player.mode == 'youtube' || player.mode == 'flash')
+                //audio but not native video is old Firefox when the video is mp4
+                //so ultimately, we only support it with standard mp4/webm video
+                if(player.media.rendererName != 'html5')
                 {
                     //set the xad tracks data to null
                     player.tracks.xad = null;
@@ -6257,14 +5927,6 @@ var OzPlayer = (function()
                 }
             }
         }
-
-
-        //*** DEV TMP
-        //if(__.console) { console.log(etc.dump(player.tracks)); }
-        //if(__.console) { etc.delay(1000, function() { console.log(etc.dump(player.tracks)); }); }
-        //if(__.console) { etc.delay(5000, function() { console.log(etc.dump(player.tracks)); }); }
-        //if(__.console) { etc.delay(9000, function() { console.log(etc.dump(player.tracks)); }); }
-        //etc.get('#info').innerHTML = etc.dump(player.tracks);
 
 
         //create an indicator overlay which covers the entire interface
@@ -6397,7 +6059,7 @@ var OzPlayer = (function()
             //defined, then use that value to set a width on the controlform,
             //otherwise use the default width from config; which we have to do
             //else it will have no width, since there's no video to stretch it
-            var w = player.wrapper.getAttribute('data-width');
+            var w = player.video.getAttribute('data-width');
             if(!w || isNaN(w = parseInt(w, 10)))
             {
                 w = config['default-width'];
@@ -6405,18 +6067,15 @@ var OzPlayer = (function()
             player.controlform.style.width = w + 'px';
         }
 
-        //then for all but iPhone and Windows Phone, append the control form to the container
-        //nb. we don't need the controls for those phones because you can't use them anyway
-        //since they're always either covered by the native click to play overlay,
-        //or the video is playing and in fullscreen mode (in its native player)
+        //then append the control form to the container,
+        //for all except iphones, or for ipads when the player mode is vimeo
+        //nb. we don't need the controls for iphones or ipad/vimeo
         //so we can save the rendering overhead of appending the controls at all
         //but we do still need to create them so that their references don't break
-        //** though ultimately it would be better if all through the script we can allow for
-        //** the possibility of the form not even being present; but one thing at a time :-)
-        //** maybe the next step is to get rid of work like updating the slider values
-        //nb. we don't do this for android or ipad because they don't have the same behavior
+        //(and it's not worth the time and code to refactor the assumption of their presence)
+        //nb. we don't except android or ipad/native because they don't have the same behavior
         //they embed the video for playback in the page, like a normal desktop browser
-        //we also don't do this for the audio-only player, which always has custom controls
+        //we also don't do except the audio-only player, which always has custom controls
         //nb. we have to insert this before the captions, not append after it,
         //on order to fix a weird bug that occurs in JAWS: whereby using
         //the quick form key "f" while the video is playing moves between
@@ -6432,7 +6091,14 @@ var OzPlayer = (function()
         //nnb. although this is not the ideal DOM structure, since the captions
         //are visually before the controls but structurally come after them
         //however I think that's a small price to pay for fixing this bug
-        if(!(defs.agent.iphone || defs.agent.winphone) || player.isaudio)
+        if
+        (
+            player.isaudio
+            ||
+            !defs.agent.ios
+            ||
+            (defs.agent.ios && !defs.agent.iphone && player.mode != 'vimeo')
+        )
         {
             player.controlform = player.container.insertBefore(player.controlform, player.captions);
         }
@@ -6446,18 +6112,17 @@ var OzPlayer = (function()
         }
 
 
-        //if this is iOS or Android with youtube, force the controls
-        //to be "row", because we can't allow the auto-hiding events,
+        //if this is iOS or Android with third-party media, force the
+        //controls to be "row", because we can't allow the auto-hiding events,
         //since the auto-show is controlled by touches, but we won't get
-        //those events from the youtube plugin, presumably because the events
-        //go through to the youtube iframe document, but if we just disabled
+        //those events from third-party plugins, presumably because the events
+        //go through to the embedded iframe document, but if we just disabled
         //the auto-hiding then you'd lose the bottom 32px of the picture
         //so I think the best thing is to force the layout to be "row"
         //then there are no auto-hiding events and you get the full picture
         //nb. this isn't necessary for the iphone since it doesn't have the
         //custom controls anyway, but it's not worth the extra condition
-        //(it's also not necessary for windows phone, hence the lack of condition!)
-        if((defs.agent.ios || defs.agent.android) && player.mode == 'youtube')
+        if((defs.agent.ios || defs.agent.android) && library.isThirdPartyMedia(player.mode))
         {
             player.options.controls = 'row';
         }
@@ -6467,6 +6132,18 @@ var OzPlayer = (function()
         {
             etc.addClass(player.container, config.classes['stack-controls']);
         }
+
+        //for reasons I can't really fathom, whichever media "play" event
+        //is the first one to be bound doesn't fire on initial playback
+        //you have to play, then pause, then play again before it fires
+        //while all other play events are fine, it's just the first one
+        //and since the auto-hiding play event is the first one we bind
+        //auto-hiding won't happen at all when you initially play the video
+        //like wtf is that? what could it possibly be? I really have nfi
+        //maybe ME does some kind of JIT event management or some shit, idfk
+        //anyway, we can workaround that by creating an empty one first
+        //which won't fire the first time, obvs, but that doesn't matter
+        etc.listen(player.media, 'play', function(){});
 
         //now start the auto-hiding process, which maintains the container auto-hiding
         //and auto-hidden classes, and monitors user interaction events to add and remove them
@@ -6710,10 +6387,6 @@ var OzPlayer = (function()
                     //ignore this event if the button is disabled
                     if(player.controlform.playpause.disabled) { return false; }
 
-                    //*** DEV TMP
-                    //var e = { type : 'playpause' };
-                    //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'paused = ' + player.media.paused;str += '\tfakepaused = ' + player.fakepaused;str += '\tstarted = ' + player.started;str += '\tended = ' + player.media.ended;str += '\t[ button pre-click handler ]';str += '<br />'; etc.get('#info').innerHTML = str+etc.get('#info').innerHTML;}
-
                     //if the video is already paused
                     //nb. sometimes if you play, pause, then try to play again
                     //all within the first couple of seconds, you might have to click
@@ -6785,14 +6458,11 @@ var OzPlayer = (function()
                         }
 
                         //now pause the media
-                        pauseMedia(player);
+                        pauseMedia(player, true);
 
                         //then update the button state
                         updateControlState(player, 'playpause', 'off');
                     }
-
-                    //*** DEV TMP
-                    //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'paused = ' + player.media.paused;str += '\tfakepaused = ' + player.fakepaused;str += '\tstarted = ' + player.started;str += '\t[ button post-click handler ]';str += '<br />'; etc.get('#info').innerHTML += str;}
                 }
             }
         );
@@ -6823,12 +6493,14 @@ var OzPlayer = (function()
         etc.build('br', { '=parent' : player.controlform.lastChild });
 
 
-        //if we have any captions tracks data or embedded youtube captions
+        //if we have any captions tracks data or embedded youtube or vimeo captions
         //unless this is an audio-only player and we don't have multiple languages
         //(in which case we don't need the button since there's no language selection)
         if
         (
             player.tracks.youtube_captions
+            ||
+            player.tracks.vimeo_captions
             ||
             (
                 player.tracks.captions
@@ -6841,12 +6513,17 @@ var OzPlayer = (function()
             )
         )
         {
-            //for embedded youtube captions, define the default button state and lang
-            //acccording to whether the captions are enabled by default
+            //for embedded youtube or vimeo captions, define the default button state
+            //and lang acccording to whether the captions are enabled by default
             if(player.tracks.youtube_captions)
             {
                 var
                 statekey = player.tracks.youtube_captions.enabled ? 'on' : 'off',
+                labelkey = statekey;
+            }
+            else if(player.tracks.vimeo_captions)
+            {
+                statekey = player.tracks.vimeo_captions.enabled ? 'on' : 'off';
                 labelkey = statekey;
             }
 
@@ -6971,10 +6648,6 @@ var OzPlayer = (function()
                         //ignore this event if the button is disabled
                         if(player.controlform.cc.disabled) { return false; }
 
-                        //*** DEV TMP
-                        //var e = { type : 'CC' };
-                        //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'enabled = ' + player.tracks.captions.enabled;str += '\t[ button pre-click handler ]';str += '<br />'; etc.get('#info').innerHTML += str;}
-
                         //if we're controlling youtube captions then the cc button is an on/off switch
                         if(player.tracks.youtube_captions)
                         {
@@ -6982,11 +6655,40 @@ var OzPlayer = (function()
                             player.tracks.youtube_captions.enabled = !player.tracks.youtube_captions.enabled;
 
                             //load or unload the captions module accordingly
-                            player.media.pluginApi[(player.tracks.youtube_captions.enabled ? '' : 'un') + 'loadModule']('cc');
-                            player.media.pluginApi[(player.tracks.youtube_captions.enabled ? '' : 'un') + 'loadModule']('captions');
+                            player.media.youTubeApi[(player.tracks.youtube_captions.enabled ? '' : 'un') + 'loadModule']('cc');
+                            player.media.youTubeApi[(player.tracks.youtube_captions.enabled ? '' : 'un') + 'loadModule']('captions');
 
                             //then update the button state
                             updateControlState(player, 'cc', (player.tracks.youtube_captions.enabled ? 'on' : 'off'));
+                        }
+
+                        //else if we're controlling vimeo captions then the cc button is an on/off switch
+                        else if(player.tracks.vimeo_captions)
+                        {
+                            //invert the vimeo captions enabled flag
+                            player.tracks.vimeo_captions.enabled = !player.tracks.vimeo_captions.enabled;
+
+                            //enable or disable the text track accordingly
+                            //or if that fails (eg. invalid language code) then show the CC button error state
+                            //nb. the vimeo API returns a Promise, which IE11 doesn't fully support
+                            //and a failure due to invalid language code may still show captions
+                            //maybe it just selects from available languages randomly, dk
+                            //but those captions can't be controlled because the CC button is disabled now
+                            player.media.vimeoPlayer[(player.tracks.vimeo_captions.enabled ? 'enable' : 'disable') + 'TextTrack'](player.tracks.vimeo_captions_lang)
+                                .then(function(){})
+                                .catch(function(ex)
+                                {
+                                    player.tracks.vimeo_captions.enabled = false;
+                                    updateControlState(player, 'cc', 'off');
+                                    updateControlDisabled(player, 'cc', true);
+                                    etc.render(player.controlform.cc,
+                                    {
+                                        'aria-label' : getLang(player, 'button-cc-error')
+                                    });
+                                });
+
+                            //then update the button state
+                            updateControlState(player, 'cc', (player.tracks.vimeo_captions.enabled ? 'on' : 'off'));
                         }
 
                         //else if we only have one track language then the cc button is an on/off switch
@@ -7417,15 +7119,17 @@ var OzPlayer = (function()
             //not just for stack controls, do the same thing here for consistency
             //and also do the same for android since we have to disable the fullscreen
             //button for other reasons, so disabling this also helps visual consistency
-            //but don't do that for ios and winphone if this is the audio-only player
+            //but don't do that for ios and android if this is the audio-only player
             //because there's no need for it to be disabled since you can use it
             //as soon as the transcript is available, and having it enabled is
             //more consistent with the play button also being enabled in that case
-            //we also do this for youtube captions since the API functions that switch
-            //embedded captions on and off are not available until playback
+            //we also do this for youtube and vimeo captions since the API functions
+            //that switch embedded captions on and off are not available until playback
             if
             (
                 player.tracks.youtube_captions
+                ||
+                player.tracks.vimeo_captions
                 ||
                 (
                     (defs.agent.ios || defs.agent.android)
@@ -7447,7 +7151,7 @@ var OzPlayer = (function()
                 {
                     ccbutton.silence();
 
-                    if(player.tracks.youtube_captions || player.tracks.captions.languages.length)
+                    if(player.tracks.youtube_captions || player.tracks.vimeo_captions || player.tracks.captions.languages.length)
                     {
                         updateControlDisabled(player, 'cc', false);
                     }
@@ -7518,10 +7222,6 @@ var OzPlayer = (function()
                         //then if actual audio descriptions are available
                         if(player.audiodesk)
                         {
-                            //*** DEV TMP
-                            //var e = { type : 'AD' };
-                            //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'enabled = ' + player.audiodesk.enabled;str += '\t[ button pre-click handler ]';str += '<br />'; etc.get('#info').innerHTML += str;}
-
                             //if we're enabling audio but haven't yet initialised it
                             //nb. this will only happen if audio was turned off
                             //by default and has now been turned on by the user
@@ -7651,11 +7351,11 @@ var OzPlayer = (function()
         }
 
 
-        //changing the volume doesn't work in iOS and Windows Phone, which must
-        //be deliberate so that media objects can't be different from the system volume
-        //(in fact its native video controls don't even have a volume control)
+        //changing the volume doesn't work in iOS, which must be deliberate
+        //so that media objects can't be different from the system volume
+        //(in fact its native media players don't even have volume controls)
         //so there's no point adding the controls since they won't do anything
-        if(!(defs.agent.ios || defs.agent.winphone))
+        if(!defs.agent.ios)
         {
             //create a span-wrapped mute button inside the second fieldset
             //with its state according to the default muting, which will be
@@ -7679,10 +7379,6 @@ var OzPlayer = (function()
 
                         //ignore this event if the button is disabled
                         if(player.controlform.mute.disabled) { return false; }
-
-                        //*** DEV TMP
-                        //var e = { type : 'MUTE' };
-                        //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'volume = ' + player.media.volume;str += '\tmuted = ' + player.media.muted;str += '\tstarted = ' + player.started;str += '\t[ button pre-click handler ]';str += '<br />'; etc.get('#info').innerHTML += str;}
 
                         //invert the current muting (without changing the volume)
                         //nb. if the user has no sound output then this will have no effect
@@ -7863,23 +7559,12 @@ var OzPlayer = (function()
 
 
         //detect the supported fullscreen model
-        //nb. this is based on the fullscreen code from MediaElement's player
-        //but extended so it also supports the standard (non-prefixed) model
         //nb. iOS only supports video fullscreen, not container fullscreen
         //which means it won't have custom controls in fullscreen mode
-        //and iOS6 won't have captions (since only iOS7+ supports native captions)
-        //I did consider disabling fullscreen entirely, but you do kinda need
-        //fullscreen on a tablet or handheld device, so in this case I think
-        //that that expectation has to take priority over the lack of captions in iOS6
         var screentype = library.getFullscreenModel(player.video);
 
         //there are also cases where we need to explicitly disable fullscreen
         //=> the video-only fullscreen model doesn't work with non-native video
-        //=> in safari with flash the resizing is broken
-        //   in that it fails to resize upwards when entering fullscreen
-        //   (me-plugin and the embed object do resize, but the flash content doesn't)
-        //   but then resizes to the screen dimensions when exiting fullscreen again!
-        //   nb. safari with youtube+native is fine so we use the plugin flag to differentiate
         //=> in windows/safari it sometimes just fails to happen, but even when it does
         //   it introduces a stacking context problem because of the new base z-index
         //   whereby the transcript container ends up still visible above the fullscreen video
@@ -7888,13 +7573,10 @@ var OzPlayer = (function()
         //   (and windows versions of safari aren't officially supported anymore anyway)
         //=> in firefox 10-15 it fails to resize the screen and controls properly
         //   while in firefox 9 it just plain doesn't work even though it claims support
-        //   (and firefox 9-15 aren't officially supported anyway)
-        //nb. these conditions could be simplified but are easier to comprehend this way
+        //   (and firefox 9-30 aren't officially supported anymore anyway)
         if
         (
             (screentype == 'webkit-video' && player.mode != 'native')
-            ||
-            (defs.agent.safari && player.plugin == 'shockwave')
             ||
             (defs.agent.safari && defs.agent.windows)
             ||
@@ -7927,30 +7609,11 @@ var OzPlayer = (function()
             //nb. the video-only model doesn't have a screen event
             //but it does have a video event that we'll handle separately
             screenevent =
-                screentype == 'webkit-screen'    ? 'webkitfullscreenchange'
+                screentype == 'webkit-screen'   ? 'webkitfullscreenchange'
                 : screentype == 'moz-screen'    ? 'mozfullscreenchange'
-                : screentype == 'ms-screen'        ? 'MSFullscreenChange'
+                : screentype == 'ms-screen'     ? 'MSFullscreenChange'
                 : screentype == 'screen'        ? 'fullscreenchange'
                 : null;
-
-
-            //*** DEV TMP
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-            //str += 'screentype = "'+screentype+'"';
-            //str += '\tscreenevent = '+(screenevent?('"'+screenevent+'"'):'(none)')+'<br />';
-            //etc.get('#info').innerHTML += str;
-
-            //*** DEV TMP
-            //var screenwatch = __.setInterval(function()
-            //{
-            //    var e = { type : 'screenwatch' };
-            //    var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-            //    str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-            //    str += '<br />';
-            //    etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-            //
-            //}, 1000);
-            //etc.listen(etc.get('#info'), 'mousedown', function(){ __.clearInterval(screenwatch); });
 
 
             //now add another cheeky <br> so this button has a line of its own
@@ -7977,7 +7640,7 @@ var OzPlayer = (function()
 
                     //then define an abstraction for the screenchange event
                     //nb. we would actually get smoother results if we resized the
-                    //container before it goes to fullscreen, but we shouldn't do that,
+                    //container before it goes to fullscreen, but we musn't do that,
                     //because we can't guarantee that it's happened until the event fires
                     //(eg. it won't fire if user permissions have already blocked fullscreen)
                     //indeed the overall process is pretty inelegant, but it does the job!
@@ -7985,18 +7648,6 @@ var OzPlayer = (function()
                     {
                         //if this is not the designated fullscreen player, just ignore the event
                         if(screenplayer != player) { return; }
-
-
-                        //*** DEV TMP
-                        //etc.get('#info').innerHTML = ('fullscreen->'+screenevent+'='+library.isFullscreen(player.video, player.controlform.fullscreen.screentype)+'(' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
-
-                        //*** DEV TMP
-                        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                        //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-                        //str += '<br />';
-                        //etc.get('#info').innerHTML += str;
-
 
                         //close the language menu if it exists and is open and CSS is enabled
                         //nb. another way of handling this would be to only close the menu and not exit fullscreen
@@ -8032,23 +7683,8 @@ var OzPlayer = (function()
                             //still have to check it again next time, which is why we reset it on exit
                             screenpermission = true;
 
-                            //*** DEV TMP
-                            //etc.get('#info').innerHTML = ('fullscreen[screenpermission=true](' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
-
-                            //record the wrapper dimensions before switching
-                            //saving them as properties of the button for convenience
-                            button.videowidth = player.wrapper.offsetWidth;
-                            button.videoheight = player.wrapper.offsetHeight;
-
-                            //*** DEV TMP
-                            //etc.get('#info').innerHTML = ('<br>'
-                            //    + 'videowidth  = ' + button.videowidth + '<br>'
-                            //    + 'videoheight = ' + button.videoheight + '<br>'
-                            //    + '');
-
-                            //remove the smallscreen class from the player container if applicable
-                            etc.removeClass(player.container, config.classes['smallscreen']);
+                            //remove the smallscreen or midscreen classes as applicable
+                            etc.removeClass(player.container, config.classes['smallscreen'] + ' ' + config.classes['midscreen']);
 
                             //apply role=dialog and aria-modal so that ATs keep the read cursor inside the player
                             player.container.setAttribute('role', 'dialog');
@@ -8098,35 +7734,22 @@ var OzPlayer = (function()
                             }
 
 
-                            //update the video dimensions to match the screen, using the
-                            //MediaElements sizing function so it also works for the flash player
+                            //update the video dimensions to match the screen
                             //nb. this will letterbox the video if the aspect ratio is different
                             //nb. I did consider setting video.width and height as well as
                             //style.width and height, so that it would work without CSS
                             //but then the controls and captions would no longer be visible
                             //without the CSS to overlay them on top of the fullscreen video
-                            player.media.setVideoSize(screen.width, screen.height);
-
-                            //but if we're playing a youtube video using native video (ie. not flash)
-                            //then setVideoSize doesn't resize the IFRAME element which is used for that
-                            //(a problem I noticed in IE11 and Firefox 31 when the flash plugin is disabled)
-                            //but we can fix that by manually resizing the iframe element ourselves, and when
-                            //we do that, the video takes on the same dimensions (so it's presumably flexible)
-                            if(player.mode == 'youtube' && player.wrapper.nodeName.toLowerCase() == 'iframe')
-                            {
-                                player.wrapper.setAttribute('width', screen.width);
-                                player.wrapper.setAttribute('height', screen.height);
-                            }
+                            player.media.setSize(screen.width, screen.height);
 
                             //then update the controls form width to match
                             player.controlform.style.width = screen.width + 'px';
 
                             //if images are disabled, we need to re-update the
                             //dynamic widths of the seek and volume siders, since the
-                            //change in font-size will have changed the width of the button
+                            //change in font-size will have changed the widths of the button
                             //nb. the change in button text itself should usually do this
                             //but let's do it again anyway just to be sure it's up to date
-                            //*** do we need to do this here since we do it at the end anyway?
                             if(!player.images)
                             {
                                 updateSliderStretch(player);
@@ -8136,7 +7759,6 @@ var OzPlayer = (function()
                             //except it won't automatically maintain the same aspect ratio
                             //so we have to do that manually using background size and position
                             //nb. any letterbox gaps will show the poster's default black background
-                            //nb. all browsers which support fullscreen also support background-size
                             if(player.poster)
                             {
                                 var aspect = (aspect = button.videoheight / button.videowidth) < 1 ? aspect : (1 / aspect);
@@ -8190,9 +7812,6 @@ var OzPlayer = (function()
                             //in case the user selected "deny and remember" in the confirmation prompt
                             screenpermission = false;
 
-                            //*** DEV TMP
-                            //etc.get('#info').innerHTML = ('fullscreen[screenpermission=false](' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
 
                             //remove the role and aria-modal
                             player.container.removeAttribute('role');
@@ -8203,27 +7822,19 @@ var OzPlayer = (function()
                             //worth explicitly checking for that since removeClass does that anyway
                             etc.removeClass(player.container, config.classes['container-fullscreen'] + ' ' + config.classes['large-controls']);
 
-                            //then if the previous video width was smaller than the smallscreen threshold
-                            if(button.videowidth < config['default-width'])
+                            //then add the smallscreen or midscreen class as applicable to
+                            //whether the previous video size was smaller than those thresholds
+                            if(button.videowidth < config['smallscreen-threshold'])
                             {
-                                //add the smallscreen class to the player container
-                                //which will hide the links and logo
                                 etc.addClass(player.container, config.classes['smallscreen']);
+                            }
+                            else if(button.videowidth < config['midscreen-threshold'])
+                            {
+                                etc.addClass(player.container, config.classes['midscreen']);
                             }
 
                             //restore the previous video dimensions
-                            player.media.setVideoSize(button.videowidth, button.videoheight);
-
-                            //but if we're playing a youtube video using native video (ie. not flash)
-                            //then setVideoSize doesn't resize the IFRAME element which is used for that
-                            //(a problem I noticed in IE11 and Firefox 31 when the flash plugin is disabled)
-                            //but we can fix that by manually resizing the iframe element ourselves, and when
-                            //we do that, the video takes on the same dimensions (so it's presumably flexible)
-                            if(player.mode == 'youtube' && player.wrapper.nodeName.toLowerCase() == 'iframe')
-                            {
-                                player.wrapper.setAttribute('width',button.videowidth);
-                                player.wrapper.setAttribute('height', button.videoheight);
-                            }
+                            player.media.setSize(button.videowidth, button.videoheight);
 
                             //reset the controls width
                             player.controlform.style.width = button.videowidth + 'px';
@@ -8352,29 +7963,16 @@ var OzPlayer = (function()
                     //then define an abstraction for the button's command handler
                     '.command'      : function(e)
                     {
-                        //*** DEV TMP
-                        //etc.get('#info').innerHTML = ('fullscreen->command(' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
                         //reset the keyclick flag
                         player.keyclick = false;
 
                         //ignore this event if the button is disabled
                         if(player.controlform.fullscreen.disabled) { return false; }
 
-
-                        //*** DEV TMP
-                        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                        //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-                        //str += '\tscreenplayer = ' + screenplayer;
-                        //str += '<br />';
-                        //etc.get('#info').innerHTML += str;
-
-
-                        //now get the current fullscreen state, then call the
-                        //enter or exit fullscreen function to do the opposite
-                        //however the screenchange event will fire for every player
-                        //that has fullscreen, so we need to use the screenplayer flag
-                        //which ensures that the event only responds to this player
+                        //now get the current fullscreen state, then if we're in fullscreen
+                        //nb. the screenchange event will fire for every player on the page
+                        //that supports fullscreen, so we need to use the screenplayer flag
+                        //to ensures that the event only responds to this player instance
                         //and that another player can't enter fullscreen in the meantime
                         //(ie. triggered from another player while this one is in fullscreen mode)
                         //nb. if we try to enter fullscreen mode when user permissions have already blocked it
@@ -8391,19 +7989,10 @@ var OzPlayer = (function()
                             {
                                 //then exit fullscreen
                                 library.leaveFullscreen(player.video, player.controlform.fullscreen.screentype);
-
-
-
-                                //*** DEV TMP ZOOM
-                                //if(player.rescale)
-                                //{
-                                //    player.rescale.silence();
-                                //
-                                //    player.container.style.webkitTransform = 'none';
-                                //    player.container.style.webkitTransformOrigin = '0 0';
-                                //}
                             }
                         }
+
+                        //[else if we're not already in fullscreen]
                         else
                         {
                             //check that we don't already have a fullscreen-player reference
@@ -8475,6 +8064,21 @@ var OzPlayer = (function()
                                 //});
 
 
+                                //record the wrapper dimensions before entering fullscreen
+                                //saving them as properties of the button for convenience
+                                //nb. we used to do this in the screenchange expand event
+                                //but since ME4 that no longer returns the correct values
+                                //neither the default size nor the final fullscreen size
+                                //which means that the video doesn't expand to the correct size
+                                //(it's slighty smaller than the screen size) and then retains
+                                //that slightly-smaller large size when exiting fullscreen again
+                                //I guess it's getting called during the screentype event itself
+                                //like mid-way through the the fullscreen element being resized
+                                //or something, I dunno, but whatever, if we record the
+                                //dimensions before that happens then we get the right values
+                                button = player.controlform.fullscreen;
+                                button.videowidth = player.wrapper.offsetWidth;
+                                button.videoheight = player.wrapper.offsetHeight;
 
                                 //then enter fullscreen
                                 library.enterFullscreen(player.video, player.container, player.controlform.fullscreen.screentype);
@@ -8493,23 +8097,13 @@ var OzPlayer = (function()
             );
 
             //in iOS the fullscreen function doesn't work until the video plays
-            //and while it does work in Android stock it causes strange problems:
-            //if you enter fullscreen before playing, then exit again, the video starts to
-            //play automatically AS AN EXTERNAL PROCESS, ie. the interface isn't updated,
-            //the buttons can't control it, and even refreshing the page doesn't stop it!
-            //the only way to stop it from playing is to quit the browser altogether
-            //* however the same thing still happens in android stock if you manage to touch
-            //* the native controls fullscreen button before the player has initialized
-            //* and I don't see how we can prevent that without removing static controls
-            if(defs.agent.ios || defs.agent.android)
+            if(defs.agent.ios)
             {
                 //so disable the button by default
                 updateControlDisabled(player, 'fullscreen', true);
 
                 //then bind a play event, with which we can re-enable it
                 //and then we can silence the event since we won't need it again
-                //nb. in iOS we can use "canplay" but that fires too soon in Android
-                //however the first "play" event is soon enough to handle both cases
                 var screenbutton = etc.listen(player.video, 'play', function()
                 {
                     screenbutton.silence();
@@ -8530,12 +8124,6 @@ var OzPlayer = (function()
             //have video events that fire when the video enters and exits fullscreen
             //so we can use those to maintain the screenplayer reference,
             //and to toggle the appearance of native captions, if supported
-            //* we might also be able to use it to handle android's exit behavior
-            //* ie. if the video is paused while in fullscreen, then exits and starts to play
-            //* maybe if we check the video paused state in the exit event, we can detect that
-            //* although what we do then? we can't just update the play button, because subsequently
-            //* pressing it again won't pause the video, it will carry on playing it
-            //* and i'm not sure we should prevent the auto-play even if we could (could we?)
             else if(screentype == 'webkit-video')
             {
                 //we may need to create a temporary textTracks change event when entering fullscreen
@@ -8563,19 +8151,8 @@ var OzPlayer = (function()
                     //(though the webkit-video model itself doesn't allow for fullscreen to be blocked)
                     screenpermission = true;
 
-                    //*** DEV TMP
-                    //etc.get('#info').innerHTML = ('videoscreen[screenpermission=true](' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
-
-                    //*** DEV TMP
-                    //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-                    //str += '<br />';
-                    //etc.get('#info').innerHTML += str;
-
-
-                    //set the screenplayer reference here, even though our button will do that
-                    //for extra safety, just in case fullscreen was triggered externally
+                    //set the screenplayer reference here, for extra safety even though
+                    //our button will do that, just in case fullscreen was triggered externally
                     //nb. although we don't actually need this reference for the video model
                     //we do compare it with null to determine whether to enter fullscreen
                     //so we may as well update it the same as others, for internal consistency
@@ -8600,7 +8177,7 @@ var OzPlayer = (function()
                         //** but if not that, how can we be sure in advance that entering fullscreen will actually happen?
                         //nnb. although it still doesn't update the native language menu selection,
                         //it does update the actual displayed captions, so that's good enough;
-                        //the native language menu is generally  kinda flaky in iOS7-9, eg. switching
+                        //the native language menu is generally kinda flaky in iOS7-9, eg. switching
                         //languages doesn't always work unless you select a different language first
                         //(or off) then the one you want; but there isn't anything we can do to fix that
                         etc.delay(function()
@@ -8679,41 +8256,15 @@ var OzPlayer = (function()
                             });
                         });
                     }
-
-
-                    //*** DEV TMP
-                    //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-                    //str += '\tenabled = ' + (player.tracks.captions ? player.tracks.captions.enabled : null);
-                    //str += '<br />';
-                    //etc.get('#info').innerHTML += str;
                 });
 
                 //when the video exits fullscreen mode
                 //nb. in iOS<8 the video automatically pauses when jumping out of fullscreen
                 //whereas Android 4 automatically plays when jumping in or out of fullscreen
-                //** and on my android tablet the fullscreen controls are sometimes unresponsiv
-                //** while the play that occurs when jumping out of fullscreen when currently paused
-                //** may not update the custom controls or video picture for several seconds, or at all
-                //** (eg. the video picture and controls indicate that the video is paused,
-                //**  although the captions still update and the audio continues to play, then if
-                //**  you touch the video then everything updates, as though rendering were unfreezing)
-                //** although all of that might just be the sluggishness of my particular device
                 etc.listen(player.video, 'webkitendfullscreen', function(e)
                 {
                     //reset the screen permissions flag
                     screenpermission = false;
-
-                    //*** DEV TMP
-                    //etc.get('#info').innerHTML = ('videoscreen[screenpermission=false](' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
-
-                    //*** DEV TMP
-                    //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-                    //str += '<br />';
-                    //etc.get('#info').innerHTML += str;
-
 
                     //reset the screenplayer reference to null
                     //nb. if we didn't do this then it wouldn't be possible
@@ -8724,28 +8275,35 @@ var OzPlayer = (function()
 
                     //then if we have captions data and native captions are supported,
                     //reset any native track modes to back to "disabled" to hide them
+                    //(but only for ipad, so that iphone still shows playsinline captions)
                     //and stop monitoring for changes in native language selection
+                    //(including iphone because playsinline has no language selection menu)
+                    //*** check updated iOS for this, or maybe just make ontrackchange permanent for future proofing
                     if(player.tracks.captions && etc.def(player.video.textTracks))
                     {
                         //silence the textTracks change event
                         ontrackchange.silence();
 
-                        //set all the native textTrack mode flags in every instance to "disabled"
-                        //nb. logically we should only have to do this for the current player instance
-                        //however for some reason, enabling captions or switching language using the
-                        //native menu in iOS fullscreen causes native captions to become enabled
-                        //in all other instances as well (when multiple instances have captions),
-                        //resulting in other instances showing both custom and native captions in non-fullscreen
-                        etc.each(players, function(thetarget)
+                        //for ipad only
+                        if(!defs.agent.iphone)
                         {
-                            if(thetarget.tracks.captions && etc.def(thetarget.video.textTracks))
+                            //set all the native textTrack mode flags in every instance to "disabled"
+                            //nb. logically we should only have to do this for the current player instance
+                            //however for some reason, enabling captions or switching language using the
+                            //native menu in iOS fullscreen causes native captions to become enabled
+                            //in all other instances as well (when multiple instances have captions),
+                            //resulting in other instances showing both custom and native captions in non-fullscreen
+                            etc.each(players, function(thetarget)
                             {
-                                etc.each(thetarget.video.textTracks, function(track)
+                                if(thetarget.tracks.captions && etc.def(thetarget.video.textTracks))
                                 {
-                                    track.mode = 'disabled';
-                                });
-                            }
-                        });
+                                    etc.each(thetarget.video.textTracks, function(track)
+                                    {
+                                        track.mode = 'disabled';
+                                    });
+                                }
+                            });
+                        }
                     }
 
                     //if the responsive layout is enabled
@@ -8760,26 +8318,8 @@ var OzPlayer = (function()
                         //then call the responsive handler for consistency and safety
                         doResponsiveEvent(player, 'videoexit');
                     }
-
-                    //*** DEV TMP
-                    //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                    //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-                    //str += '\tenabled = ' + (player.tracks.captions ? player.tracks.captions.enabled : null);
-                    //str += '<br />';
-                    //etc.get('#info').innerHTML += str;
                 });
             }
-
-
-            //*** DEV TMP
-            //var e = { type : 'add-button' };
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-            //str += '\tfull = '+library.isFullscreen(player.video, player.controlform.fullscreen.screentype);
-            //str += '\tenabled = ' + (player.tracks.captions ? player.tracks.captions.enabled : null);
-            //str += '\tscreentype = ' + screentype;
-            //str += '<br />';
-            //etc.get('#info').innerHTML += str;
-
 
             //then add it to the lastChild buttonkeys
             player.buttonkeys.lastChild.push('fullscreen');
@@ -8790,7 +8330,7 @@ var OzPlayer = (function()
         //(ie. right-most) field, which can be used to apply style variations
         //=> the fullscreen control is last, if it's present
         //=> otherwise volume is last, unless that's not there either
-        //=> otherwise it goes: ad, cc, seek (in that order)
+        //=> otherwise it goes: ad, cc, seek (right to left, in that order)
         //nb. the addClass opening bracket must be on the same line for function name compression
         etc.addClass(
             (
@@ -8811,63 +8351,103 @@ var OzPlayer = (function()
         etc.addClass(player.controlform.playpause.parentNode, config.classes['first-field-wrapper']);
 
 
-        //and now that we've created and added all the controls we need
+        //and now that we've created and added all the controls
         //apply dynamic widths to the seek and volume field wrappers,
         //so they proportionately take up all the remaining space
         updateSliderStretch(player);
 
 
-        //then once we've done that we can create the custom sliders
-        //so first create the seek input, which is a "time" type slider
-        //(ie. aria-valuetext and tooltip show the value converted to "mm:ss")
-        //nb. the slider must have an ID for ARIA assignments, which is
-        //why addMediaSlider requires an ID not an object reference
-        addMediaSlider(player.controlform.seek, 'time');
-
-
-        //now pause for more than long enough that applyImageSupport to have finished
-        //before we can proceed to check whether a high-contrast theme is in use
-        //nb. in some cases (eg. the high-contrast theme in windows) the normal
-        //image test will still indicate that images are enabled, whereas in other
-        //cases (eg. disabling site colors in firefox) they'll already show as disabled
-        //so we do this in either case to cater for every possible permutation, but we
-        //use the same styles as the no-images layout so we don't have to differentiate
-        //nb. the background-image testing approach no longer works in MS Edge because
-        //background images are still displayed, but we can media match "(-ms-high-contrast)"
-        etc.delay(500, function()
+        /*** DEV TMP (buttonkeyclick) ***//***
+        player.konsole = etc.build('code',
         {
-            //so check the computed background-image of the playpause button
-            //(which we use because it will always be present irrespective of settings)
-            //and if that returns "none" then either images are already disabled
-            //or a high-contrast them has removed them (which is what they generally do)
-            //alternatively if matchMedia is supported and matches "(-ms-high-contrast)"
-            //then we're using a high-contrast theme in Edge on Windows 10
-            if
-            (
-                (
-                    etc.def(window.matchMedia)
-                    &&
-                    window.matchMedia('(-ms-high-contrast)').matches
-                )
-                ||
-                etc.getStyle(player.controlform.playpause, 'backgroundImage') == 'none'
-            )
+            '=after' : player.poster,
+            '#style' :
             {
-                //set the images flag and add the no-images class
-                player.images = false;
-                etc.addClass(player.container, config.classes['no-images']);
-
-                //udpate the sliders' dynamic widths with the new stable button sizes
-                updateSliderStretch(player);
-
-                //then if we have the logo-bug, negate its backgroundImage
-                if(player.logo)
-                {
-                    player.logo.style.backgroundImage = 'none';
-                }
+                'zIndex' : 4000,
+                'display' : 'block',
+                'position' : 'absolute',
+                'left' : '40px',
+                'top' : '40px',
+                'border' : '2px solid white',
+                'background' : '#003',
+                'fontSize' : '11px',
+                'width' : '500px',
+                'height' : '250px',
+                'overflow' : 'auto'
             }
         });
+        function zeropad(n, length)
+        {
+            while((n = n.toString()).length < (length || 2))
+            {
+                n = '0' + n;
+            }
+            return n;
+        }
+        ***/
+        /***
+        etc.listen(player.container, 'keydown', function(e, thetarget)
+        {
+            player.konsole.innerHTML = 'KEYDOWN [' + zeropad(new Date().getMilliseconds(), 3) + '] ' + thetarget + '<br>' + player.konsole.innerHTML;
+        });
+        etc.listen(player.container, 'click', function(e, thetarget)
+        {
+            player.konsole.innerHTML = 'CLICK   [' + zeropad(new Date().getMilliseconds(), 3) + '] ' + thetarget + '<br>' + player.konsole.innerHTML;
+        });
+        ***/
 
+
+        //define a flag for whether we're in windows high contrast, false by default
+        player.whc = false;
+
+        //now create and append an empty element with a specific background color (hot pink)
+        //then read its computed backgroundColor and confirm that its rgb() matches
+        //if it doesn't, then author colors have been overriden, and the most likely
+        //reason for that is that a windows high contrast theme is in use; although
+        //there might be another reason, such as user styling, which will then be
+        //treated as high contrast, but I think that's probably a good thing anyway
+        //nb. this will fail if the hc theme uses this exact shade of pink, but I mean, really?
+        //just to be easily-cautious though, the color is slightly different from html "hotpink"
+        //nb. this doesn't detect inverted/grayscale themes in Mac OS or Android, because they
+        //don't actually change rendered colors, they just apply a filter to the overall display
+        //but we don't need to cater for them anyway since they still display images
+        //nb. this doesn't work in windows/chrome because it doesn't actually implement
+        //windows hc themes, but then hc users won't be using chrome anyway, because of that
+        var whc = etc.build('span',
+        {
+            '=parent' : player.container,
+            '#style'  : { 'backgroundColor' : 'rgb(250,\ 100,\ 180)' }
+        });
+        if(etc.getStyle(whc, 'backgroundColor') != 'rgb(250,\ 100,\ 180)')
+        {
+            //set the whc flag
+            player.whc = true;
+
+            //set the images flag and add the no-images class
+            player.images = false;
+            etc.addClass(player.container, config.classes['no-images']);
+
+            //udpate the slider wrappers with the new stable button sizes
+            updateSliderStretch(player);
+
+            //then if we have the logo-bug, negate its backgroundImage
+            //which we have to do because Edge still displays background images
+            //and then we'd get the image plus the alt text displayed on top of it
+            //also Firefox displays data URIs even if images are explicitly blocked
+            //nb. most browsers still display the poster too, but I think that's okay
+            //I mean they still display the video and it's part of the video, so
+            if(player.logo)
+            {
+                player.logo.style.backgroundImage = 'none';
+            }
+        }
+
+        //either way, remove the test element
+        player.container.removeChild(whc);
+
+        //*** DEV TMP
+        //console.warn('player.whc');
+        //console.log(player.whc);
 
 
         //*** DEV TMP
@@ -8881,6 +8461,13 @@ var OzPlayer = (function()
         //    });
         //});
 
+
+        //once we've done all that we can create the custom sliders
+        //so first create the seek input, which is a "time" type slider
+        //(ie. aria-valuetext and tooltip show the value converted to "mm:ss")
+        //nb. the slider must have an ID for ARIA assignments, which is
+        //why addMediaSlider requires an ID not an object reference
+        addMediaSlider(player.controlform.seek, 'time');
 
         //now bind a slider seek index event, which fires whenever it's
         //updated by interaction on the slider or it's underlying input
@@ -8897,12 +8484,6 @@ var OzPlayer = (function()
             //slider when refreshing its data with the media duration
             if(data.from == data.to) { return; }
 
-            //*** DEV TMP
-            //var e = { type : 'seek-index' };
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-            //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'theslider = ' + data.theslider.id.split('-').pop() + '\tto = ' + data.to + '\tfrom = ' + data.from;str+='<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
             //nb. we were getting an occassional INVALID_STATE_ERR
             //when playing the video for the first time, but it didn't
             //make any difference to anything, so just silently handle it
@@ -8916,7 +8497,10 @@ var OzPlayer = (function()
                 }
 
                 //also remove the video's poster attribute if it has one
-                player.video.removeAttribute('poster');
+                if(player.video.getAttribute('poster'))
+                {
+                    player.video.removeAttribute('poster');
+                }
 
                 //if the selected index is the highest slider index
                 if(data.to == data.theslider.options.length - 1)
@@ -8928,7 +8512,7 @@ var OzPlayer = (function()
                     setMediaTime(player, player.media.duration);
 
                     //pause the media
-                    pauseMedia(player);
+                    pauseMedia(player, true);
 
                     //hide the loading indicator jic
                     hideIndicator(player);
@@ -8942,12 +8526,6 @@ var OzPlayer = (function()
                     //using this interface then play from the native interface
                     //but that doesn't really matter since it's an unlikely combination
                     player.ended = true;
-
-                    //*** DEV TMP
-                    //var e = { type : 'seek-reset' };
-                    //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-                    //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'paused = ' + player.media.paused+'\tended = ' + player.ended;str+='<br />';
-                    //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
                 }
 
                 //otherwise
@@ -8987,7 +8565,6 @@ var OzPlayer = (function()
                     player.controlform.seek.unseeking = nullifyTimer(player.controlform.seek.unseeking);
 
                 });
-
             }
             catch(ex){}
         });
@@ -9003,20 +8580,13 @@ var OzPlayer = (function()
             //now bind a slider volume index event
             addMediaSliderEvent(player.controlform.volume, 'index', function(data)
             {
-                //*** DEV TMP
-                //if(!player.fakevolume){var e = { type : 'volume-index' };
-                //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-                //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'theslider = ' + data.theslider.id.split('-').pop() + '\tto = ' + data.to + '\tfrom = ' + data.from;str+='<br />';
-                //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;}
-
                 //pass the data.from and data.to values to the update volume abstraction
                 //converting them from integer indices to the float from 0 to 1 we need
                 //and passing false for the slider argument so we don't get a circular update
                 updateVolume(player, data.from / 10, data.to / 10, false);
             });
 
-
-            //then if we're using the youtube player, disable the volume and mute controls
+            //then if we're using a third-party player, disable the volume and mute controls
             //and also the volume slider and thumb (including applicable disabled classes)
             //so that you can't change it until the default volume has been set
             //and remove the mute button's aria-label as it won't get enabled again
@@ -9024,7 +8594,7 @@ var OzPlayer = (function()
             //nb. this also stops displacement that happens in safari, whereby
             //if you click to the left of the thumb while the player is still connecting,
             //then the entire controls fieldset jumps a few pixels to the left!
-            if(player.mode == 'youtube')
+            if(library.isThirdPartyMedia(player.mode))
             {
                 etc.each(['mute','volume'], function(key)
                 {
@@ -9046,52 +8616,23 @@ var OzPlayer = (function()
         }
 
 
-        /*** DEV TMP ***//*
-        //etc.each(['mousedown','mouseup','keydown','keyup','focus','DOMFocusIn','blur','DOMFocusOut'], function(type)
-        etc.each(['DOMFocusIn','DOMFocusOut'], function(type)
-        {
-            //etc.listen(player.container, type, function(e, thetarget)
-            etc.listen(document, type, function(e, thetarget)
-            {
-                var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-                //str += '\tkeyCode = '+(e.keyCode||'-')
-                str += '\tcontains = ' + (thetarget && etc.contains(player.container, thetarget) ? true : false);
-                str += ' \ttarget = '+(thetarget?((thetarget.name?thetarget.name:thetarget.id?('#'+thetarget.id):thetarget.className?('.'+thetarget.className):thetarget.nodeName)):null);
-
-                //str += '<br />';
-                //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-                console.log(str);
-
-            });
-        }); */
-
-
-        //*** DEV TMP (speed up playback)
-        //player.video.playbackRate = 2;
-        //if(player.audiodesk)
-        //{
-        //    player.audio.playbackRate = 2;
-        //}
-
-
-        //if the player offset width is already less than the smallscreen threshold
+        //if the player offset width is already less than the smallscreen or midscreen threshold
         //(or the control form width if this is the audio-only player)
-        //nb. now that we have the layout variations we need to handle smallscreen
+        //nb. now that we have the layout variations we need to handle smaller screens
         //we can do so by default even if we don't have a responsive container
         //nb. we need the wrapper offset width so it doesn't include the player borders
         //which gives us the same width value as was defined in the video width attribute
         //** what about the default width and height we sent to mediaelement for flash?
         //** it doesn't seem to matter now, but when we implement ways around the
         //** flash-of-too-large problem, that may well be one of the things we need to change
-        if((player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth) < config['default-width'])
+        var offsetWidth = player.isaudio ? player.controlform.offsetWidth : player.wrapper.offsetWidth;
+        if(offsetWidth < config['midscreen-threshold'])
         {
             //*** DEV TMP
             //_.title = player.wrapper.nodeName + ' [!] ' + player.wrapper.offsetWidth;
 
-            //add the smallscreen class to the player container
-            //which will hide the links and logo
-            etc.addClass(player.container, config.classes['smallscreen']);
+            //add the smallscreen or midscreen class to the player container
+            etc.addClass(player.container, offsetWidth < config['smallscreen-threshold'] ? config.classes['smallscreen'] : config.classes['midscreen']);
 
             //then update the slider stretch to compensate for the hidden controls
             updateSliderStretch(player);
@@ -9127,12 +8668,6 @@ var OzPlayer = (function()
 
             //*** DEV TMP
             //_.title = player.wrapper.nodeName + ' [=] ' + player.responsivedata.playerwidth;
-
-            //*** DEV TMP
-            //etc.get('#info').innerHTML = ('<br>'
-            //    + 'default width  = ' + player.responsivedata.playerwidth + '<br>'
-            //    + 'default aspect = ' + player.responsivedata.playeraspect + '<br>'
-            //    + '');
 
             //now bind the primary event we need to maintain responsive size
             //and save its reference to the responsivedata object so we can
@@ -9212,9 +8747,10 @@ var OzPlayer = (function()
             node.controlform = player.controlform;
 
             //then since the tooltips don't work in touch devices
-            //we can save them some work by excluding ios, android and windows phone
+            //we can save them some work by excluding ios and android
+            //*** what about ios or android with a bluetooth keyboard
             //nb. but we still need the circular references
-            if(defs.agent.ios || defs.agent.android || defs.agent.winphone) { return true; }
+            if(defs.agent.ios || defs.agent.android) { return true; }
 
             //apply a button mouseover event to conditionally create and
             //show the tooltip, which we do for buttons even if it's disabled
@@ -9427,8 +8963,6 @@ var OzPlayer = (function()
         //because that would just be the video, it wouldn't include custom captions and controls
         //nb. if you double-click the poster then firefox and chrome will start the video
         //and jump into fullscreen mode, but safari doesn't respond fast enough
-        //nb. event blocking doesn't work for the youtube flash player, and consequently
-        //dblclick still triggers flash-only fullscreen with flash controls and no captions
         etc.listen(player.video, 'dblclick', function(e)
         {
             if(screentype !== null)
@@ -9446,16 +8980,10 @@ var OzPlayer = (function()
         //in case the media is played from external events, eg. native controls
         //nb. but we can't use this event alone because the play event
         //doesn't fire until enough data has loaded to start playing
-        //nb. in Windows Phone 8 pressing play always restarts playback from the beginning
         etc.listen(player.media, 'play', function(e)
         {
-            //*** DEV TMP
-            //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'paused = ' + player.media.paused;str += '\tfakepaused = ' + player.fakepaused;str += '\tstarted = ' + player.started;str += '\tended = ' + player.ended;str += '\t[ general play handler ]';str += '<br />'; etc.get('#info').innerHTML = str+etc.get('#info').innerHTML;}
-
             /*** DEV TMP COMMENTED OUT ***//***
-
             ***/
-
             //if we still have native controls (eg. on iOS) then remove them now
             //otherwise they'll appear whenever the focus is inside the player
             //(and on the ipad you'd see a little glow of them under the stack!)
@@ -9466,8 +8994,12 @@ var OzPlayer = (function()
             //so if we hid the controls, then exiting fullscreen would just show the
             //video frame with no controls, making it impossible to play or pause again
             //(which happens either from that icon or just from pressing "done")
-            //there's no conflict with native controls because they're hidden from iphone
-            //(which is better since they'd be really tiny on an iphone in portrait)
+            //and anyway we supports playsinline now so we need the native controls
+            //because our custom controls are way too tiny to use on an iphone
+            //or if we use large-controls then they'd take up way too much space
+            //can't fucking win either way really, but that's because our controls
+            //are bulkier and more visible in order to be more widely accessible
+            //we could potentially design different controls for the iphone, but ...
             if(player.controlform && !defs.agent.iphone)
             {
                 player.video.removeAttribute('controls');
@@ -9516,16 +9048,34 @@ var OzPlayer = (function()
             }
         });
 
+        //for the ipad, shore that up with a playing event
+        //since we don't always get a play event on initial playback
+        //(we used to, this must be related to the ME4 update)
+        //and that would mean that the native controls are still present
+        //and our custom play button hasn't updated its state
+        if(defs.agent.ios && !defs.agent.iphone)
+        {
+            etc.listen(player.media, 'playing', function(e)
+            {
+                //if we still have native controls then remove them now
+                //nb. it's possible we'll see the empty strip which used
+                //to contain the native controls until they were removed
+                //but that will disappear on its first inactivity fade
+                //and won't ever appear again, so let's not worry about that
+                //(and there's nothing we can do about it anyway, so whatevs)
+                if(player.controlform)
+                {
+                    player.video.removeAttribute('controls');
+                }
+
+                //update the button state
+                updateControlState(player, 'playpause', 'on');
+            });
+        }
+
         //do an equivalent thing for the pause event
         etc.listen(player.media, 'pause', function(e)
         {
-            //*** DEV TMP
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (16 - e.type.length); n ++) { str += ' '; }
-            //str += 'Mp = ' + player.media.paused;
-            //str += ' \tfake = ' + player.fakepaused;
-            //str += '<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
             //update the button state
             updateControlState(player, 'playpause', 'off');
 
@@ -9573,10 +9123,7 @@ var OzPlayer = (function()
             player.ended = true;
 
             //pause the media
-            pauseMedia(player);
-
-            //*** DEV TMP
-            //etc.get('#info').innerHTML = '['+new Date().getMilliseconds()+'] (-F)<br />' + etc.get('#info').innerHTML;
+            pauseMedia(player, true);
 
             //hide the loading indicator jic
             hideIndicator(player);
@@ -9658,21 +9205,15 @@ var OzPlayer = (function()
         //setting the initial default volume usually fails in the youtube player,
         //so we have to do it again when canplay fires, at which point it's fine
         //however canplay doesn't fire with youtube in IE11, so we back it up with play
-        //** does the fact that we're using native youtube now change the need for any of this?
+        //these events also enable the third-party volume slider that was disabled by default
         //nb. we don't get canplay in iOS, but it doesn't support player volume anyway
         //(and maybe there's an inherent correlation between those differences)
-        if(player.mode == 'youtube')
+        if(library.isThirdPartyMedia(player.mode))
         {
             //so, we'll create an abstraction for what happens when it fires
             //then bind both events to that, and whichever one fires first will cancel them both
             var youtubecanplay, youtubeisplaying, youtubevolume = function(e)
             {
-                //*** DEV TMP
-                //if(!e) { e = { type : 'xcanplay' }; }
-                //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-                //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'volume = ' + player.media.volume + '\tmuted = ' + player.media.muted;str+='<br />';
-                //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
                 //silence both events so this doesn't happen again
                 youtubecanplay.silence();
                 youtubeisplaying.silence();
@@ -9732,33 +9273,15 @@ var OzPlayer = (function()
 
         //also bind an error event listener, which will fire soon after you press play
         //if the media sources failed to load (eg. because of 404s), so if that happens
-        //nb. we still need the player timeout because we don't get this event in the flash player
         player.erroneous = etc.listen(player.media, 'error', function(e)
         {
             //*** DEV TMP
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'time = ('+player.media.currentTime.toFixed(2)+')';str += '\tduration = ('+(isNaN(player.media.duration)?'NaN':player.media.duration.toFixed(2))+')';str += '<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
+            //console.warn('media error');
+            //console.log(e);
 
-            //in chrome, opera and firefox this error event is generated
-            //if the poster SRC is broken, whereas other browsers don't do that
-            //but we need to handle that differently since it doesn't prevent
-            //the video and audio from playing, only the poster from showing;
-            //however there's no explicit way of differentiating the errors,
-            //but I did discover minor differences in the returned event data:
-            //in chrome and opera e.cancelable is true for a video error
-            //but false for a poster error; it's false for both cases in firefox
-            //but e.originalTarget points to no element for the poster error;
-            //so we can use those inferences to prevent media abort in that case
-            if
-            (!(
-                (defs.agent.chrome && e.cancelable === false)
-                ||
-                (defs.agent.firefox && e.originalTarget !== player.video)
-            ))
-            {
-                //abort media playback and progress monitoring and show the timeout indicator
-                abortMedia(player);
-            }
+            //abort media playback and progress monitoring and show the timeout indicator
+            //passing the false flag because we don't need to explicitly pause the media
+            abortMedia(player, false);
         });
 
 
@@ -9773,13 +9296,6 @@ var OzPlayer = (function()
         {
             //get the media's currentTime quantized to the seek slider's timestep
             var time = Math.floor(player.media.currentTime / player.controlform.seek.timestep);
-
-            //*** DEV TMP
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-            //str += 'time = ('+time.toFixed(2)+')';
-            //str += '\tseeking = '+(player.controlform?player.controlform.seek.seeking:'-');
-            //str += '<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
 
             //*** DEV TMP
             //_.title = '['+player.media.currentTime.toFixed(2)+'] = ' + (time * player.controlform.seek.timestep);
@@ -9805,38 +9321,25 @@ var OzPlayer = (function()
             }
 
 
-            //if we have any captions, and this is not the iphone or windows phone
-            //nb. don't bother showing custom captions for the iphone and windows phone,
-            //since you never get to see them anyway while it's in the external player
-            //so it would be inefficient to update them in the background
-            //however that's not the case for iOS10 which can now continue playback
-            //after exiting fullscreen, so in that case do show the captions as usuall
-            //nb. on the iphone if you pause while in fullscreen mode
-            //and then exit, the placeholder video element will show the
-            //current caption, if there is one, so this also prevents that
-            //it also means that the transcript highlight won't be applied
-            //but likewise the only time you see that is if you exit fullscreen
-            //while the video is paused, so there's no benefit to having it
-            //compared with a real efficiency saving from excluding it
-            if
-            (
-                player.tracks.captions
-                &&
-                (
-                    !defs.agent.iphone
-                    ||
-                    defs.agent.iphone10p
-                )
-                &&
-                !defs.agent.winphone
-            )
+            //if we have any captions
+            if(player.tracks.captions)
             {
                 //*** DEV TMP
                 //_.title = '['+library.getTimeStamp(player.media.currentTime)+'] => [data-cue="'+player.captions.getAttribute('data-cue')+'"]';
 
-                //if captions are enabled and the caption-selected track's
-                //readyState is 4 (which means they've been loaded and parsed)
-                if(player.tracks.captions.enabled && player.tracks.captions[player.tracks.captions.selected.captions].readyState == 4)
+                //if this is not an iphone captions are enabled and the caption-selected
+                //track's readyState is 4 (which means they've been loaded and parsed)
+                //nb. custom captions aren't shown on the iphone because they
+                //can't be controlled without the custom interface, so it always
+                //shows native <track> captions for playsinline or full-screen
+                if
+                (
+                    !defs.agent.iphone
+                    &&
+                    player.tracks.captions.enabled
+                    &&
+                    player.tracks.captions[player.tracks.captions.selected.captions].readyState == 4
+                )
                 {
                     //update the captions container to match the currentTime
                     //either adding or replacing the cue that corresponds with the time
@@ -9853,7 +9356,13 @@ var OzPlayer = (function()
                 }
 
                 //if we have a transcript and the transcript-selected track's readyState is 4
-                if(player.transcript && player.tracks.captions[player.tracks.captions.selected.transcript].readyState == 4)
+                //nb. we still do this for iphone so you can see it with playsinline
+                if
+                (
+                    player.transcript
+                    &&
+                    player.tracks.captions[player.tracks.captions.selected.transcript].readyState == 4
+                )
                 {
                     //update the transcript cue markers to match the currentTime, either
                     //adding or replacing the markers for the cue that corrresponds with the time
@@ -9973,7 +9482,7 @@ var OzPlayer = (function()
                     updateControlDisabled(player, 'playpause', false);
                 }
 
-                //then if the instance mode is "youtube" set focus on the playpause button
+                //then if this is a third-party player set focus on the playpause button
                 //which we do to avoid a keyboard trap when the plugin object is an iframe,
                 //ie. clicking the youtube play icon sets focus in the iframe document
                 //and you can't tab to escape, you have to click outside it again
@@ -9984,7 +9493,7 @@ var OzPlayer = (function()
                 //** moving the focus back on response to video events, that solution would be
                 //** worse than the original problem, so how can we detect it happening?
                 //** maybe some kind of generic "focus has left this document"?
-                if(player.mode == 'youtube')
+                if(library.isThirdPartyMedia(player.mode))
                 {
                     player.controlform.playpause.focus();
                 }
@@ -9995,59 +9504,6 @@ var OzPlayer = (function()
             }
 
         }, false);
-
-        //however the flash player doens't generate error events for failed loading
-        //so we need to monitor the initial load events to timeout if required
-        if(player.mode == 'flash')
-        {
-            //bind a loadstart event which fires when the flash player first attempts loading
-            etc.listen(player.media, 'loadstart', function(e)
-            {
-                //start the timeout timer at the config specified speed
-                player.timeout = etc.delay(config['progress-timeout'] * 1000, function()
-                {
-                    //if the timer completes, abort loading and playback
-                    abortMedia(player);
-
-                    /*** DEV LOG (video timeout) ***//*
-                    if($this.logs.video)
-                    {
-                        videolog([
-                            ['TIMEOUT', 18],
-                            [(etc.def(player.media.readyState) ? player.media.readyState : '?') + '/' + (etc.def(player.media.networkState) ? player.media.networkState : '?'), 7],
-                            [player.media.duration, 10],
-                            [player.media.currentTime, 0]
-                            ],
-                            ['<b><b>','</b></b>']);
-                    } */
-                });
-
-                /*** DEV LOG (video timeout) ***//*
-                if($this.logs.video)
-                {
-                    videolog([['TIMEOUT', 18],['',26],['WAIT', 0]],['<dfn>','</dfn>']);
-                } */
-
-                //but if we get a canplay event then we can reset the timer
-                var timeoutcanplay = etc.listen(player.media, 'canplay', function(e)
-                {
-                    //silence this event since we only need it once
-                    timeoutcanplay.silence();
-
-                    //then if the timeout is still running, reset it now
-                    if(player.timeout)
-                    {
-                        player.timeout = nullifyTimer(player.timeout);
-                    }
-
-                    /*** DEV LOG (video timeout) ***//*
-                    if($this.logs.video)
-                    {
-                        videolog([['TIMEOUT', 18],['',26],['GOOD', 0]],['<dfn>','</dfn>']);
-                    } */
-                });
-            });
-        }
 
         //bind a set of monitoring events to update the buffer info
         //and initialise the seek slider once the video duration is known
@@ -10067,10 +9523,6 @@ var OzPlayer = (function()
             {
                 //*** DEV TMP
                 //return;
-
-                //*** DEV TMP
-                //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += e.type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'time = ('+player.media.currentTime.toFixed(2)+')';str += '\tduration = ('+(isNaN(player.media.duration)?'NaN':player.media.duration.toFixed(2))+')';str += '<br />';
-                //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
 
                 //as soon as the video duration is available
                 //nb. native video returns NaN until the duration is
@@ -10112,9 +9564,6 @@ var OzPlayer = (function()
                     {
                         refreshSeekData(player);
                     }
-
-                    //*** DEV TMP
-                    //if(etc.get('#info')&&!etc.get('#info').silence){var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += 'duration = ' + player.media.duration.toFixed(2);str += '\tmaxres = ' + config['seek-resolution'];str += '\tstep = ' + step;str += '\tpoints = ' + Math.floor(player.media.duration / step);str += '<br />                ';str += player.controlform.seek.outerHTML.replace(/</g,'&lt;').replace(/>/g,'&gt;');str += '<br />';etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;etc.get('#info').silence = true;}
                 }
 
 
@@ -10304,7 +9753,7 @@ var OzPlayer = (function()
         //however we can monitor other media events to know when to show the loading
         //spinner, by checking whether current time is inside a loaded time range
         //but we do this for all, not just for flash, because it allows for browser quirks
-        //such as native implementations that don't fire enough waiting/canplay events (eg. IE9-11 and Edge)
+        //such as native implementations that don't fire enough waiting/canplay events (eg. IE11 and Edge)
         //and for low-bandwidth situations where the video might freeze while loading data
         //even though checking the buffer shows that the time is inside a loaded range
         //and there are two different ways a browser might respond: either continuing to fire
@@ -10321,9 +9770,6 @@ var OzPlayer = (function()
         //=> ipad safari just pauses if it doesn't have enough bandwidth! and I don't think there's
         //   anything I can do to fix that, but the rest of the time it seems better with progress
         //   though since ios doesn't have audio descriptions its loading indication isn't as important
-        //   however all browsers need it with youtube because it doesn't fire reliable progress events
-        //   but youtube doesn't have the same freeze problem as we get with standard native video
-        //   because it manages most of the buffering and bandwidth negotiation within the api itself
         //however, we can't rely on progress events in native/firefox < 35 because the timerange data
         //they provide is often badly wrong, eg. in Firefox 10 the first time range could be
         //something like [18446744073.71,0.3] while in Firefox 34 it could be [-3000,-2999.53]
@@ -10339,16 +9785,18 @@ var OzPlayer = (function()
         //canplay/waiting events either, so we just have to make do without the custom loading indicator
         //and rely on the fact that youtube's API provides its own loading indication when necessary
         //(which means we still won't get accurate loading information in the player interface)
+        //nb. there's no point doing this for third-party media sources like youtube or facebook
+        //since they manage buffering in their API and have their own indicators for that anyway
         //nb. in android 4.1 we don't get any buffer data at all until the entire video has loaded
         //no progress events fire, and the timeupdate events simply have [0,0] in their buffer data
         //with the result that the loading indicator would show continually during initial playback
         //disappearing only when the whole video has loaded and the buffer now has a [0,duration] range
         //(at which point we start getting continual progress events with the same single range)
-        //nb. there's also no point doing this for the iphone or winphone, since you wouldn't see it
+        //nb. there's also no point doing this for the iphone, since you wouldn't see it
         //but we do need to do it for the ipad since iOS(8) doesn't fire the necessary waiting/canplay events
-        if(!((defs.agent.firefox && player.mode == 'native') || defs.agent.android || defs.agent.iphone || defs.agent.winphone))
+        if(!((defs.agent.firefox && player.mode == 'native') || library.isThirdPartyMedia(player.mode) || defs.agent.android || defs.agent.iphone))
         {
-            etc.listen(player.media, (defs.agent.ie || defs.agent.edge || defs.agent.firefox || player.mode == 'youtube' ? 'timeupdate' : 'progress'), function(e)
+            etc.listen(player.media, (defs.agent.ie || defs.agent.edge || defs.agent.firefox ? 'timeupdate' : 'progress'), function(e)
             {
                 //ignore this event if the video is not playing, because
                 //there's no point showing the indicator for background loading
@@ -10549,36 +9997,18 @@ var OzPlayer = (function()
 
         //~~ interface ready ~~//
 
-        //now enable the poster and playpause button, unless this is youtube with flash
-        //because the play button doesn't work until the connection has been made
-        //so we can't enable it for playback until the canplay event has fired
-        //(which we won't necessarily get with native youtube, but that's okay anyway)
-        //or in IE10 using native video, because pressing play before then
-        //sometimes fails to establish a connection, so it just stays loading forever
-        //or connection might be delayed so that AD starts playing before the video
-        //(but that now causes IE11 to fail to initialise since it doesn't fire the
-        // alternative canplay event until after playback has begun, so we have to
-        // specifically except IE11 from this otherwise the player is unuseable)
-        //or in iOS it still doesn't work until you've actually started to play
-        //and in iOS with stack controls the native icon covers the buttons
-        //and in iOS with row controls pressing the play button causes the
-        //native controls to appear briefly, during the first buffer before playback
-        //so in that case we can't use it until the video actually starts to play
-        //(ie. you can only start it in iOS using the native click to play icon)
-        //but that's not an issue for the audio-only player, indeed we need the custom
-        //play button because there's no native click-to-play icon in that case
-        //nb. I also wanted to do the same thing for Android, for internal consistency,
-        //but if we do that then the click to play icon no longer works at all!
-        if
-        (
-            !(
-                (player.mode == 'youtube' && player.plugin == 'shockwave')
-                ||
-                (!defs.agent.ie11p && defs.agent.ie10p && player.mode == 'native')
-                ||
-                (defs.agent.ios && !player.isaudio)
-            )
-        )
+        //now enable the poster and playpause button, except in special cases
+        //=> in iOS it still doesn't work until you've actually started to play
+        //=> in iOS with stack controls the native icon covers the buttons
+        //=> in iOS with row controls pressing the play button causes the
+        //   native controls to appear briefly, during the first buffer before playback
+        //   so in that case we can't use it until the video actually starts to play
+        //   (ie. you can only start it in iOS using the native click to play icon)
+        //   but that's not an issue for the audio-only player, indeed we need the custom
+        //   play button because there's no native click-to-play icon in that case
+        //   nb. I also wanted to do the same thing for Android, for internal consistency,
+        //   but if we do that then the click to play icon no longer works at all!
+        if(!(defs.agent.ios && !player.isaudio))
         {
             updateControlDisabled(player, 'playpause', false);
 
@@ -10603,30 +10033,7 @@ var OzPlayer = (function()
             });
         }
 
-        //similarly, if this is the flash player with auto preload we can't
-        //play the video until the loadedmetadata event has fired, so likewise,
-        //disable the button and poster by default then use loadedmetadata to enable it
-        if(player.mode == 'flash' && player.video.getAttribute('preload') == 'auto')
-        {
-            updateControlDisabled(player, 'playpause', true);
-
-            if(player.poster)
-            {
-                etc.addClass(player.poster, config.classes['state-disabled']);
-            }
-
-            etc.listen(player.media, 'loadedmetadata', function()
-            {
-                updateControlDisabled(player, 'playpause', false);
-
-                if(player.poster)
-                {
-                    etc.removeClass(player.poster, config.classes['state-disabled']);
-                }
-            });
-        }
-
-        //if the player type is youtube, add an extra one-off play event to enable the
+        //if this is third-party media, add an extra one-off play event to enable the
         //playpause button and set its state to on, which iOS, Android and IE11 sometimes need
         //* because sometimes their play event doesn't fire, though I don't know why
         //* it doesn't seem to happen predictably or reliably, just now and then
@@ -10637,7 +10044,7 @@ var OzPlayer = (function()
         //nb. unloadModule doesn't work during initialisation, so presumably
         //it requires playback (or maybe just "canplay") before it can be used
         //and since this event is already here we may as well shoehorn into it
-        if(player.mode == 'youtube')
+        if(library.isThirdPartyMedia(player.mode))
         {
             var jolt = etc.listen(player.media, 'play', function()
             {
@@ -10648,17 +10055,77 @@ var OzPlayer = (function()
                 updateControlDisabled(player, 'playpause', false);
                 updateControlState(player, 'playpause', 'on');
 
-                //if we have custom captions included via track elements
-                //or we have embedded captions but they're disabled
-                //then unload the youtube captions module to remove them
-                if(player.tracks.captions || (player.tracks.youtube_captions && !player.tracks.youtube_captions.enabled))
+                //if we have embedded youtube captions but they're disabled
+                //or we also have local captions and this is not the iphone
+                //then unload the captions modules to remove them
+                //because the cc_load_policy flag always enables them by default
+                //irrespective of the default that was set in the creator studio
+                if
+                (
+                    player.mode == 'youtube'
+                    &&
+                    (
+                        (player.tracks.youtube_captions && !player.tracks.youtube_captions.enabled)
+                        ||
+                        (player.tracks.captions && !defs.agent.iphone)
+                    )
+                )
                 {
-                    player.media.pluginApi.unloadModule('cc');
-                    player.media.pluginApi.unloadModule('captions');
+                    player.media.youTubeApi.unloadModule('cc');
+                    player.media.youTubeApi.unloadModule('captions');
                 }
 
-                //*** DEV TMP
-                //if(__.console) { console.log(player.media.pluginApi.getOptions()); }
+                //if we have embedded vimeo captions then enable or disable them by similar conditions
+                //or if that fails (eg. invalid language code) then show the CC button error state
+                //nb. not sure how the vimeo creator specifies defaults so this
+                //is the safest way of ensuring we honour what's defined in ozplayer
+                //however, the iphone doesn't honour these methods at all, they're ignored
+                //captions are always enabled by default even if we turn them off
+                //(and the vimeo menu indicates that they're turned off ffs)
+                //and if turn them on then we get two sets of captions with playsinline!
+                //so don't do any of this for the iphone, users just get what vimeo decides
+                if(player.mode == 'vimeo' && !defs.agent.ios)
+                {
+                    if
+                    (
+                        (player.tracks.vimeo_captions && !player.tracks.vimeo_captions.enabled)
+                        ||
+                        (player.tracks.captions)
+                    )
+                    {
+                        player.media.vimeoPlayer.disableTextTrack()
+                            .then(function(){})
+                            .catch(function(ex)
+                            {
+                                player.tracks.vimeo_captions.enabled = false;
+                                updateControlState(player, 'cc', 'off');
+                                updateControlDisabled(player, 'cc', true);
+                                etc.render(player.controlform.cc,
+                                {
+                                    'aria-label' : getLang(player, 'button-cc-error')
+                                });
+                            });
+                    }
+                    else
+                    {
+                        //nb. the vimeo API returns a Promise, which IE11 doesn't fully support
+                        //and a failure due to invalid language code may still show captions
+                        //maybe it just selects from available languages randomly, dk
+                        //but those captions can't be controlled because the CC button is disabled now
+                        player.media.vimeoPlayer.enableTextTrack(player.tracks.vimeo_captions_lang)
+                            .then(function(){})
+                            .catch(function(ex)
+                            {
+                                player.tracks.vimeo_captions.enabled = false;
+                                updateControlState(player, 'cc', 'off');
+                                updateControlDisabled(player, 'cc', true);
+                                etc.render(player.controlform.cc,
+                                {
+                                    'aria-label' : getLang(player, 'button-cc-error')
+                                });
+                            });
+                    }
+                }
             });
         }
 
@@ -10687,8 +10154,18 @@ var OzPlayer = (function()
 
 
         //*** DEV TMP
-        //etc.delay(10000, function() { abortMedia(player); });
+        //etc.delay(10000, function() { abortMedia(player, true); });
 
+
+        //*** DEV TMP (relies on preload=auto)
+        //etc.delay(1000, function()
+        //{
+        //    if(player.poster) { player.poster = etc.remove(player.poster); }
+        //    setMediaTime(player, 68);
+        //});
+
+        //*** DEV TMP
+        //showIndicator(player, 'loading');
 
 
         //*** DEV TMP DELAY SO LOAD IS BEFORE FORM ADDITION
@@ -10705,11 +10182,11 @@ var OzPlayer = (function()
     //nb. this is called before the logo bug because it's more important
     function addSkipLinks(player)
     {
-        //if this is iOS, Android or Windows Phone, just exit
+        //if this is ios or android, just exit
         //nb. we don't create the links there because they don't really have
         //any value in a non-keyboard interface, and because they wouldn't
-        //be clickable in iOS while covered by the click-to-play overlay
-        if(defs.agent.ios || defs.agent.android || defs.agent.winphone) { return; }
+        //be clickable in ios while covered by the click-to-play overlay
+        if(defs.agent.ios || defs.agent.android) { return; }
 
 
         //create the links list, but don't append it yet
@@ -11000,9 +10477,15 @@ var OzPlayer = (function()
         //but only if it's null so that this doesn't itself repeat
         etc.listen(player.controlform[key], 'keydown', function(e)
         {
+            //*** DEV TMP (buttonkeyclick)
+            //player.konsole.innerHTML = '["' + key + '"] keydown{' + e.keyCode + '} GET keyclick=' + player.buttonkeyclick + '' + '<br>' + player.konsole.innerHTML;
+
             if(e.keyCode == 13 && player.buttonkeyclick === null)
             {
                 player.buttonkeyclick = false;
+
+                //*** DEV TMP (buttonkeyclick)
+                //player.konsole.innerHTML = '["' + key + '"] keydown{' + e.keyCode + '} SET > keyclick=' + player.buttonkeyclick + '' + '<br>' + player.konsole.innerHTML;
 
                 //*** DEV TMP
                 //if(__.console) { console.log('buttonkeyclick = ' + player.buttonkeyclick); }
@@ -11012,6 +10495,9 @@ var OzPlayer = (function()
         //bind the click handler
         etc.listen(player.controlform[key], 'click', function(e)
         {
+            //*** DEV TMP (buttonkeyclick)
+            //player.konsole.innerHTML = '["' + key + '"] click GET keyclick=' + player.buttonkeyclick + '' + '<br>' + player.konsole.innerHTML;
+
             //if the flag is true then return null to block repeats
             if(player.buttonkeyclick === true)
             {
@@ -11030,9 +10516,15 @@ var OzPlayer = (function()
             {
                 player.buttonkeyclick = true;
 
+                //*** DEV TMP (buttonkeyclick)
+                //player.konsole.innerHTML = '["' + key + '"] keydown{' + e.keyCode + '} SET > keyclick=' + player.buttonkeyclick + '' + '<br>' + player.konsole.innerHTML;
+
                 //*** DEV TMP
                 //if(__.console) { console.log('buttonkeyclick = ' + player.buttonkeyclick); }
             }
+
+             //*** DEV TMP (buttonkeyclick)
+            //player.konsole.innerHTML = '["' + key + '"] click > FIRE COMMAND' + '<br>' + player.konsole.innerHTML;
 
             //[else] call and return the command function
             return player.controlform[key].command();
@@ -11049,6 +10541,9 @@ var OzPlayer = (function()
             if(e.keyCode == 13)
             {
                 player.buttonkeyclick = null;
+
+                //*** DEV TMP (buttonkeyclick)
+                //player.konsole.innerHTML = '["' + key + '"] keyup{' + e.keyCode + '} SET > keyclick=' + player.buttonkeyclick + '' + '<br>' + player.konsole.innerHTML;
 
                 //*** DEV TMP
                 //if(__.console) { console.log('buttonkeyclick = ' + player.buttonkeyclick); }
@@ -11383,9 +10878,6 @@ var OzPlayer = (function()
     //in case the player's container is already smaller than the player
     function doResponsiveEvent(player, etype)
     {
-        //*** DEV TMP
-        //etc.get('#info').innerHTML = ('doResponsiveEvent->'+etype+'(' + new Date().getSeconds() + '.' + new Date().getMilliseconds() + ')<br>') + etc.get('#info').innerHTML;
-
         //get the current width difference between the responsive container and player container
         //then if it's not zero (for the unlikely but possible case where they're the same)
         //nb. we use the container offset width so it does include the player borders
@@ -11421,7 +10913,7 @@ var OzPlayer = (function()
 
 
             /*** DEV TMP ***//***
-            console.warn('\n'
+            console.info('\n'
                 + 'default width     = ' + player.responsivedata.playerwidth + '\n'
                 + 'default aspect    = ' + player.responsivedata.playeraspect + '\n'
                 + '\n'
@@ -11431,44 +10923,58 @@ var OzPlayer = (function()
                 + '\n'
                 + 'responsive width  = ' + responsivewidth + '\n'
                 + 'responsive height = ' + (responsivewidth * player.responsivedata.playeraspect) + '\n'
-                + 'smallscreen       = ' + (responsivewidth < config['default-width']) + '\n'
+                + 'smallscreen       = ' + (responsivewidth < config['smallscreen-threshold']) + '\n'
+                + 'midscreen         = ' + (responsivewidth >= config['smallscreen-threshold'] && responsivewidth < config['midscreen-threshold']) + '\n'
                 + '\n');
             ***/
 
-            //then if the difference is not the same as the last width we applied
+
+            //then check the difference is not the same as the last width we applied
             //so that we avoid repeatedly re-applying the same responsive width
             if(responsivewidth != player.responsivedata.responsivewidth)
             {
                 //update the stored responsive width with this responsive width
                 //then if it's less than the smallscreen threshold
-                if((player.responsivedata.responsivewidth = responsivewidth) < config['default-width'])
+                if((player.responsivedata.responsivewidth = responsivewidth) < config['smallscreen-threshold'])
                 {
-                    //add the smallscreen class to the player container
+                    //add the smallscreen class and remove the midscreen class
                     etc.addClass(player.container, config.classes['smallscreen']);
+                    etc.removeClass(player.container, config.classes['midscreen']);
                 }
 
-                //else [if equals or exceeds the smallscreen threshold]
+                //else [if it equals or exceeds the smallscreen threshold]
+                //but it's less than the midscreen threshold
+                else if(responsivewidth < config['midscreen-threshold'])
+                {
+                    //add the midscreen class and remove the smallscreen class
+                    etc.addClass(player.container, config.classes['midscreen']);
+                    etc.removeClass(player.container, config.classes['smallscreen']);
+                }
+
+                //else [if it equals or exceeds the midscreen threshold]
                 else
                 {
-                    //remove the smallscreen class from the player container
-                    etc.removeClass(player.container, config.classes['smallscreen']);
+                    //remove the smallscreen and midscreen classes
+                    etc.removeClass(player.container, config.classes['smallscreen'] + ' ' + config.classes['midscreen']);
                 }
 
                 //don't do this bit for audio-only because it has no visible media element
                 if(!player.isaudio)
                 {
                     //now update the video size to match the responsive width while retaining the original aspect ratio
-                    player.media.setVideoSize(responsivewidth, responsivewidth * player.responsivedata.playeraspect);
+                    player.media.setSize(responsivewidth, responsivewidth * player.responsivedata.playeraspect);
 
-                    //but if we're playing a youtube video using native video (ie. not flash)
-                    //then setVideoSize doesn't resize the IFRAME element which is used for that
-                    //(a problem I noticed in IE11 and Firefox 31 when the flash plugin is disabled)
-                    //but we can fix that by manually resizing the iframe element ourselves, and when
-                    //we do that, the video takes on the same dimensions (so it's presumably flexible)
-                    if(player.mode == 'youtube' && player.wrapper.nodeName.toLowerCase() == 'iframe')
+                    //for facebook video, the sizing method doesn't work
+                    //but it does respond to changes in the container width
+                    //so we can resize the video by setting the container width
+                    //nb. setting the height doesn't affect it, the video always
+                    //sizes itself according to its own aspect ratio, so if we set a
+                    //non-matching height we'll just get black space under the controls
+                    //*** so how will that work for portrait videos?
+                    //*** the height is too large with black space on iOS/Android
+                    if(player.mode == 'facebook')
                     {
-                        player.wrapper.setAttribute('width', responsivewidth);
-                        player.wrapper.setAttribute('height', responsivewidth * player.responsivedata.playeraspect);
+                        player.container.style.width = responsivewidth + 'px';
                     }
                 }
 
@@ -11483,9 +10989,6 @@ var OzPlayer = (function()
                     player.controlform['menu-cc'].getAttribute('aria-hidden') == 'false'
                 )
                 {
-                    //*** DEV TMP
-                    //console.log('*** RS CLOSE!!!');
-
                     player.controlform['menu-cc'].setAttribute('aria-hidden', 'true');
                 }
 
@@ -11520,14 +11023,6 @@ var OzPlayer = (function()
         //but for safety we're treating any value less than 1 the same
         //because a delay of less than one second would be wholly unusable
         if(config['auto-hiding-delay'] < 1) { return; }
-
-
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-        //str += 'start';
-        //try { console.log(str); } catch(ex){}
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
 
         //[else] if we haven't already defined the autohiding management object
         //define it now, with a set of timer references for managing auto-hide,
@@ -11594,22 +11089,13 @@ var OzPlayer = (function()
 
     //apply the showing state and define the auto-hiding and auto-showing events,
     //when the media plays, or when entering fullscreen mode during playback
+    //nb. this isn't strictly necessary when the controls options is "row"
+    //and there are no skip links, but it's too convoluted to prevent
+    //without also preventing it for fullscreen mode stack controls
     //nb. the second argument overrides applying the showing state
     //so we can call this from the pin function to re-init without showing
     function primeAutoHiding(player, noshow)
     {
-        //nb. this isn't strictly necessary when the controls options is "row"
-        //and there are no skip links, but it's too convolted to prevent
-        //without also preventing it for fullscreen mode stack controls
-
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-        //str += 'prime';
-        //try { console.log(str); } catch(ex){}
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
         //if the nowshow argument is false or undefined
         //apply the showing state and start the timer to auto-hide
         if(!noshow)
@@ -11633,14 +11119,6 @@ var OzPlayer = (function()
     //apply the showing state and silence the auto-show events, when the media pauses
     function unprimeAutoHiding(player)
     {
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-        //str += 'unprime';
-        //try { console.log(str); } catch(ex){}
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
         //apply the showing state
         doShowingState(player);
 
@@ -11659,14 +11137,6 @@ var OzPlayer = (function()
     //new timer to re-apply the hiding state in the absence of user interaction
     function autoShowingState(player)
     {
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-        //str += 'autoshow';
-        //try { console.log(str); } catch(ex){}
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
         //apply the showing state
         doShowingState(player);
 
@@ -11682,14 +11152,6 @@ var OzPlayer = (function()
     //existing autohiding timers and remove the hiding and hidden classes
     function doShowingState(player)
     {
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-        //str += 'shown';
-        //try { console.log(str); } catch(ex){}
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
         //clear any running hiding timers and nullify the references
         etc.each(player.autohiding.timers, function(timer, key)
         {
@@ -11714,14 +11176,6 @@ var OzPlayer = (function()
     //that adjust the position of the caption after they're fully hidden
     function autoHidingState(player)
     {
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-        //str += 'hiding';
-        //try { console.log(str); } catch(ex){}
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
         //add the hiding class to the container to trigger its transition
         etc.addClass(player.container, config.classes['auto-hiding']);
 
@@ -11729,14 +11183,6 @@ var OzPlayer = (function()
         //nb. this should match or exceed the speed of the CSS hiding transition
         player.autohiding.timers.hiding = etc.delay(config['auto-hiding-speed'] * 1000, function()
         {
-            //*** DEV TMP
-            //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }
-            //str += 'hidden';
-            //try { console.log(str); } catch(ex){}
-            //str += '<br />';
-            //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
             //then unless this gets interrupted in the meantime
             //add the fully hidden class that will adjust the captions position
             etc.addClass(player.container, config.classes['auto-hidden']);
@@ -11751,8 +11197,8 @@ var OzPlayer = (function()
         //create a null poster reference by default, in case we don't create one
         var poster = null;
 
-        //don't do this for the youtube plugin, because people expect to see the familiar youtube icon
-        //also don't do this for iOS or Windows Phone because we'll be hiding its own click to play icon
+        //don't do this for third-party media, because people expect to see familiar play icons
+        //also don't do this for iOS because we'll be hiding its own click to play icon
         //and although that might be a nice design choice, it messes with user expectation
         //because that icon is very much an entrenched feature of video, on the iphone at least,
         //although we do add our own to the poster anyway, it will obviously look different
@@ -11767,7 +11213,7 @@ var OzPlayer = (function()
         //one finger, or by holding down their finger for a longpress duration, or by swiping
         //slightly at the same time, in which cases the native touchstart action doesn't happen
         //if you're really concerned about it, you could always use row controls instead of stack
-        if(!(defs.agent.ios || defs.agent.winphone || player.mode == 'youtube'))
+        if(!(defs.agent.ios || library.isThirdPartyMedia(player.videoType)))
         {
             //the poster image doesn't show in the flash player, or even in all native players
             //(eg. in IE9 the poster is replaced by the first video frame once available)
@@ -11803,21 +11249,21 @@ var OzPlayer = (function()
             //eg. NVDA just says "clickable" even if it has an aria-label
             poster = etc.build('span',
             {
-                '=parent'                     : player.container,
+                '=parent'                   : player.container,
                 'class'                     : config.classes['poster'] + ' ' + config.classes['state-disabled'],
-                'aria-hidden'                : 'true',
-                '#style'                     :
+                'aria-hidden'               : 'true',
+                '#style'                    :
                 {
-                    'backgroundImage'        : ((poster = player.video.getAttribute('poster')) ? ('url(' + poster + ')') : 'none'),
+                    'backgroundImage'       : ((poster = player.video.getAttribute('poster')) ? ('url(' + poster + ')') : 'none'),
                     //nb. the escape is to avoid symbol compression
                     'backgroundPosition'    : '50%\ 0%',
                     'backgroundSize'        : width + 'px ' + height + 'px'
                 },
-                '#dom'                        : etc.build('span',
+                '#dom'                      : etc.build('span',
                 {
-                    '#dom'                    : etc.build('span',
+                    '#dom'                  : etc.build('span',
                     {
-                        '#dom'                : etc.build('span')
+                        '#dom'              : etc.build('span')
                     })
                 })
             });
@@ -11827,9 +11273,6 @@ var OzPlayer = (function()
             {
                 //ignore this event if the playpause button is still disabled
                 if(player.controlform.playpause.disabled) { return false; }
-
-                //*** DEV TMP
-                //if(etc.get('#info')&&!etc.get('#info').silence){var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'paused = ' + player.media.paused;str += '\tfakepaused = ' + player.fakepaused;str += '\tstarted = ' + player.started;str += '\t[ poster click handler ]';str += '<br />'; etc.get('#info').innerHTML += str;}
 
                 //if the poster is still present, remove its inner icon span
                 //ie. the icon disappears immediately, but the poster itself
@@ -11899,14 +11342,6 @@ var OzPlayer = (function()
             '#text' : getLang(player, 'indicator-' + player.indicator.icontype)
         });
 
-
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = { type : 'icon' }).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-        //str += '"'+player.indicator.firstChild.firstChild.innerHTML+'"';
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
-
         //nb. we don't show the indicator until the second animation frame
         //so that very short loading periods don't need to show it at all
         //this will also prevent it from appearing in the tiny moments
@@ -11954,18 +11389,18 @@ var OzPlayer = (function()
             //show the indicator
             etc.addClass(player.indicator, config.classes['state-visible']);
 
-            //add the indicator type class, unless this is iOS or Windows Phone
-            //with the timeout "type", because it already has a native failure icon
+            //add the indicator type class, unless this is iOS with the
+            //timeout "type", because it already has a native failure icon
             //nb. android doesn't fire an error event, but it is caught by the timeout
             //however we can't prevent its native loading indicator from showing as well
             //nothing I've tried successfully removed it, not even the video/x-stop trick
             //however the custom error icon will show above it, so users won't notice :-)
             //of course I did consider just leaving the native icon, but it doesn't actually
             //show the error state, it just keeps showing the loading spinner forever
-            //** but will it still be trying to establish a network connection?
-            //** surely that would timeout, even if the indicator says otherwise?
-            //** though it's kinda moot since we can't prevent it anyway!
-            if(!((defs.agent.ios || defs.agent.winphone) && player.indicator.icontype == 'timeout'))
+            //* but will it still be trying to establish a network connection?
+            //* surely that would timeout, even if the indicator says otherwise?
+            //* though it's kinda moot since we can't prevent it anyway!
+            if(!(defs.agent.ios && player.indicator.icontype == 'timeout'))
             {
                 etc.addClass(player.indicator, config.classes['indicator-' + player.indicator.icontype]);
             }
@@ -11991,14 +11426,6 @@ var OzPlayer = (function()
 
         //remove the text from the aria-live region
         etc.remove(player.indicator.firstChild.firstChild.firstChild);
-
-
-        //*** DEV TMP
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = { type : 'hide' }).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }
-        //str += '"'+player.indicator.firstChild.firstChild.innerHTML+'"';
-        //str += '<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
 
         //remove the state and type classes to undisplay the indicator
         etc.removeClass(player.indicator, config.classes['indicator-' + player.indicator.icontype] + ' ' + config.classes['state-visible']);
@@ -12050,9 +11477,6 @@ var OzPlayer = (function()
         //update the aria-label unless the control is disabled, and the element's inner text
         //including re-applying the slider widths if images are disabled and it's necessary
         updateControlText(player, name, player.controlform[name].disabled ? '' : getLang(player, 'button-' + name + '-' + state), getLang(player, 'text-' + name + '-' + state));
-
-        //*** DEV TMP
-        //etc.get('#info').innerHTML += '"'+name+'" => state="'+player.controlform[name].state+'" class="'+player.controlform[name].className+'"<br />';
     }
 
     //update the label and inner text of a control by name (eg. "playpause")
@@ -12366,9 +11790,6 @@ var OzPlayer = (function()
             (player.media.volume < 0.5 ? 'low' : 'high')
         ]);
 
-        //*** DEV TMP
-        //etc.get('#info').innerHTML = ('basekey = "'+player.basekey+'"<br>');
-
         //then pass the basekey and user-volume key to the add storage function
         //along with the current media volume (not the to value, same as for the controls)
         //but round the value to 2 digits to remove any extraneous precision
@@ -12380,14 +11801,6 @@ var OzPlayer = (function()
             config['user-volume'],
             (Math.round(player.media.volume * 100) / 100).toString()
             );
-
-        //*** DEV TMP
-        //tmp = library.addStorageValue(
-        //    player.basekey,
-        //    config['user-volume'],
-        //    (Math.round(player.media.volume * 100) / 100).toString()
-        //    );
-        //etc.get('#info').innerHTML += ('ADD storage ('+typeof(tmp)+') = ' + tmp + '<br>volume ('+typeof(player.media.volume)+') = ' + player.media.volume + '<br>');
 
         //finally if the theslider argument is true
         if(theslider === true)
@@ -13120,8 +12533,13 @@ var OzPlayer = (function()
     //or removing any existing cue if there isn't one for that time
     function displayCaption(player, time)
     {
-        //don't display captions for the audio-only player
-        if(player.isaudio) { return; }
+        //don't display captions for the audio-only player or for the iphone
+        //or for the ipad when the player mode is vimeo
+        //nb. since iphone doesn't have custom controls when played inline
+        //we can't show the captions since there'd be no way to control them
+        //but they will show up natively when played in full-screen mode
+        //and can be controlled via the iphone's native player interface
+        if(player.isaudio || defs.agent.iphone || (defs.agent.ios && player.mode == 'vimeo')) { return; }
 
         //*** DEV TMP
         //if(__.console) { console.log('displayCaption(time=' + time + ')'); }
@@ -13247,7 +12665,7 @@ var OzPlayer = (function()
                 //then update the activecue reference, and add new wrapper(s)
                 //nb. double-check that we have a transcript cue for this timecue
                 //just in case the transcript hasn't compiled that far, which is
-                //pretty unlikely, but we may as well avoid all errors we can
+                //pretty unlikely, but possible since it compiles asynchronously
                 //nb. the wrapper will be wrapped around the content of each
                 //cue paragraph, where a single cue may contain one or more
                 //it can therefore can be any element that's allowed inside <p>
@@ -13281,17 +12699,30 @@ var OzPlayer = (function()
                             ].concat(etc.list(node.childNodes))
                         });
 
-                        //however the windows high-contrast layout renders these mark elements
-                        //with the same color foreground and background, making the text invisible
-                        //we can prevent that by not defining any background or color on the element
+                        //*** DEV TMP
+                        //console.log(
+                        //    'color = ' + etc.getStyle(mark, 'color')
+                        //    + '\nbackground = ' + etc.getStyle(mark, 'backgroundColor')
+                        //    + '\nequal = ' + (etc.getStyle(mark, 'color') == etc.getStyle(mark, 'backgroundColor')));
+
+                        //however windows high contrast in IE11 renders these mark elements with
+                        //the same foreground and background colors, making the text invisible
+                        //we could prevent that by not defining any background or color on the element
                         //in the first place, but that's not a particularly attractive solution
                         //and we could have a no-images class for the transcript, but I'm not keen
                         //on complicating that for users or for an udpate to require style changes
+                        //and I guess we could scan the entire stylesheets collection to identify
+                        //remove rules which apply to <mark> when images are off ... but yeah ... no
                         //so the best solution I can think is if we simply detect that situation
                         //by comparing the computed color and background, and if they're the same
                         //then simply remove the active cue wrapper, so there's no style difference
-                        //then at least the cue will scroll and be visible, even with no other style change
-                        if(!player.images && etc.getStyle(mark, 'color') == etc.getStyle(mark, 'backgroundColor'))
+                        //then at least the cue will scroll and be visible, even with no other style changes
+                        //however ... that doesn't work in Chromium Edge, which does apply correctly contrasting
+                        //themes colors to the <mark> element (eg. yellow background and black text color),
+                        //but then applies an rgba(0,0,0,0) background to the bounds of the inner text content
+                        //which renders as a black background, producing black text on a black background (ffs)
+                        //so I don't see what else we can do except always remove the active cue wrapper in whc
+                        if(player.whc)
                         {
                             deleteTranscriptMarkers(player);
                         }
@@ -13485,27 +12916,26 @@ var OzPlayer = (function()
                 if(c == xresponse)
                 {
                     //*** DEBUG
-                    //if(window.console){window.console.log('OZPLAYER SUBSCRIPTION RESPONSE:\n\tServer responded with correct success value\n\tAUTHENTICATION OK');}
+                    //if(window.console){window.console.log('OZPLAYER SUBSCRIPTION RESPONSE:\n\tServer responded with correct authentication value\n\tAUTHENTICATION OK');}
 
                     return;
                 }
 
                 //*** DEBUG
-                //else{if(window.console){window.console.log('OZPLAYER SUBSCRIPTION RESPONSE:\n\tServer responded with incorrect success value\n\tAUTHENTICATION DENIED - PLAYER WILL BE DISABLED');}}
+                //else{if(window.console){window.console.log('OZPLAYER SUBSCRIPTION RESPONSE:\n\tServer responded with incorrect authentication value\n\tAUTHENTICATION DENIED\ -\ PLAYER WILL BE DISABLED');}}
             }
 
             //[else] if the response is anything else then this is an unauthorized response
             //so we need to abandon playback and lock down the interface
 
             //*** DEBUG
-            //else{if(window.console){window.console.log('OZPLAYER SUBSCRIPTION RESPONSE:\n\tServer responded with correct failure value\n\tAUTHENTICATION DENIED - PLAYER WILL BE DISABLED');}}
+            //else{if(window.console){window.console.log('OZPLAYER SUBSCRIPTION RESPONSE:\n\tServer responded with explicit failure value\n\tAUTHENTICATION DENIED\ -\ PLAYER WILL BE DISABLED');}}
 
             //define tabindex on the player container and then set focus on it
             //nb. we have to manage focus since we're going to completely disable
             //and then hide the player controls; we didn't have to do this for other
             //player abort conditions because we kept focus on the fullscreen button
             //** but what about browsers that don't have a fullscreen button?
-            //** maybe abortMedia should do this (and jump out of fullscreen mode, and disable the full button)
             player.container.tabIndex = 0;
             player.container.focus();
 
@@ -13527,13 +12957,14 @@ var OzPlayer = (function()
 
             //now abort media playback, which will stop the video (and audio),
             //disable all controls apart from fullscreen, and show the X overlay
+            //passing the true flag because we do need to explicitly pause the media
             //nb. I was concerned that the video might continue to load in the background
             //since we don't explicitly prevent it; but that doesn't seem to happen
             //although chrome will do so at first, but then stops after a few seconds
             //* why does that happen? why does it not just keep loading the whole thing?
             //* or maybe it does! but then it doesn't keep loading for long enough to do that
             //* it stops after ~10s whereas loading the whole thing takes ~20s
-            abortMedia(player);
+            abortMedia(player, true);
 
             //the X overlay will show fallback/aria text for load failure
             //so we need to update that text to describe what's actually happened
@@ -13565,9 +12996,12 @@ var OzPlayer = (function()
                 updateControlDisabled(player, 'fullscreen', true);
             }
 
-            //now hide the player controls using both hiding state classes
+            //now hide the player controls using the hiding state classes
+            //nb. the first one only hides tooltips, the second hides the controls
+            //but we also need to add the stack controls class for that to work
+            //because row controls don't have a hidden state defined in the CSS
             etc.addClass(player.controlform, config.classes['state-hidden']);
-            etc.addClass(player.container, config.classes['auto-hidden']);
+            etc.addClass(player.container, config.classes['stack-controls'] + ' ' + config.classes['auto-hidden']);
 
             //also add aria-hidden so that screenreaders don't read all the disabled controls
             player.controlform.setAttribute('aria-hidden', 'true');
@@ -13718,10 +13152,10 @@ var OzPlayer = (function()
         {
             var theslider =
             {
-                id            : control.id,
-                callbacks    : {},
-                tooltipType    : tooltipType,
-                buffer        : null
+                id          : control.id,
+                callbacks   : {},
+                tooltipType : tooltipType,
+                buffer      : null
             };
         }
 
@@ -14117,18 +13551,6 @@ var OzPlayer = (function()
                 //since by definition they can't repeat their action
                 if(config['ke\y-repeat-rate'] > 0 && !(e.keyCode == 35 || e.keyCode == 36))
                 {
-                    //but first we have to create a custom event-data object
-                    //with the event type and keyCode needed in doSlide
-                    //because IE doesn't allow us to send an event reference through
-                    //an asynchronous process, and would throw a "member not found"
-                    //error when we try to access any of its properties
-                    //(every other browser is fine with it, probably related to the fact that
-                    // other browsers create events by reference, whereas in IE it's a window object)
-                    var edata = {
-                        type    : e.type,
-                        keyCode    : e.keyCode
-                        };
-
                     //create a new timer at the delay speed defined in config
                     //** why does these have underscored names? is it just a surveyslider hangover?
                     theslider.__keydelay = etc.delay(config['ke\y-repeat-delay'], function()
@@ -14136,7 +13558,7 @@ var OzPlayer = (function()
                         //call doSlide immediately, so that it happens straight after the delay
                         //(so that the timing is as-defined, rather than one-iteration slower)
                         //passing the custom event-data object we made earlier
-                        doSlide(edata, thetarget, theslider);
+                        doSlide(e, thetarget, theslider);
 
                         //then start a key-repeat interval at the speed defined in config
                         //nb. this will run ad-infinitum until cancelled by the "off" (keyup) event
@@ -14145,7 +13567,7 @@ var OzPlayer = (function()
                             //call doSlide with the same data again
                             //nb. we don't need to check if it reaches either end
                             //because doSlide will take care of that, via applySliderValue
-                            doSlide(edata, thetarget, theslider);
+                            doSlide(e, thetarget, theslider);
 
                         }, config['ke\y-repeat-rate']);
                     });
@@ -14337,11 +13759,6 @@ var OzPlayer = (function()
                 //if the value has changed
                 if(theslider.control.value != theslider.value)
                 {
-                    //*** DEV TMP
-                    //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-                    //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'theslider = ' + theslider.id.split('-').pop() + '\tto = ' + theslider.control.value;str+='<br />';
-                    //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
                     //pass the updated value to applySliderValue with a true valueupdate flag
                     //nb. we don't need to check that the value is in-range for this slider,
                     //or value input at all, because the apply function takes care of all that
@@ -14414,7 +13831,6 @@ var OzPlayer = (function()
         //only proceed if the sliding flag is enabled,
         //otherwise just return true to allow the native action
         if(!theslider.__sliding) { return true; }
-
 
         //if this is not a keyboard-triggered "on" (keydown) event
         //(ie. it's a mouse or touch-triggered slide or track-snap event)
@@ -14843,12 +14259,6 @@ var OzPlayer = (function()
     //and for each one we find, fire the callback with all the requisite data
     function dispatchSliderEvent(theslider, prop, from, to)
     {
-        //*** DEV TMP
-        //var e = { type : 'dispatch-' + prop };
-        //var now = new Date();var stamp = (now.toGMTString()).split(/\s+2014\s+/)[1].replace(/(\s*(UTC|GMT))/i, '') + '.' + now.getMilliseconds();
-        //var str = stamp;for(var n = 0; n < (16 - stamp.length); n ++) { str += ' '; }str += (e = e || __.event).type.toUpperCase();for(var n = 0; n < (20 - e.type.length); n ++) { str += ' '; }str += 'theslider = ' + theslider.id.split('-').pop() + '\tto = ' + to + '\tfrom = ' + from;str+='<br />';
-        //etc.get('#info').innerHTML = str + etc.get('#info').innerHTML;
-
         //run through the API callbacks dictionary, to look for
         //a top-level group object indexed by the specified prop
         etc.each(theslider.callbacks, function(fnlist, key)

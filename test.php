@@ -516,7 +516,16 @@
 
 
     <!-- MediaElement library (this must be in the head) -->
+    <script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"></script>
+    <!--
     <script src="./ozplayer-core/mediaelement.js" type="text/javascript"></script>
+    -->
+
+    <!-- MediaElement renderers -->
+    <script src="./ozplayer-core/vimeo.min.js" type="text/javascript"></script>
+    <!--
+    <script src="./ozplayer-core/vimeo.js" type="text/javascript"></script>
+    -->
 
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
@@ -664,15 +673,17 @@
         -->
         <!--
             preload="auto"
-            width="400" height="225"
             width="240" height="135"
+            width="300" height="169"
+            width="320" height="180"
+            width="400" height="225"
             width="480" height="270"
-            width="640" height="360"
         -->
         <video
             preload="none"
-            width="640" height="360"
             controls="controls"
+            playsinline="playsinline"
+            width="640" height="360"
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'brain') : ?>
             poster="./media/posters/BrainSurgerySketch.jpg"
@@ -714,20 +725,42 @@
 
 <?php if(isset($_GET['video']) && $_GET['video'] == 'youtube') : ?>
 
-            <source src="//www.youtube.com/watch?v=EzbETcExSwE" type="video/x-youtube" />
+            <source src="https://www.youtube.com/watch?v=K7STM0WhjHU" type="video/x-youtube" />
 
             <!--
-            <source src="https://youtu.be/tTYaum_YmRs" type="video/x-youtube" />
+            <source src="//www.youtube.com/watch?v=EzbETcExSwE" type="video/x-youtube" />
             -->
 
             <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
             <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
 
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'facebook') : ?>
+
+            <source src="http://www.facebook.com/facebook/videos/10155278547321729" type="video/x-facebook" />
+
+            <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
+            <!--
+            -->
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'vimeo') : ?>
+
+            <source src="https://player.vimeo.com/video/108018156" type="video/x-vimeo" />
+
+            <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
+            <!--
+            -->
+
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'youtube-captions') : ?>
 
-            <!--(has proper captions)
+            <!--(has proper captions which don't override track captions, except on the iphone)
             -->
+            <source src="//www.youtube.com/watch?v=Z7x4ZS7ZZWc" type="video/x-youtube" />
+
+            <!--(has proper captions which override track captions for all users)
             <source src="//www.youtube.com/watch?v=Z7x4ZS7ZZWc" type="video/x-youtube" data-captions="true" />
+            -->
 
             <!--(has auto-generated captions)
             <source src="//www.youtube.com/watch?v=hn1VxaMEjRU" type="video/x-youtube" />
@@ -738,8 +771,22 @@
             -->
 
             <!--(local proper captions)
-            <track src="./media/captions/en/obama.vtt" kind="captions" srclang="en" default="default" />
             -->
+            <track src="./media/captions/en/obama.vtt" kind="captions" srclang="en" default="default" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'vimeo-captions') : ?>
+
+            <!--(has proper captions which don't override track captions, except on the iphone)
+            -->
+            <source src="https://player.vimeo.com/video/358296408" type="video/x-vimeo" />
+
+            <!--(has proper captions which override track captions for all users)
+            <source src="https://player.vimeo.com/video/358296408" type="video/x-vimeo" data-captions="true" data-captions-srclang="en" />
+            -->
+
+            <!--(local proper captions)
+            -->
+            <track src="./media/captions/en/vimeofaq.vtt" kind="captions" srclang="en" default="default" />
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'ozplayer') : ?>
 
@@ -782,13 +829,35 @@
 
             <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
 
-<?php elseif(isset($_GET['video']) && $_GET['video'] == 'xad-youtube') : ?>
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'hls') : ?>
 
-            <source src="//www.youtube.com/watch?v=JLiidg5PtkM" type="video/x-youtube" />
+            <source src="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8" type="application/x-mpegURL" />
 
-            <track src="./media/captions/en/xad-counting.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
 
-            <track src="./media/metadata/xad-counting.vtt" kind="metadata" data-kind="xad" />
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'hls-live') : ?>
+
+            <source src="http://playertest.longtailvideo.com/adaptive/wowzaid3/playlist.m3u8" type="application/x-mpegURL" />
+
+            <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
+            <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'dash') : ?>
+
+            <source src="https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd" type="application/dash+xml" />
+            <!--
+            <source src="./media/videos/HorribleHistories-VileVictorians.mp4" type="video/mp4" />
+            -->
+
+            <track src="./media/captions/de/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="de" label="Deutsch" />
+            <track src="./media/transcripts/de/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="de" />
+            <track src="./media/captions/en/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="en" label="English" default="default" />
+            <track src="./media/captions/es/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="es" label="Español" data-default-transcript="default" />
+            <track src="./media/transcripts/en/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="en" />
+            <track src="./media/transcripts/es/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="es" />
+            <!--
+            -->
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 
@@ -797,10 +866,12 @@
 <?php else : ?>
 
             <!--
-            -->
             <source src="./media/videos/HorribleHistories-VileVictorians.webm" type="video/webm" />
+            -->
             <source src="./media/videos/HorribleHistories-VileVictorians.mp4" type="video/mp4" />
 
+            <!--
+            -->
             <track src="./media/captions/de/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="de" label="Deutsch" />
             <track src="./media/transcripts/de/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="de" />
             <track src="./media/captions/en/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="en" label="English" default="default" />
@@ -813,8 +884,6 @@
             <track src="./media/transcripts/fr/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="fr" />
             <track src="./media/transcripts/pa/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="pa" />
             <track src="./media/transcripts/tlh/HorribleHistories-VileVictorians.vtt" kind="metadata" data-kind="transcript" srclang="tlh" />
-            <!--
-            -->
 
 <?php endif; ?>
 
@@ -875,7 +944,23 @@
             <source src="./media/descriptions/ozplayer.mp3" type="audio/mp3" />
             <source src="./media/descriptions/ozplayer.ogg" type="audio/ogg" />
 
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'facebook') : ?>
+
+            <source src="./media/descriptions/ozplayer.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/ozplayer.ogg" type="audio/ogg" />
+            <!--
+            -->
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'vimeo') : ?>
+
+            <source src="./media/descriptions/ozplayer.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/ozplayer.ogg" type="audio/ogg" />
+            <!--
+            -->
+
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'youtube-captions') : ?>
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'vimeo-captions') : ?>
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'cloudfront') : ?>
 
@@ -897,10 +982,33 @@
             <source src="./media/descriptions/xad-counting.mp3" type="audio/mp3" />
             <source src="./media/descriptions/xad-counting.ogg" type="audio/ogg" />
 
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'hls') : ?>
+
+            <source src="./media/descriptions/ozplayer.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/ozplayer.ogg" type="audio/ogg" />
+            <!--
+            -->
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'hls-live') : ?>
+
+            <source src="./media/descriptions/ozplayer.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/ozplayer.ogg" type="audio/ogg" />
+            <!--
+            -->
+
+<?php elseif(isset($_GET['video']) && $_GET['video'] == 'dash') : ?>
+
+            <source src="./media/descriptions/HorribleHistories-VileVictorians.mp3" type="audio/mp3" />
+            <source src="./media/descriptions/HorribleHistories-VileVictorians.ogg" type="audio/ogg" />
+            <!--
+            -->
+
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'test') : ?>
 
 <?php else : ?>
 
+            <!--
+            -->
             <source src="./media/descriptions/HorribleHistories-VileVictorians.mp3" type="audio/mp3" />
             <source src="./media/descriptions/HorribleHistories-VileVictorians.ogg" type="audio/ogg" />
 
@@ -942,10 +1050,10 @@
             $transcript = array('en' => './media/transcripts/en/HorribleHistories-VileVictorians.vtt');
 
             /***
+            ***/
             //now pass the captions and transcript data to the get_transcript method
             //which will load and parse the data and compile it into transcript markup
             OzPlayer::get_transcript($captions, $transcript);
-            ***/
 
         ?>
         </div>
@@ -979,8 +1087,7 @@
                 <video width="480" height="270"
                     poster="./media/posters/ozplayer.png"
                     preload="none" controls="controls">
-                    <source src="./media/videos/ozplayer.mp4" type="video/mp4" />
-                    <source src="./media/videos/ozplayer.webm" type="video/webm" />
+                    <source src="https://www.youtube.com/watch?v=K7STM0WhjHU" type="video/x-youtube" />
                     <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
                     <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
                 </video>
@@ -994,8 +1101,7 @@
         <figure style="display:inline-table !important;margin:10px 0 0 0 !important;">
             <div id="demo3" class="ozplayer">
                 <video width="640" height="360" preload="auto" controls="controls">
-                    <source src="./media/videos/SendUsYourReckons.mp4" type="video/mp4" />
-                    <source src="./media/videos/SendUsYourReckons.webm" type="video/webm" />
+                    <source src="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8" type="application/x-mpegURL" />
                 </video>
             </div>
         </figure>

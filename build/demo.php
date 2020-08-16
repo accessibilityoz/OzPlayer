@@ -29,16 +29,16 @@
 
 
     <!-- MediaElement library (this must be in the head) -->
-    <script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"></script>
+    <script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"></script>
 
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
-    <link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css?v=4.0" media="all" type="text/css" />
     <!-- (select from blue, purple, pink, red, orange, yellow, green) -->
-    <link rel="stylesheet" href="./ozplayer-skin/highlights-blue.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="./ozplayer-skin/highlights-pink.css?v=4.0" media="all" type="text/css" />
 
     <!-- (sample transcript styles) -->
-    <link rel="stylesheet" href="transcript.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="transcript.css?v=4.0" media="all" type="text/css" />
 
 </head>
 <body>
@@ -189,9 +189,9 @@
 
     <!-- required player + optional lang + required configuration
          (these should be at the end of the body, and must go in order: core, lang, configuration) -->
-    <script src="./ozplayer-core/ozplayer.min.js" type="text/javascript"></script>
-    <script src="./ozplayer-lang/en.js" type="text/javascript"></script>
-    <script src="config.js" type="text/javascript"></script>
+    <script src="./ozplayer-core/ozplayer.min.js?v=4.0" type="text/javascript"></script>
+    <!-- <script src="./ozplayer-lang/en.js?v=4.0" type="text/javascript"></script> -->
+    <script src="config.js?v=4.0" type="text/javascript"></script>
 
 
 </body>

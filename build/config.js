@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-20 AccessibilityOz       http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.5.1] => configuration script
+ OzPlayer [4.0] => configuration script
  ------------------------------------------------------------------------------
 *******************************************************************************/
 (function()

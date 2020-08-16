@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.5.1 WebVTT Reference</title>
+    <title>OzPlayer 4.0 WebVTT Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,12 +19,13 @@
 
 
 
-        <h1>OzPlayer 3.5.1 WebVTT Reference</h1>
+        <h1>OzPlayer 4.0 WebVTT Reference</h1>
 
         <p>
             This reference describes WebVTT support in OzPlayer, and shows you
             how to hook into cue markup to override the styling of individual
-            captions and transcript cues.
+            captions and transcript cues. It also shows you how to implement
+            Extended Audio Descriptions using OzPlayer's custom metadata format.
         </p>
 
         <nav>
@@ -49,7 +50,7 @@
                         <li><a href="#styling-emphasis">Emphasis Elements</a></li>
                     </ol>
                 </li>
-                <li><a href="#xad">VTT Metadata for Extended Audio Descriptions</a></li>
+                <li><a href="#xad">WebVTT Metadata for Extended Audio Descriptions</a></li>
             </ol>
         </nav>
 
@@ -60,7 +61,7 @@
             <h2>Introduction to WebVTT</h2>
 
             <p>
-                The Web Video Text Tracks Format (WebVTT) is a format for
+                The Web Video Text Tracks format (WebVTT) is a format for
                 displaying timed text information using the <code>&lt;track&gt;</code>
                 element. WebVTT is a text-based format and must be encoded using UTF-8.
             </p>
@@ -146,6 +147,20 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
                 time it shows on screen), and to synchronise the start of each cue
                 with the speech it represents.
             </p>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        The WebVTT cue format is substantially similar to SRT
+                        (SubRip Text). OzPlayer does support SRT as well,
+                        however only WebVTT is supported natively by
+                        browsers. So if the video is played without
+                        scripting, only WebVTT captions will work,
+                        and therefore this format is strongly recommended in
+                        preference to SRT.
+                    </em>
+                </p>
+            </figure>
 
         </section>
 
@@ -359,7 +374,7 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
                     <p>
                         <em>
                             OzPlayer will only parse classes containing
-                            contain letters, numbers, dash or underscore &#x2014;
+                            contain letters, numbers, dash and underscore &#x2014;
                             other characters are not supported.
                         </em>
                     </p>
@@ -489,17 +504,38 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
                 <p id="code-cuetransmarkup-description">
                     Transcript-only cues are essentially the same, except that
                     they don't have a <code>&lt;q&gt;</code> element around
-                    the cue text; they also have a different value for the
-                    identifying <code>data-kind</code> attribute, and they
-                    usually have no voice information:
+                    the cue text, and they have a different value for the
+                    identifying <code>[data-kind]</code> attribute. These cues
+                    can have voice information, but they generally won't need it:
                 </p>
 
 <figure class="code" id="code-cuetransmarkup">
     <pre aria-describedby="code-cuetransmarkup-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
          class="html"><b>&lt;div</b><b> data-kind=<u>"transcript"</u></b><b> lang=<u>"en"</u></b><b> data-cue=<u>"T-2"</u></b><b>&gt;</b>
-    <b>&lt;p</b><b>&gt;</b>Text on screen: What is web accessibility and how does it translate to online videos?<b>&lt;/p</b><b>&gt;</b>
+    <b>&lt;p</b><b>&gt;</b>(He really did this!)<b>&lt;/p</b><b>&gt;</b>
 <b>&lt;/div</b><b>&gt;</b></code></pre>
+</figure>
+
+                <p id="code-cuetransmarkmarkup-description">
+                    Any cue which is currently highlighted in the transcript
+                    will insert a <code>&lt;mark&gt;</code> element as the
+                    child of each <code>&lt;p&gt;</code> element, wrapping
+                    around all the content within it. These marks never appear
+                    in captions, only within the transcript output:
+                </p>
+
+<figure class="code" id="code-cuetransmarkmarkup">
+    <pre aria-describedby="code-cuetransmarkmarkup-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div data-kind="captions" lang="en" data-cue="42"&gt;</small>
+    <small>&lt;p data-voice="Alfred Nobel"&gt;</small>
+        <b>&lt;mark&gt;</b>
+            <small>&lt;cite&gt;Alfred Nobel:&lt;/cite&gt;</small>
+            <small>&lt;q&gt;I shall reinvent my own image.&lt;/q&gt;</small>
+        <b>&lt;/mark&gt;</b>
+    <small>&lt;/p&gt;</small>
+<small>&lt;/div&gt;</small></code></pre>
 </figure>
 
 
@@ -826,11 +862,12 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
 
         <section tabindex="-1" id="xad">
 
-            <h2>VTT Metadata for Extended Audio Descriptions</h2>
+            <h2>WebVTT Metadata for Extended Audio Descriptions</h2>
 
             <p>
-                OzPlayer uses a VTT metadata format to define playback commands
-                for Extended Audio Descriptions.
+                OzPlayer uses a WebVTT metadata format to define playback commands
+                for Extended Audio Descriptions. Extended Audio Descriptions are
+                only supported with standard HTML5 video (MP4 or WebM).
             </p>
 
             <p>
@@ -843,8 +880,8 @@ One that rewards positive human endeavours in the pursuit of peace.</code></pre>
             </p>
 
             <p id="code-xadcommand-description">
-                Each playback command is defined as part of a VTT cue. A single
-                command cue looks like this:
+                Each playback command is defined as part of a WebVTT cue.
+                A single command cue looks like this:
             </p>
 
 <figure class="code" id="code-xadcommand">

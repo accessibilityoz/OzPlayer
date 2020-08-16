@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.5.1 Markup Reference</title>
+    <title>OzPlayer 4.0 Markup Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.5.1 Markup Reference</h1>
+        <h1>OzPlayer 4.0 Markup Reference</h1>
 
         <p>
             This is a detailed reference of every element that OzPlayer uses.
@@ -35,6 +35,7 @@
                             <ol>
                                 <li><a href="#video-source">Video Source Elements</a></li>
                                 <li><a href="#video-source-youtube">YouTube Source Element</a></li>
+                                <li><a href="#video-source-vimeo">Vimeo Source Element</a></li>
                                 <li><a href="#captions-track">Captions Track Elements</a></li>
                                 <li><a href="#transcript-track">Transcript Track Elements</a></li>
                                 <li><a href="#xad-track">Extended AD Metadata Track Element</a></li>
@@ -77,9 +78,10 @@
             <h2>Player Container</h2>
 
             <p id="code-container-description">
-                The player container is a wrapper element that holds all the
-                others together, while defining a reference to the transcript
-                container, and specifying how the controls are laid out:
+                The player container is a wrapper element that holds everything
+                else together. Its attributes define a reference to the transcript,
+                control responsive behaviour, and specify how the controls
+                should be laid out:
             </p>
 
 <figure class="code" id="code-container">
@@ -141,8 +143,8 @@
                                 if you have one.
                             </p>
                             <p>
-                                If you don't have a transcript then you should
-                                omit this attribute. However the use of a
+                                If you don't have a transcript then you don't
+                                need this attribute. However the use of a
                                 transcript is strongly encouraged, for best
                                 accessibility and user engagement.
                             </p>
@@ -158,15 +160,19 @@
 
                             <p>
                                 The responsive container <code>ID</code> reference,
-                                which can specify a reference to any page element,
-                                that OzPlayer will adapt itself to.
+                                which can specify a reference to any page element
+                                for OzPlayer to adapt itself to.
                             </p>
                             <p>
                                 If this attribute is specified, and points to a
                                 flexible container, then OzPlayer will continually
                                 resize itself to match the internal width of the
                                 container (down to an absolute minimum of
-                                <code>240</code> pixels).
+                                <code>300</code> pixels).
+                            </p>
+                            <p>
+                                The container would typically be an element that
+                                OzPlayer is inside, but it doesn't have to be.
                             </p>
 
                         </div>
@@ -196,7 +202,7 @@
                                 If it has the value <code>"initial"</code> then
                                 there won't be any minimum or maximum width
                                 constraints (apart from the absolute minimum
-                                of <code>240</code> pixels).
+                                of <code>300</code> pixels).
                             </p>
                             <p>
                                 If this attribute is not defined, the mode
@@ -282,7 +288,7 @@
 
                                 <p>
                                     The video width in pixels, which must be
-                                    <code>240</code> or more.
+                                    <code>300</code> or more.
                                 </p>
                                 <p>
                                     If this attribute is not defined, the
@@ -300,7 +306,7 @@
 
                                 <p>
                                     The video height in pixels, which must be
-                                    <code>135</code> or more.
+                                    <code>169</code> or more.
                                 </p>
                                 <p>
                                     If this attribute is not defined, the
@@ -331,7 +337,7 @@
                                 <p>
                                     If a poster is not defined, then the video
                                     will show a black background (except for
-                                    YouTube videos).
+                                    YouTube or Vimeo content).
                                 </p>
 
                                 <figure class="note">
@@ -339,13 +345,12 @@
                                         <em>
                                             Poster images are
                                             <strong>not implemented</strong> for
-                                            YouTube videos, because they would
-                                            obscure the familiar play icon,
-                                            which is part of user expectation.
-                                            YouTube videos typically display a
-                                            single frame as their poster image,
+                                            YouTube or Vimeo. These videos
+                                            typically display a single
+                                            frame as their poster image,
                                             taken from around the middle of the
-                                            video (or whatever the owner specified).
+                                            video (or whatever was specified
+                                            in the creator).
                                         </em>
                                     </p>
                                 </figure>
@@ -403,18 +408,16 @@
                                     <p>
                                         <em>
                                             Preload settings won't have any
-                                            effect with YouTube videos, because
-                                            loading and buffering is controlled
-                                            by YouTube's
+                                            effect with YouTube or Vimeo content,
+                                            because loading and buffering is
+                                            controlled by their
                                             <abbr title="Application Programming Interface">API</abbr>.
                                         </em>
                                     </p>
                                     <p>
                                         <em>
-                                            Preloading is also disabled on
-                                            mobile devices (running iOS, Android
-                                            or Windows Mobile), which is system
-                                            behaviour that can't be changed.
+                                            Preloading is not supported on iOS
+                                            or Android devices.
                                         </em>
                                     </p>
                                 </figure>
@@ -445,7 +448,50 @@
                         </details>
                     </li>
 
+                    <li>
+                        <details id="video-playsinline">
+                            <summary><code>"playsinline"</code> <small>(optional)</small></summary>
+                            <div>
+
+                                <p>
+                                    This is a boolean attribute, which
+                                    allows videos to be played inline on
+                                    compatible devices (iPhones running iOS 10
+                                    or later), rather than entering full-screen
+                                    mode automatically.
+                                </p>
+                                <figure class="note">
+                                    <p>
+                                        <em>
+                                            This feature cannot be supported for
+                                            YouTube videos, which will continue
+                                            to enter full-screen mode automatically
+                                            when played on an iPhone.
+                                        </em>
+                                    </p>
+                                </figure>
+                            </div>
+                        </details>
+                    </li>
+
                 </ol>
+
+                <figure class="note">
+                    <p>
+                        <em>
+                            Autoplay is explicitly not supported. Any <code>autoplay</code>
+                            attribute will be removed when OzPlayer initialises,
+                            and if the video has already started to play at this point,
+                            it will be stopped and reset to the beginning.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            The <code>loop</code> attribute is also
+                            not supported and will be removed.
+                        </em>
+                    </p>
+                </figure>
 
 
 
@@ -461,8 +507,8 @@
 <figure class="code" id="code-video-source">
     <pre aria-describedby="code-video-source-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
-<b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b></code></pre>
+         class="html"><b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b>
+<b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                     <ol>
@@ -489,6 +535,14 @@
                                         The video file's mime-type,
                                         such as <code>"video/mp4"</code>.
                                     </p>
+                                    <p>
+                                        The mime-types for WebM and MP4 are
+                                        shown in the previous example. The
+                                        mime-type for HLS should be
+                                        <code>"application/x-mpegURL"</code>,
+                                        or for MPEG-DASH it should be
+                                        <code>"application/dash+xml"</code>.
+                                    </p>
 
                                 </div>
                             </details>
@@ -499,12 +553,24 @@
                     <figure class="note">
                         <p>
                             <em>
-                                For best cross-browser compatibility you should
-                                include <strong>two video sources</strong>
-                                &#x2014; one encoded as MP4 and the other as
-                                WebM, which between them will work in every
-                                browser that OzPlayer supports. The Flash
-                                fallback player uses MP4.
+                                Multiple video sources should be defined if your
+                                primary format is not supported by all browsers,
+                                e.g. if your primary source is WebM, then you'll
+                                also need a secondary MP4 source to support
+                                browsers that can't decode WebM.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                If you're using HLS video then only
+                                one video is source is required, since browsers
+                                that don't support it natively will use a
+                                JavaScript shim. However <strong>this is not
+                                supported for MPEG-DASH in iOS</strong>,
+                                and therefore if you're using that format then
+                                a secondary MP4 would also be required to
+                                support iOS devices, otherwise they'll only see the
+                                <a href="#fallback">fallback content</a>.
                             </em>
                         </p>
                         <p>
@@ -535,7 +601,7 @@
                     <h4>YouTube Source Element</h4>
 
                     <p id="code-video-source-youtube-description">
-                        For YouTube videos, a single source defines the
+                        For YouTube content, a single source defines the
                         <abbr title="Uniform Resource Locator">URL</abbr>
                         and a proprietary type, and optionally controls the
                         appearance of embedded YouTube captions:
@@ -593,7 +659,7 @@
                                         <code>"video/x-youtube"</code>,
                                         which is a proprietary
                                         value used by the script to
-                                        identify YouTube videos.
+                                        identify YouTube content.
                                     </p>
 
                                 </div>
@@ -626,8 +692,8 @@
                                                 <a href="#captions-track">track captions</a>,
                                                 so that you don't see both sets
                                                 of captions at the same time.
-                                                However, if you don't have any
-                                                track captions but the video
+                                                But if you don't have any
+                                                track captions and the video
                                                 does have embedded captions,
                                                 then you can use this attribute
                                                 to provide control over them.
@@ -637,9 +703,258 @@
                                             <em>
                                                 This functionality is provided
                                                 for convenience, but is not the
-                                                best approach, since embedded
-                                                YouTube captions cannot be used
+                                                best approach, since only track
+                                                captions can be used to create
+                                                a transcript, and because embedded
+                                                YouTube captions tend to be
+                                                too small in most browsers.
+                                                (The YouTube Creator Studio
+                                                does provide an option to export
+                                                captions in the <code>.vtt</code>
+                                                format that OzPlayer uses.)
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                However, track captions cannot
+                                                be shown for YouTube videos
+                                                on the iPhone.
+                                                If you do have track captions
+                                                <strong>and</strong> the video
+                                                has embedded captions,
+                                                then the embedded captions will
+                                                still be available to iPhone users,
+                                                and their default appearance will
+                                                be determined by the
+                                                <a href="#captions-track-default">track default attribute</a>.
+                                                Having both will allow a transcript
+                                                to be created from the track
+                                                captions, and for
+                                                those to be shown on the
+                                                video for most users, while
+                                                embedded captions are shown
+                                                on the video for iPhone users.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                This combined behaviour is enabled
+                                                by default. If you have both, then
+                                                the <code>"data-captions"</code>
+                                                attribute <strong>should not</strong>
+                                                be included, unless you want the
+                                                embedded captions to override
+                                                the track captions for all users
+                                                (which is what will happen if
+                                                this attribute is defined).
+                                            </em>
+                                        </p>
+
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                    </ol>
+
+                </section>
+
+
+
+                <section tabindex="-1" id="video-source-vimeo">
+
+                    <h4>Vimeo Source Element</h4>
+
+                    <p id="code-video-source-vimeo-description">
+                        For Vimeo content, a single source defines the
+                        <abbr title="Uniform Resource Locator">URL</abbr>
+                        and a proprietary type, and optionally controls the
+                        appearance and language of embedded Vimeo captions:
+                    </p>
+
+<figure class="code" id="code-video-source-vimeo">
+    <pre aria-describedby="code-video-source-vimeo-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><b>&lt;source</b><b> src=<u>"https://player.vimeo.com/video/12345"</u></b><b> type=<u>"video/x-vimeo"</u></b><b> data-captions=<u>"true"</u></b><b> data-captions-srclang=<u>"en"</u></b> <b>/&gt;</b></code></pre>
+</figure>
+
+                    <ol>
+
+                        <li>
+                            <details id="video-source-vimeo-src">
+                                <summary><code>"src"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        Specifies a Vimeo
+                                        <abbr title="Uniform Resource Locator">URL</abbr>,
+                                        such as
+                                        <code>"https://player.vimeo.com/video/12345"</code>.
+                                    </p>
+
+                                    <figure class="note">
+                                        <p>
+                                            <em>
+                                                Vimeo <abbr title="Uniform Resource Locators">URLs</abbr>
+                                                <strong>must not</strong> contain any query-string values.
+                                            </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="video-source-vimeo-type">
+                                <summary><code>"type"</code> <strong>(required)</strong></summary>
+                                <div>
+
+                                    <p>
+                                        This must have the exact value
+                                        <code>"video/x-vimeo"</code>,
+                                        which is a proprietary
+                                        value used by the script to
+                                        identify Vimeo content.
+                                    </p>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="video-source-vimeo-captions">
+                                <summary><code>"data-captions"</code> <small>(optional)</small></summary>
+                                <div>
+
+                                    <p>
+                                        Adding this attribute specifies that
+                                        embedded Vimeo captions should be
+                                        controllable via the player interface.
+                                    </p>
+                                    <p>
+                                        If present, the value of this attribute
+                                        controls whether the embedded captions
+                                        should be enabled (<code>"true"</code>)
+                                        or disabled (<code>"false"</code>) by
+                                        default.
+                                    </p>
+                                    <figure class="note">
+                                       <p>
+                                            <em>
+                                                Embedded captions in Vimeo
+                                                videos are usually removed in
+                                                favour of
+                                                <a href="#captions-track">track captions</a>,
+                                                so that you don't see both sets
+                                                of captions at the same time.
+                                                But if you don't have any
+                                                track captions and the video
+                                                does have embedded captions,
+                                                then you can use this attribute
+                                                to provide control over them.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                This functionality is provided
+                                                for convenience, but is not the
+                                                best approach, since only track
+                                                captions can be used
                                                 to create a transcript.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                However, track captions cannot
+                                                be shown for Vimeo videos
+                                                on the iPhone or iPad.
+                                                If you do have track captions
+                                                <strong>and</strong> the video
+                                                has embedded captions,
+                                                then the embedded captions will
+                                                still be available to iOS users.
+                                                Having both will allow a transcript
+                                                to be created from the track
+                                                captions, and for
+                                                those to be shown on the
+                                                video for most users, while
+                                                embedded captions are shown
+                                                on the video for iOS users.
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                This combined behaviour is enabled
+                                                by default. If you have both, then
+                                                the <code>"data-captions"</code>
+                                                attribute <strong>should not</strong>
+                                                be included, unless you want the
+                                                embedded captions to override
+                                                the track captions for all users
+                                                (which is what will happen if
+                                                this attribute is defined).
+                                            </em>
+                                        </p>
+                                        <p>
+                                            <em>
+                                                The default appearance of embedded
+                                                captions cannot be controlled for
+                                                iOS devices: the Vimeo
+                                                <abbr title="Application Programming Interface">API</abbr>
+                                                ignores the relevant commands,
+                                                and always shows captions enabled,
+                                                however the Vimeo player interface
+                                                does provide control during playback.
+                                           </em>
+                                        </p>
+                                    </figure>
+
+                                </div>
+                            </details>
+                        </li>
+
+                        <li>
+                            <details id="video-source-vimeo-captions-srclang">
+                                <summary><code>"data-captions-srclang"</code> <small>(optional)</small></summary>
+                                <div>
+
+                                    <p>
+                                        If you're using the
+                                        <a href="#video-source-vimeo-captions"><code>data-captions</code></a>
+                                        attribute to control embedded Vimeo captions,
+                                        then this can specify the
+                                        <abbr title="International Standards Organisation">ISO</abbr>
+                                        language code of the captions to load.
+                                    </p>
+                                    <p>
+                                        If this attribute is omitted,
+                                        it defaults to <code>"en"</code>.
+                                    </p>
+                                    <figure class="note">
+                                       <p>
+                                            <em>
+                                                If the video doesn't have embedded captions for
+                                                the specified language, then embedded captions
+                                                will not be available at all in most browsers.
+                                                OzPlayer does not currently support
+                                                multi-language selection for embedded
+                                                Vimeo captions.
+                                            </em>
+                                        </p>
+                                       <p>
+                                            <em>
+                                                The default language of embedded
+                                                captions cannot be controlled for
+                                                iOS devices: the Vimeo
+                                                <abbr title="Application Programming Interface">API</abbr>
+                                                ignores the relevant commands,
+                                                and always shows the default
+                                                language, however the Vimeo player
+                                                interface does provide controls
+                                                for language selection during
+                                                playback.
                                             </em>
                                         </p>
                                     </figure>
@@ -700,14 +1015,14 @@
                                         <p>
                                             <em>
                                                 Although OzPlayer supports both
-                                                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Video_Text_Tracks_Format">WebVTT</a>
-                                                and <a href="https://en.wikipedia.org/wiki/SubRip#SubRip_text_file_format">SRT</a>
-                                                formats, only WebVTT is supported
+                                                WebVTT and SRT formats,
+                                                only WebVTT is supported
                                                 natively by browsers. So if the
                                                 video is played without scripting,
                                                 only WebVTT captions will work,
                                                 and therefore this format is
-                                                recommended in preference to SRT.
+                                                strongly recommended in
+                                                preference to SRT.
                                             </em>
                                         </p>
                                         <p>
@@ -784,9 +1099,9 @@
                                                 be used with caution
                                                 &#x2014; reserved for cases
                                                 where you have no alternative,
-                                                or for use with YouTube videos
-                                                (which aren't supported without
-                                                scripting anyway).
+                                                or with media formats that
+                                                aren't supported without
+                                                scripting anyway.
                                             </em>
                                         </p>
                                     </figure>
@@ -1000,7 +1315,7 @@
                                 <div>
 
                                     <p>
-                                        Specifies what kind of meta-data
+                                        Specifies what kind of metadata
                                         this is, which must have the exact value
                                         <code>"transcript"</code>.
                                     </p>
@@ -1132,7 +1447,7 @@
                                 <div>
 
                                     <p>
-                                        Specifies what kind of meta-data
+                                        Specifies what kind of metadata
                                         this is, which must have the exact value
                                         <code>"xad"</code>.
                                     </p>
@@ -1146,8 +1461,8 @@
                     <figure class="note">
                         <p>
                             <em>
-                                Extended Audio Descriptions are not supported
-                                with YouTube or Flash videos.
+                                Extended Audio Descriptions are only supported
+                                with standard HTML5 video (MP4 or WebM).
                             </em>
                         </p>
                     </figure>
@@ -1162,9 +1477,11 @@
 
                     <p id="code-fallback-description">
                         The fallback content container is a wrapper for
-                        any content you want to show to older browsers,
-                        i.e. those which don't support the video sources
-                        or the Flash replacement:
+                        any content you want to show to incompatible browsers,
+                        i.e. those that don't support the script nor
+                        natively support any of the media sources you're using,
+                        or that do support the script but don't support any of
+                        the media sources nor their replacement shims.
                     </p>
 
 <figure class="code" id="code-fallback">
@@ -1205,7 +1522,7 @@
                             <em>
                                 The fallback content can be anything you like,
                                 but a good recommendation is to include a set of
-                                links to download the video and captions files:
+                                links to download the media and captions files:
                             </em>
                         </p>
 
@@ -1214,8 +1531,8 @@
          contentEditable="true" tabindex="0" spellcheck="false"
          class="html"><b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
     <b>&lt;ul</b><b>&gt;</b>
-        <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
         <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.webm"</u></b><b>&gt;</b>Download WebM<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+        <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
         <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
     <b>&lt;/ul</b><b>&gt;</b>
 <b>&lt;/div</b><b>&gt;</b></code></pre>
@@ -1235,16 +1552,20 @@
                                 content directly inside the
                                 <a href="#video">video element</a>, it must
                                 always be inside the fallback container.
+                                The fallback container itself must be a child
+                                of the <a href="#container">player container</a>.
                             </em>
                         </p>
                         <p>
                             <em>
-                                If you're using OzPlayer within a
-                                <a href="#container-data-responsive">responsive layout</a>
-                                then you should avoid having any large content
-                                (such as an image) inside the fallback container,
-                                because it <strong>won't be resized</strong>
-                                to match the responsive container.
+                                Content within the fallback container
+                                will not be included in OzPlayer's
+                                <a href="#container-data-responsive">responsive resizing</a>
+                                functionality, because the triggering of fallback
+                                content also terminates script execution.
+                                You can of course handle this yourself,
+                                using whatever responsive techniques
+                                are appropriate to your site design.
                             </em>
                         </p>
                     </figure>
@@ -1280,7 +1601,7 @@
 
                                 <p>
                                     The player width in pixels, which must
-                                    be <code>240</code> or more.
+                                    be <code>300</code> or more.
                                 </p>
                                 <p>
                                     If this attribute is not defined, the
@@ -1356,10 +1677,8 @@
                                     </p>
                                     <p>
                                         <em>
-                                            Preloading is not supported on
-                                            mobile devices (running iOS, Android
-                                            or Windows Mobile), which is system
-                                            behaviour that can't be changed.
+                                            Preloading is not supported on iOS
+                                            or Android devices.
                                         </em>
                                     </p>
                                 </figure>
@@ -1392,6 +1711,23 @@
 
                 </ol>
 
+                <figure class="note">
+                    <p>
+                        <em>
+                            Autoplay is explicitly not supported. Any <code>autoplay</code>
+                            attribute will be removed when OzPlayer initialises,
+                            and if the audio has already started to play at this point,
+                            it will be stopped and reset to the beginning.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            The <code>loop</code> attribute is also
+                            not supported and will be removed.
+                        </em>
+                    </p>
+                </figure>
+
 
 
                 <section tabindex="-1" id="audio-only-source">
@@ -1406,8 +1742,8 @@
 <figure class="code" id="code-audio-only-source">
 <pre aria-describedby="code-audio-only-source-description"><code
      contentEditable="true" tabindex="0" spellcheck="false"
-     class="html"><b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
-<b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b></code></pre>
+     class="html"><b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+<b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                     <ol>
@@ -1444,12 +1780,11 @@
                     <figure class="note">
                         <p>
                             <em>
-                                For best cross-browser compatibility you should
-                                include <strong>two audio sources</strong>
-                                &#x2014; one encoded as MP3 and the other as
-                                OGG, which between them will work in every
-                                browser that OzPlayer supports. The Flash
-                                fallback player uses MP3.
+                                Multiple audio sources should be defined if your
+                                primary format is not supported by all browsers,
+                                e.g. if your primary source is OGG, then you'll
+                                also need a secondary MP3 source to support
+                                browsers that can't decode OGG.
                             </em>
                         </p>
                         <p>
@@ -1516,7 +1851,7 @@
 
                     <p>
                         This is defined in exactly the same way as the
-                        <a href="#transcript-track">video fallback content container</a>.
+                        <a href="#fallback">video fallback content container</a>.
                     </p>
 
                 </section>
@@ -1534,7 +1869,7 @@
                 <p id="code-audio-description">
                     The audio element specifies whether audio descriptions
                     are enabled by default, and controls preloading for
-                    browsers which don't support them:
+                    browsers that don't support them:
                 </p>
 
 <figure class="code" id="code-audio">
@@ -1577,11 +1912,11 @@
                                 </p>
                                 <p>
                                     For browsers that do support audio
-                                    descriptions, the <a href="#video-preload">
-                                        video's preload setting</a> will be
-                                    used, so the audio preload is only used by
-                                    browsers which don't support them, or where
-                                    scripting is unavailable.
+                                    descriptions, the
+                                    <a href="#video-preload">video's preload setting</a>
+                                    will be used, so the audio preload attribute
+                                    is only used by browsers which don't support them,
+                                    or where scripting is unavailable.
                                 </p>
 
                             </div>
@@ -1613,8 +1948,8 @@
 <figure class="code" id="code-audio-source">
     <pre aria-describedby="code-audio-source-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
-<b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b></code></pre>
+         class="html"><b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+<b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                     <ol>
@@ -1651,11 +1986,11 @@
                     <figure class="note">
                         <p>
                             <em>
-                                For best cross-browser compatibility you should
-                                include <strong>two audio sources</strong>
-                                &#x2014; one encoded as MP3 and the other as
-                                OGG, which between them will work in every
-                                browser which supports audio descriptions.
+                                Multiple audio sources should be defined if your
+                                primary format is not supported by all browsers,
+                                e.g. if your primary source is OGG, then you'll
+                                also need a secondary MP3 source to support
+                                browsers that can't decode OGG.
                             </em>
                         </p>
                         <p>
@@ -1734,9 +2069,17 @@
                 <figure class="note">
                     <p>
                         <em>
-                            OzPlayer will automatically compare these attributes
+                            OzPlayer will compare these attributes
                             with the current page address, to determine whether
                             the <q>AD</q> button should be highlighted.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            If these attributes are used, the
+                            <code>&lt;audio&gt;</code> element
+                            <strong>must not</strong> contain any
+                            <code>&lt;source&gt;</code> elements.
                         </em>
                     </p>
                 </figure>

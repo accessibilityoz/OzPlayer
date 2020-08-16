@@ -163,6 +163,11 @@
     <!-- MediaElement library (this must be in the head) -->
     <script src="./ozplayer-core/mediaelement.js" type="text/javascript"></script>
 
+    <!-- MediaElement renderers -->
+    <script src="./ozplayer-core/vimeo.js" type="text/javascript"></script>
+    <!--
+    -->
+
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
     <link rel="stylesheet" href="./ozplayer-core/ozplayer.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
@@ -209,22 +214,43 @@
             width="480" height="270"
             width="400" height="225"
             width="320" height="180"
+            width="300" height="169"
             width="272" height="153"
             width="240" height="135"
         -->
 
         <video
-            width="272" height="153"
-            poster="./media/posters/HorribleHistories.jpg"
             preload="none"
             controls="controls"
+            playsinline="playsinline"
+            poster="./media/posters/HorribleHistories.jpg"
             >
+
+
+<?php if(isset($_GET['video']) && $_GET['video'] == 'facebook') : ?>
+
+            <source src="http://www.facebook.com/facebook/videos/10155278547321729" type="video/x-facebook" />
+
+            <!--
+            <source src="https://player.vimeo.com/video/108018156" type="video/x-vimeo" />
+
+            <source src="https://www.youtube.com/watch?v=K7STM0WhjHU" type="video/x-youtube" />
+
+            <source src="//www.youtube.com/watch?v=Z7x4ZS7ZZWc" type="video/x-youtube" data-captions="true" />
+
+            <source src="./media/videos/ozplayer.mp4" type="video/mp4" />
+            <source src="./media/videos/ozplayer.webm" type="video/webm" />
+
+            <source src="https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8" type="application/x-mpegURL" />
+
+            <source src="https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd" type="application/dash+xml" />
+            -->
+
+<?php else : ?>
 
             <source src="./media/videos/HorribleHistories-VileVictorians.mp4" type="video/mp4" />
             <source src="./media/videos/HorribleHistories-VileVictorians.webm" type="video/webm" />
 
-
-            <!--
             <track src="./media/captions/de/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="de" label="Deutsch" />
             <track src="./media/captions/en/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="en" label="English" default="default" />
             <track src="./media/captions/es/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="es" label="Español" />
@@ -237,16 +263,17 @@
             <track src="./media/captions/fr/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="fr-xx" label="Français" />
             <track src="./media/captions/pa/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="pa-xx" label="ਪਜਾਬੀ ਦ" />
             <track src="./media/captions/tlh/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="tlh-xx" label="TlhIngan" />
+            <!--
             -->
 
             <!--
-            -->
             <track src="./media/captions/de/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="de" label="Deutsch" />
             <track src="./media/captions/en/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="en" label="English captions with a very long label" default="default" />
             <track src="./media/captions/es/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="es" label="Español" />
             <track src="./media/captions/fr/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="fr" label="Français" />
             <track src="./media/captions/pa/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="pa" label="ਪਜਾਬੀ ਦ" />
             <track src="./media/captions/tlh/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="tlh" label="TlhIngan" />
+            -->
 
             <!--
             <track src="./media/captions/de/HorribleHistories-VileVictorians.vtt" kind="captions" srclang="de" label="Deutsche Bildunterschriften die in Deutscher sprache sind" />
@@ -270,48 +297,7 @@
             -->
 
 
-
-            <!--
-            <source src="//player.vimeo.com/video/33340864" type="video/x-vimeo" />
-
-            <source src="https://vimeo.com/33340864" type="video/x-vimeo" />
-
-            <source src="//www.youtube.com/watch?v=NPVlljVWqBg" type="video/x-youtube" />
-
-            <source src="//www.youtube.com/watch?v=pkHe4YCHd8o" type="video/x-youtube" />
-
-            <source src="http://www.youtube.com/watch?v=ty8QtaSKw_U" type="video/x-youtube" />
-            <track src="./media/captions/proxy.php?src=http://tvguide.lastown.com/bbc/subtitles/hustle-series-8/episode-2.srt"
-                   data-sync="3.6" kind="captions" srclang="en" default="default" />
-
-            <source src="./media/videos/Hustle-PicassoFingerPainting.mp4" type="video/mp4" />
-            <source src="./media/videos/Hustle-PicassoFingerPainting.webm" type="video/webm" />
-            <track src="./media/captions/en/Hustle-PicassoFingerPainting.vtt"
-                   data-sync="3.6" kind="captions" srclang="en" default="default" />
-
-            <source src="http://player.vimeo.com/external/85624400.sd.mp4?s=4ca2f9e54923b5cb4774e7afe6764a40" type="video/mp4" />
-            <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
-            <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
-
-            <source src="./media/videos/BrainSurgerySketch.mp4" type="video/mp4" />
-            <source src="./media/videos/BrainSurgerySketch.webm" type="video/webm" />
-            <track src="./media/captions/en/BrainSurgerySketch.vtt" kind="captions" srclang="en" default="default" />
-            <track src="./media/captions/de/BrainSurgerySketch.vtt" kind="captions" srclang="de" />
-
-
-            <source src="http://dhjrqu8yhdp3e.cloudfront.net/media/ozplayer.mp4" type="video/mp4" />
-            <source src="http://dhjrqu8yhdp3e.cloudfront.net/media/ozplayer.webm" type="video/webm" />
-
-            <source src="./media/videos/ozplayer.mp4" type="video/mp4" />
-            <source src="./media/videos/ozplayer.webm" type="video/webm" />
-
-            <source src="//www.youtube.com/watch?v=EzbETcExSwE" type="video/x-youtube" />
-
-            <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
-            <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
-            -->
-
-
+<?php endif; ?>
 
             <!-- (EITHER) this format provides static fallback content when applicable -->
             <div class="ozplayer-fallback">

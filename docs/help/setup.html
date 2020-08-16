@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 3.5.1 Setup Guide</title>
+    <title>OzPlayer 4.0 Setup Guide</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 3.5.1 Setup Guide</h1>
+        <h1>OzPlayer 4.0 Setup Guide</h1>
 
         <p>
             OzPlayer uses
@@ -329,7 +329,7 @@
                             video will default to
                             <code>400</code> &#x00d7; <code>225</code>.
                             The absolute minimum size you can specify is
-                            <code>240</code> &#x00d7; <code>135</code>.
+                            <code>300</code> &#x00d7; <code>169</code>.
                             If you're using responsive design, then the
                             recommendation is to take a mobile-first approach,
                             and set the default width and height to match your
@@ -338,8 +338,11 @@
                     </p>
                     <p>
                         <em>
-                            If you don't define a poster then it will show a
-                            black background (except for YouTube videos).
+                            Posters are not supported with YouTube or Vimeo content,
+                            they will show a static frame by default, as specified
+                            in their creators. For all other video types, the
+                            player will show a black background if a poster
+                            image is not specified.
                         </em>
                     </p>
                 </figure>
@@ -362,8 +365,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
 
     <small>&lt;/video&gt;</small>
 
@@ -376,15 +379,34 @@
                         required.
                     </p>
 
+                    <p>
+                        The mime-types for WebM and MP4 are shown in the
+                        previous example. The mime-type for HLS should be
+                        <code>"application/x-mpegURL"</code>, or for MPEG-DASH
+                        it should be <code>"application/dash+xml"</code>.
+                    </p>
+
                     <figure class="note">
                         <p>
                             <em>
-                                For best cross-browser compatibility you should
-                                include <strong>two video sources</strong>
-                                &#x2014; one encoded as MP4 and the other as
-                                WebM,  which between them will work in every
-                                browser that OzPlayer supports. The Flash
-                                fallback player uses MP4.
+                                Multiple video sources should be defined if your
+                                primary format is not supported by all browsers,
+                                e.g. if your primary source is WebM, then you'll
+                                also need a secondary MP4 source to support
+                                browsers that can't decode WebM.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                If you're using HLS video then only
+                                one video is source is required, since browsers
+                                that don't support it natively will use a
+                                JavaScript shim. However <strong>this is not
+                                supported for MPEG-DASH in iOS</strong>,
+                                and therefore if you're using that format then
+                                a secondary MP4 would also be required to
+                                support iOS devices, otherwise they'll only see the
+                                <a href="#markup-fallback">fallback content</a>.
                             </em>
                         </p>
                         <p>
@@ -397,7 +419,7 @@
                     </figure>
 
                     <p id="code-markup-video-sources-youtube-description">
-                        To play a YouTube video you only need a single
+                        To play YouTube content you only need a single
                         <code>SOURCE</code>, with a YouTube
                         <abbr title="Uniform Resource Locator">URL</abbr> and
                         a type of <code>"video/x-youtube"</code>:
@@ -408,9 +430,30 @@
          contentEditable="true" tabindex="0" spellcheck="false"
          class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
 
-    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
+    <small>&lt;video width="640" height="360" controls="controls"&gt;</small>
 
         <b>&lt;source</b><b> src=<u>"http://www.youtube.com/watch?v=12345"</u></b><b> type=<u>"video/x-youtube"</u></b> <b>/&gt;</b>
+
+    <small>&lt;/video&gt;</small>
+
+<small>&lt;/div&gt;</small></code></pre>
+</figure>
+
+                    <p id="code-markup-video-sources-vimeo-description">
+                        Similarly, for Vimeo content the <code>SOURCE</code>
+                        would have a Vimeo
+                        <abbr title="Uniform Resource Locator">URL</abbr> and
+                        a type of <code>"video/x-vimeo"</code>:
+                    </p>
+
+<figure class="code" id="code-markup-video-sources-vimeo">
+    <pre aria-describedby="code-markup-video-sources-vimeo-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
+
+    <small>&lt;video width="640" height="360" controls="controls"&gt;</small>
+
+        <b>&lt;source</b><b> src=<u>"https://player.vimeo.com/video/12345"</u></b><b> type=<u>"video/x-vimeo"</u></b> <b>/&gt;</b>
 
     <small>&lt;/video&gt;</small>
 
@@ -423,6 +466,13 @@
                                 YouTube <abbr title="Uniform Resource Locators">URLs</abbr>
                                 <strong>must not</strong> contain any query-string
                                 values apart from the video <code>ID</code>.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                Vimeo <abbr title="Uniform Resource Locators">URLs</abbr>
+                                <strong>must not</strong> contain any query-string
+                                values at all.
                             </em>
                         </p>
                     </figure>
@@ -474,8 +524,8 @@
 
     <small>&lt;audio data-width="640" preload="none" controls="controls"&gt;</small>
 
-        <b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
 
     <small>&lt;/audio&gt;</small>
 
@@ -485,12 +535,11 @@
                     <figure class="note">
                         <p>
                             <em>
-                                For best cross-browser compatibility you should
-                                include <strong>two audio sources</strong>
-                                &#x2014; one encoded as MP3 and the other as
-                                OGG,  which between them will work in every
-                                browser that OzPlayer supports. The Flash
-                                fallback player uses MP3.
+                                Multiple audio sources should be defined if your
+                                primary format is not supported by all browsers,
+                                e.g. if your primary source is OGG, then you'll
+                                also need a secondary MP3 source to support
+                                browsers that can't decode OGG.
                             </em>
                         </p>
                         <p>
@@ -502,8 +551,8 @@
                         </p>
                         <p>
                             <em>
-                                YouTube sources are not supported for the
-                                audio-only player.
+                                YouTube and Vimeo sources are not supported
+                                for the audio-only player.
                             </em>
                         </p>
                     </figure>
@@ -533,10 +582,10 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
-        <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b> <b>/&gt;</b>
+        <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
 
     <small>&lt;/video&gt;</small>
 
@@ -545,54 +594,22 @@
 
                 <p>
                     Each track has three required attributes &#x2014; an
-                    <code>src</code> which points to the captions file
-                    (in WebVTT or SRT format), a <code>kind</code> attribute
-                    which must have the value <code>"captions"</code>, and an
-                    <code>srclang</code> which specifies the
+                    <code>src</code> which points to a captions file,
+                    a <code>kind</code> attribute which must have the value
+                    <code>"captions"</code>, and an <code>srclang</code> which
+                    specifies the
                     <abbr title="International Standards Organisation">ISO</abbr>
-                    language code.
+                    language code. The <code>default</code> attribute specifies
+                    that the captions should be switched on by default,
+                    however this is optional.
                 </p>
-
-                <figure class="note">
-                    <p>
-                        <em>
-                            Although OzPlayer supports both WebVTT and SRT
-                            formats, only WebVTT is supported natively by
-                            browsers. So if the video is played without
-                            scripting, only WebVTT captions will work,
-                            and therefore this format is recommended in
-                            preference to SRT.
-                        </em>
-                    </p>
-                </figure>
-
-                <p id="code-markup-captions-default-description">
-                    The example above has the captions switched off by default,
-                    but it's better to have them switched on by default, by
-                    adding a <code>default</code> attribute:
-                </p>
-
-<figure class="code" id="code-markup-captions-default">
-    <pre aria-describedby="code-markup-captions-default-description"><code
-         contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;div id="demo" class="ozplayer" data-transcript="demo-transcript"&gt;</small>
-
-    <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
-
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
-        <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
-
-        <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en"<b> default=<u>"default"</u></b> /&gt;</small>
-
-    <small>&lt;/video&gt;</small>
-
-<small>&lt;/div&gt;</small></code></pre>
-</figure>
 
                 <p id="code-markup-captions-languages-description">
                     You can also specify multiple languages by adding multiple
                     tracks, each with different <code>src</code>,
-                    <code>srclang</code> and <code>label</code> attributes:
+                    <code>srclang</code> and <code>label</code> attributes,
+                    and the <code>default</code> attribute used to specify
+                    which language is shown by default:
                 </p>
 
 <figure class="code" id="code-markup-captions-languages">
@@ -602,8 +619,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <b>&lt;track</b><b> src=<u>"./media/en/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> label=<u>"English"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
         <b>&lt;track</b><b> src=<u>"./media/de/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"de"</u></b><b> label=<u>"Deutsch"</u></b> <b>/&gt;</b>
@@ -623,13 +640,6 @@
                     </p>
                     <p>
                         <em>
-                            If you're using the <code>default</code> attribute,
-                            then it should only be added to <strong>one</strong>
-                            of the tracks, to specify which will be shown by default.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
                             Track labels should be in the same language as the
                             captions themselves, e.g. for captions in German the
                             label would be <code>"Deutsch"</code> rather than
@@ -639,52 +649,6 @@
                 </figure>
 
 
-
-                <section tabindex="-1" id="markup-captions-youtube">
-
-                    <h4>Embedded YouTube Captions</h4>
-
-
-                    <p>
-                        If you're using a YouTube video which already has
-                        embedded captions, then these will be switched off in
-                        favour of the captions added using
-                        <code>TRACK</code> elements, so that you don't
-                        see both sets of captions at the same time.
-                    </p>
-
-                    <p id="code-markup-captions-youtube-description">
-                        Alternatively, if the video has embedded captions but
-                        you <strong>don't</strong> have any <code>TRACK</code>
-                        elements defined, then the player controls can still be
-                        used to switch the embedded captions
-                        on and off. To enable this feature you should add a
-                        <code>"data-captions"</code> attribute to the
-                        <code>SOURCE</code> element, with a value of
-                        <code>"true"</code> or <code>"false"</code> to specify
-                        whether the embedded captions are enabled by default:
-                    </p>
-
-<figure class="code" id="code-markup-captions-youtube">
-    <pre aria-describedby="code-markup-captions-youtube-description"><code
-         contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;source src="http://www.youtube.com/watch?v=12345" type="video/x-youtube"</small><b> data-captions=<u>"true"</u></b><small> /&gt;</small></code></pre>
-</figure>
-
-                <figure class="note">
-                    <p>
-                        <em>
-                            This functionality is provided for convenience, but
-                            is not the best approach, since embedded YouTube
-                            captions cannot be used to create a transcript.
-                            The recommended approach is to use a
-                            <code>TRACK</code> element to provide
-                            parseable captions data.
-                        </em>
-                    </p>
-                </figure>
-
-                </section>
 
             </section>
 
@@ -707,8 +671,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -755,8 +719,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/en/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
         <small>&lt;track src="./media/de/captions.vtt" kind="captions" srclang="de" /&gt;</small>
@@ -802,8 +766,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -822,13 +786,17 @@
                     This can be any element, but its <code>class</code> name
                     must be exactly as shown.
                 </p>
-
+                <p>
+                    Most users will never see this, it's only for incompatible
+                    browsers &#x2014; those that don't support the script nor
+                    natively support any of the media sources you're using,
+                    or that do support the script but don't support any of
+                    the media sources nor their replacement shims.
+                </p>
                 <p id="code-markup-fallback-content-description">
-                    Most will never see this, it's only for very old
-                    browsers &#x2014; those which don't support the script
-                    nor have Flash or native video support. You don't need to do
-                    anything particularly special, but it's a good idea to provide
-                    at least some links to download the video and captions files:
+                    The fallback content can be anything you like,
+                    but a good recommendation is to include a set of links
+                    to download the media and captions files:
                 </p>
 
 <figure class="code" id="code-markup-fallback-content">
@@ -838,8 +806,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -848,8 +816,8 @@
         <small>&lt;div class="ozplayer-fallback"&gt;</small>
 
             <b>&lt;ul</b><b>&gt;</b>
-                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
                 <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.webm"</u></b><b>&gt;</b>Download WebM<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
                 <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
             <b>&lt;/ul</b><b>&gt;</b>
 
@@ -865,7 +833,7 @@
                         <em>
                             Once the player is up and running, you can test how
                             the fallback content will appear by temporarily
-                            removing all the <code>SOURCE</code> elements.
+                            removing all the video <code>SOURCE</code> elements.
                         </em>
                     </p>
                 </figure>
@@ -892,8 +860,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -926,8 +894,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -971,8 +939,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -1018,8 +986,8 @@
 
     <small>&lt;video width="640" height="360" poster="./media/poster.jpg" preload="none" controls="controls"&gt;</small>
 
-        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
         <small>&lt;source src="./media/video.webm" type="video/webm" /&gt;</small>
+        <small>&lt;source src="./media/video.mp4" type="video/mp4" /&gt;</small>
 
         <small>&lt;track src="./media/captions.vtt" kind="captions" srclang="en" default="default" /&gt;</small>
 
@@ -1033,8 +1001,8 @@
 
     <small>&lt;audio preload="none" data-default="default"&gt;</small>
 
-        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
 
     <small>&lt;/audio&gt;</small>
 
@@ -1050,11 +1018,11 @@
                     <figure class="note">
                         <p>
                             <em>
-                                For best cross-browser compatibility you should
-                                include <strong>two audio sources</strong>
-                                &#x2014; one encoded as MP3 and the other as
-                                OGG, which between them will work in every
-                                browser which supports audio descriptions.
+                                Multiple audio sources should be defined if your
+                                primary format is not supported by all browsers,
+                                e.g. if your primary source is OGG, then you'll
+                                also need a secondary MP3 source to support
+                                browsers that can't decode OGG.
                             </em>
                         </p>
                         <p>
@@ -1099,10 +1067,11 @@
 </figure>
 
                 <p>
-                    Each page should have an instance of the player with different
-                    video sources (i.e. one with built-in audio and one without),
-                    then OzPlayer will compare the page addresses when it loads,
-                    to determine whether the <q>AD</q> button should be highlighted.
+                    Each of those pages would have an instance of the player
+                    with different video sources (i.e. one with built-in audio
+                    descriptions, and one without), then OzPlayer will compare
+                    the page addresses when it loads, to determine whether
+                    the <q>AD</q> button should be highlighted.
                 </p>
 
             </section>
@@ -1125,8 +1094,8 @@
 
     <b>&lt;video</b><b> width=<u>"640"</u></b><b> height=<u>"360"</u></b><b> poster=<u>"./media/poster.jpg"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b>
 
-        <b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/video.webm"</u></b><b> type=<u>"video/webm"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/video.mp4"</u></b><b> type=<u>"video/mp4"</u></b> <b>/&gt;</b>
 
         <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
 
@@ -1134,8 +1103,8 @@
 
         <b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
             <b>&lt;ul</b><b>&gt;</b>
-                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
                 <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.webm"</u></b><b>&gt;</b>Download WebM<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/video.mp4"</u></b><b>&gt;</b>Download MP4<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
                 <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
             <b>&lt;/ul</b><b>&gt;</b>
         <b>&lt;/div</b><b>&gt;</b>
@@ -1144,8 +1113,8 @@
 
     <b>&lt;audio</b><b> preload=<u>"none"</u></b><b> data-default=<u>"default"</u></b><b>&gt;</b>
 
-        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
 
     <b>&lt;/audio</b><b>&gt;</b>
 
@@ -1198,8 +1167,8 @@
 
     <b>&lt;audio</b><b> preload=<u>"none"</u></b><b> data-default=<u>"default"</u></b><b>&gt;</b>
 
-        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/descriptions.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/descriptions.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
 
     <b>&lt;/audio</b><b>&gt;</b>
 
@@ -1207,35 +1176,6 @@
 
 <b>&lt;div</b><b> id=<u>"demo-transcript"</u></b><b> class=<u>"ozplayer-transcript"</u></b><b>&gt;</b><b>&lt;/div</b><b>&gt;</b></code></pre>
 </figure>
-
-                <figure class="note">
-                    <p>
-                        <em>
-                            The video <code>SOURCE</code> <code>src</code> can
-                            use the format of a standard YouTube
-                            <abbr title="Uniform Resource Locator">URL</abbr>,
-                            such as
-                            <code>"http://www.youtube.com/watch?v=12345"</code>.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
-                            Or it can use a short-link such as
-                            <code>"http://youtu.be/12345"</code>
-                            or an embeddable
-                            <abbr title="Uniform Resource Locator">URL</abbr>
-                            like
-                            <code>"//www.youtube.com/embed/12345"</code>.
-                        </em>
-                    </p>
-                    <p>
-                        <em>
-                            The <code>VIDEO</code> <code>poster</code> and
-                            <code>preload</code> attributes are not supported
-                            with YouTube videos.
-                        </em>
-                    </p>
-                </figure>
 
                 <p id="code-complete-audio-only-description">
                     Here's an example for an audio-only player:
@@ -1248,8 +1188,8 @@
 
     <b>&lt;audio</b><b> data-width=<u>"640"</u></b><b> preload=<u>"none"</u></b><b> controls=<u>"controls"</u></b><b>&gt;</b>
 
-        <b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
         <b>&lt;source</b><b> src=<u>"./media/audio.ogg"</u></b><b> type=<u>"audio/ogg"</u></b> <b>/&gt;</b>
+        <b>&lt;source</b><b> src=<u>"./media/audio.mp3"</u></b><b> type=<u>"audio/mp3"</u></b> <b>/&gt;</b>
 
         <b>&lt;track</b><b> src=<u>"./media/captions.vtt"</u></b><b> kind=<u>"captions"</u></b><b> srclang=<u>"en"</u></b><b> default=<u>"default"</u></b> <b>/&gt;</b>
 
@@ -1257,8 +1197,8 @@
 
         <b>&lt;div</b><b> class=<u>"ozplayer-fallback"</u></b><b>&gt;</b>
             <b>&lt;ul</b><b>&gt;</b>
-                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/audio.mp3"</u></b><b>&gt;</b>Download MP3<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
                 <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/audio.ogg"</u></b><b>&gt;</b>Download OGG<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
+                <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/audio.mp3"</u></b><b>&gt;</b>Download MP3<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
                 <b>&lt;li</b><b>&gt;</b><b>&lt;a</b><b> href=<u>"./media/captions.vtt"</u></b><b>&gt;</b>Download Captions<b>&lt;/a</b><b>&gt;</b><b>&lt;/li</b><b>&gt;</b>
             <b>&lt;/ul</b><b>&gt;</b>
         <b>&lt;/div</b><b>&gt;</b>
@@ -1286,31 +1226,51 @@
             </p>
 
             <p id="code-head-core-description">
-                The first two go in the <code>HEAD</code> section, to define
-                the media library and the player's core style sheet:
+                The first thing in the <code>HEAD</code> section must be the media library:
             </p>
 
 <figure class="code" id="code-head-core">
     <pre aria-describedby="code-head-core-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/mediaelement.min.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+</figure>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+            <figure class="note">
+                <p>
+                    <em>
+                        Using the <code>?v=4.0</code> query string is recommended,
+                        to prevent caching issues when updating your version of
+                        OzPlayer.
+                    </em>
+                </p>
+            </figure>
+
+            <p id="code-head-renderers-description">
+                If you want to play Vimeo content
+                then you also need to include the control script
+                for its <abbr title="Application Programming Interface">API</abbr>:
+            </p>
+
+<figure class="code" id="code-head-renderers">
+    <pre aria-describedby="code-head-renderers-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
+<b>&lt;script</b><b> src=<u>"./ozplayer-core/vimeo.min.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <p id="code-head-highlights-description">
-                Third is the highlights style sheet, which applies the colours
-                and icons used in the player's controls:
+                Next is the player's core stylesheet, followed by the highlights
+                style sheet which applies the colours and icons used in the
+                player's controls:
             </p>
 
 <figure class="code" id="code-head-highlights">
     <pre aria-describedby="code-head-highlights-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
 
-<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css" media="all" type="text/css" /&gt;</small>
-
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-core/ozplayer.min.css?v=4.0"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-skin/highlights-purple.css?v=4.0"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
             <p>
@@ -1329,20 +1289,19 @@
             </ul>
 
             <p id="code-head-transcript-description">
-                The fourth and final addition to the <code>HEAD</code>
+                The final addition to the <code>HEAD</code>
                 is the transcript style sheet:
             </p>
 
 <figure class="code" id="code-head-transcript">
     <pre aria-describedby="code-head-transcript-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
 
-<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css" media="all" type="text/css" /&gt;</small>
+<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css?v=4.0" media="all" type="text/css" /&gt;</small>
+<small>&lt;link rel="stylesheet" href="./ozplayer-skin/highlights-purple.css?v=4.0" media="all" type="text/css" /&gt;</small>
 
-<small>&lt;link rel="stylesheet" href="./ozplayer-skin/highlights-purple.css" media="all" type="text/css" /&gt;</small>
-
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./transcript.css?v=4.0"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
             <p>
@@ -1382,21 +1341,20 @@
 <figure class="code" id="code-head-versions">
     <pre aria-describedby="code-head-versions-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
-
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.0/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                 <p>
                     If you want to edit the transcript style sheet so that it
                     matches your site design, please download it from
-                    <a href="http://ozplayer.global.ssl.fastly.net/3.5.1/transcript.css">
-                        http://ozplayer.global.ssl.fastly.net/3.5.1/transcript.css</a>
-                    and then use your local copy instead.
+                    <a href="http://ozplayer.global.ssl.fastly.net/4.0/transcript.css">
+                        http://ozplayer.global.ssl.fastly.net/4.0/transcript.css</a>
+                    and then include that local copy.
                 </p>
 
             </section>
@@ -1423,7 +1381,7 @@
 <figure class="code" id="code-body">
     <pre aria-describedby="code-body-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/ozplayer.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/ozplayer.min.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <p id="code-body-lang-description">
@@ -1434,9 +1392,8 @@
 <figure class="code" id="code-body-lang">
     <pre aria-describedby="code-body-lang-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
-
-<b>&lt;script</b><b> src=<u>"./ozplayer-lang/en.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
+<b>&lt;script</b><b> src=<u>"./ozplayer-lang/en.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <figure class="note">
@@ -1463,11 +1420,10 @@
 <figure class="code" id="code-body-config">
     <pre aria-describedby="code-body-config-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js" type="text/javascript"&gt;&lt;/script&gt;</small>
+         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
+<small>&lt;script src="./ozplayer-lang/en.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
 
-<small>&lt;script src="./ozplayer-lang/en.js" type="text/javascript"&gt;&lt;/script&gt;</small>
-
-<b>&lt;script</b><b> src=<u>"./config.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+<b>&lt;script</b><b> src=<u>"./config.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <p>
@@ -1544,7 +1500,7 @@
 
                 <p id="code-body-free-description">
                     If you're using the free or subscription version of OzPlayer,
-                    then you can load the player and language scripts from our
+                    then you can load the player script from our
                     <abbr title="Content Delivery Network">CDN</abbr>,
                     using <code>"ozplayer.free.js"</code> for the free version:
                 </p>
@@ -1552,9 +1508,7 @@
 <figure class="code" id="code-body-free">
     <pre aria-describedby="code-body-free-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
-
-<b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-lang/en.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
                 <p id="code-body-subs-description">
@@ -1564,16 +1518,14 @@
 <figure class="code" id="code-body-subs">
     <pre aria-describedby="code-body-subs-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
-
-<small>&lt;script src="//ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-lang/en.js" type="text/javascript"&gt;&lt;/script&gt;</small></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
                 <p>
                     If you want to edit the language script, please download it from
-                    <a href="http://ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-lang/en.js">
-                        http://ozplayer.global.ssl.fastly.net/3.5.1/ozplayer-lang/en.js</a>
-                    and then use your local copy instead.
+                    <a href="http://ozplayer.global.ssl.fastly.net/4.0/ozplayer-lang/en.js">
+                        http://ozplayer.global.ssl.fastly.net/4.0/ozplayer-lang/en.js</a>
+                    and then include that local copy.
                 </p>
 
             </section>
