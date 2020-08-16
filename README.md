@@ -20,8 +20,8 @@
 ## Top-Level Files
 
 * `responsive-audio.php` is a test page for the responsive audio-only player
-* `responsive.php` is a test page for the standard audio-only player
-* `responsive-test.php` is a test page for the responsive video player
+* `responsive.php` is a test page for the responsive video player
+* `test-audio.php` is a test page for the standard audio-only player
 * `test.js` is a test configuration script
 * `test.php` is a test page for the standard video player
 * `transcript-cue.png` is the transcript cue marker image for the **latest version**
