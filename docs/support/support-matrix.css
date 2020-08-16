@@ -34,13 +34,13 @@ table.matrix sup a:visited
 /* table caption */
 table.matrix caption
 {
-    margin:0 0 0.5em 14em;
+    margin:0 0 0.5em 8em;
 
     font-size:1.4em;
+    text-align:center;
 }
 table.matrix.formats caption
 {
-    margin-left:0;
 }
 
 /* dynamic caption scripting info */

@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer (Audio Demo)</title>
+    <title>OzPlayer (YouTube Demo)</title>
 
     <!-- (general demo styles, not required for player to function) -->
     <style type="text/css">
@@ -21,7 +21,7 @@
         {
             display:table;
             width:1%;
-            margin:30px auto;
+            margin:10px auto;
         }
 
     </style>
@@ -30,6 +30,9 @@
 
     <!-- MediaElement library (this must be in the head) -->
     <script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"></script>
+
+    <!-- Vimeo renderer script (this must come directly after MediaElement) -->
+    <script src="./ozplayer-core/vimeo.min.js?v=4.0" type="text/javascript"></script>
 
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
@@ -44,7 +47,7 @@
 <body>
 
 
-    <!-- player container
+    <!-- player markup:
          "id"                       can be anything, but must the same as in the config script
          "class"                    must be "ozplayer"
          "data-responsive"          optionally specifies the ID of a responsive container
@@ -52,23 +55,26 @@
                                     or omit the attribute entirely to disable responsive layout
          "data-transcript"          optionally specifies the ID of the transcript container
                                     or omit the attribute entirely for no transcript
+         "data-controls"            either "stack" for superimposed controls, or "row" for a separate row
     -->
-    <div id="demo" class="ozplayer" data-transcript="demo-transcript">
+    <div id="demo" class="ozplayer" data-transcript="demo-transcript" data-controls="row">
 
-        <!-- video element
-             "data-width"           player width can be anything, or defaults to 400 if omitted
-             "preload"              can be "none" (don't preload) or "auto" (do preload)
+        <!-- player video
+             "width"                can be anything, or defaults to 400 if omitted
+             "height"               can be anything, or defaults to 225 if omitted
              "controls"             must be "controls"
+             n.b. the "poster" and "preload" attributes won't have any effect:
+             => posters aren't implemented for vimeo videos because they would
+                obscure the default appearance which is part of user expectation
+             => loading is controlled by the vimeo server
         -->
-        <audio data-width="640" preload="none" controls="controls">
+        <video width="640" height="360" controls="controls">
 
-            <!-- one or more audio sources
-                 "src"              specifies the path to a video file
-                 "type"             specifies the mime-type e.g. "audio/mp3"
-                 n.b. for best browser support include both "mp3" and "ogg"
+            <!-- single vimeo video source
+                 "src"              specifies the vimeo URL
+                 "type"             must be "video/x-vimeo"
             -->
-            <source src="../media/audio.mp3" type="audio/mp3" />
-            <source src="../media/audio.ogg" type="audio/ogg" />
+            <source src="https://player.vimeo.com/video/12345" type="video/x-vimeo" />
 
             <!-- none or more caption/transcript language sources
                  "src"              specifies the path to a VTT or SRT file
@@ -100,19 +106,33 @@
 
             <!-- static fallback content (for when video sources are not supported)
                  "class"            must be "ozplayer-fallback"
-                 n.b. the content can be anything, but recommend including
-                 a set of links to download the video and captions files
+                 n.b. the content can be anything, but recommend a link to further info
                  n.b. ensure that any CSS you define for the fallback content
                  is specified with a descendent selector from ".ozplayer-fallback"
             -->
             <div class="ozplayer-fallback">
                 <ul>
-                    <li><a href="../media/audio.mp3">Download MP3</a></li>
-                    <li><a href="../media/audio.ogg">Download OGG</a></li>
-                    <li><a href="../media/captions-en.vtt">Download Captions <span lang="en">(English)</span></a></li>
-                    <li><a href="../media/captions-de.vtt">Download Captions <span lang="de">(Deutsch)</span></a></li>
+                    <li><a href="http://www.website.com/about-this-video">More about this video</a></li>
                 </ul>
             </div>
+
+        </video>
+
+        <!-- audio descriptions element
+             "data-default"         can be "default" to have descriptions enabled by default,
+                                    or omit the attribute entirely to have them off by default
+             "preload"              should be "none" to prevent preloading in unsupported browsers
+                                    n.b. in supported browsers the video's preload setting will be used
+        -->
+        <audio preload="none" data-default="default">
+
+            <!-- one or more audio sources
+                 "src"              specifies the path to an audio file
+                 "type"             specifies the mime-type e.g. "audio/mp3"
+                 n.b. for best browser support include both "mp3" and "ogg"
+            -->
+            <source src="../media/descriptions.mp3" type="audio/mp3" />
+            <source src="../media/descriptions.ogg" type="audio/ogg" />
 
         </audio>
 
@@ -128,7 +148,7 @@
 
         <!-- transcript expander trigger
              n.b. if the expander is present then this must be its first-child -->
-        <summary>Audio Transcript</summary>
+        <summary>Video Transcript</summary>
 
 
         <!-- optional player transcript container
@@ -151,7 +171,6 @@
     <script src="./ozplayer-core/ozplayer.min.js?v=4.0" type="text/javascript"></script>
     <!-- <script src="./ozplayer-lang/en.js?v=4.0" type="text/javascript"></script> -->
     <script src="config.js?v=4.0" type="text/javascript"></script>
-
 
 </body>
 </html>

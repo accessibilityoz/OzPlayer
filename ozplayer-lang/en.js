@@ -1,7 +1,7 @@
 /*******************************************************************************
- Copyright (c) 2013-8 AccessibilityOz        http://www.accessibilityoz.com.au/
+ Copyright (c) 2013-20 AccessibilityOz       http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [3.5.1] => interface language
+ OzPlayer [4.0] => interface language
  ------------------------------------------------------------------------------
 *******************************************************************************/
 (function(){var lang={
@@ -9,7 +9,7 @@
 
 
     //button labels and tooltips
-    //n.b. the % tokens represents dynamic text:
+    //n.b. the % tokens represent dynamic text:
     //%1 = the label attribute defined on the captions language's track element
     //%2 = the number of seconds' seeking controlled by rewind/forward buttons
     "button-playpause-off"      : "Play"
@@ -34,7 +34,7 @@
     ,"button-pin-on"            : "Unpin the controls"
 
     //button fallback text (e.g. when images are disabled)
-    //n.b. the % tokens represents dynamic text:
+    //n.b. the % tokens represent dynamic text:
     //%1 = the src attribute defined on the captions language's track element
     //%2 = the number of seconds' seeking controlled by rewind/forward buttons
     ,"text-playpause-off"       : "Play"
@@ -76,7 +76,7 @@
     ,"indicator-timeout"        : "Media failed to load."
 
     //transcript messages
-    //n.b. the % tokens represents dynamic text:
+    //n.b. the % tokens represent dynamic text:
     //%1 = the label attribute defined on the captions language's track element
     ,"transcript-off"           : "Transcript is off"
     ,"transcript-lang"          : "Transcript = %1"

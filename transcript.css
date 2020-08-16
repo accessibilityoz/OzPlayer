@@ -10,7 +10,6 @@
 /* transcript expander */
 .ozplayer-expander
 {
-    /* n.b. display is essential for html5 elements */
     display:block;
 
     margin:10px 0 0 0;
@@ -30,7 +29,6 @@
     position:relative;
     z-index:2000;
 
-    /* n.b. display is essential for html5 elements */
     display:block;
 
     padding:3px 10px 5px 10px;

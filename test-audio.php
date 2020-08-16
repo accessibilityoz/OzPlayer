@@ -116,6 +116,12 @@
     <!-- MediaElement library (this must be in the head) -->
     <script src="./ozplayer-core/mediaelement.js" type="text/javascript"></script>
 
+    <!-- MediaElement renderers -->
+    <!--
+    <script src="./ozplayer-core/vimeo.js" type="text/javascript"></script>
+    <script src="./ozplayer-core/facebook.js" type="text/javascript"></script>
+    -->
+
     <!-- required player + required highlights
          (these must go in order: player, highlights) -->
     <link rel="stylesheet" href="./ozplayer-core/ozplayer.css<?php echo('?nocache=' . microtime(true)); ?>" media="all" type="text/css" />
@@ -195,7 +201,13 @@
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch.mp3<?php echo('?nocache=' . microtime(true)); ?>" type="audio/mp3" />
             <source src="http://www.brothercake.com/clients/GianWild/VideoPlayer/media/descriptions/BrainSurgerySketch.ogg<?php echo('?nocache=' . microtime(true)); ?>" type="audio/ogg" />
             -->
+            <!--
+            <source src="https://player.vimeo.com/video/108018156" type="video/x-vimeo" />
+            <source src="//www.youtube.com/watch?v=Z7x4ZS7ZZWc" type="video/x-youtube" data-captions="true" />
+            -->
 
+            <!--
+            -->
             <track src="./media/captions/en/BrainSurgerySketch.vtt" kind="captions" srclang="en" label="English" />
             <track src="./media/captions/de/BrainSurgerySketch.vtt" kind="captions" srclang="de" label="Deutsch" />
             <track src="./media/captions/fr/BrainSurgerySketch.vtt" kind="captions" srclang="fr" label="Français" />

@@ -8,8 +8,8 @@ $jsfile = "$_GET[codebase]";
 $config = array
 (
     "do-compression"        => true,        //enable compression (master option)
-    "remove-debug"            => true,        //+ remove debug sections
-    "line-break-handling"    => 2            //+ line-break handling [2=remove, 1=reduce, 0=retain]
+    "remove-debug"          => true,        //+ remove debug sections
+    "line-break-handling"   => 2            //+ line-break handling [2=remove, 1=reduce, 0=retain]
 );
 
 //-- override config with GET value --//
@@ -64,7 +64,8 @@ $functions = array
     'definitelyMoveButtonTooltip','updateVisibleButtonTooltip',
     'maybeShowSliderTooltip','showSliderTooltip','definitelyMoveSliderTooltip',
 
-    'getSupportedType','getBaseVolume','yesCanPlay','getStampTime','getTimeStamp',
+    'getSupportedType','getVideoFallback','isThirdPartyMedia',
+    'getBaseVolume','yesCanPlay','getStampTime','getTimeStamp',
     'addStorageValue','getStorageValue',
     'getFullscreenModel','isFullscreen','enterFullscreen','leaveFullscreen',
 
@@ -81,7 +82,9 @@ $functions = array
 
     'getBufferData','isTimeBuffered',
 
-    'doResponsiveEvent','xadTracking','xadReset'
+    'doResponsiveEvent','xadTracking','xadReset',
+
+    'initMediaInterface','abandonMedia'
 
 );
 
@@ -149,10 +152,7 @@ $variables = array
     'formwidth','controlspace',
     'seekwidth','spacerwidth','volumewidth','volumemax',
 
-
-    //nb. this must be defined as a var because it's called using apply()
-    'getVideoFallback'
-
+    'initwait','dopause'
 );
 
 
