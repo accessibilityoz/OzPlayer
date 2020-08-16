@@ -522,8 +522,10 @@
     -->
 
     <!-- MediaElement renderers -->
+    <script src="./ozplayer-core/facebook.min.js" type="text/javascript"></script>
     <script src="./ozplayer-core/vimeo.min.js" type="text/javascript"></script>
     <!--
+    <script src="./ozplayer-core/facebook.js" type="text/javascript"></script>
     <script src="./ozplayer-core/vimeo.js" type="text/javascript"></script>
     -->
 
