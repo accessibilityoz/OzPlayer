@@ -9676,13 +9676,16 @@ var OzPlayer = (function()
         }
 
         // TL - update duration once player is ready
+        var loadedmetadata = etc.listen(player.media, 'loadedmetadata', function(e)
+        {
+            updateCurrentTimeInfo(player);
+        });
+
         var canplay = etc.listen(player.media, 'canplay', function(e)
         {
             //silence this event since we only need it once
             canplay.silence();
 
-            // Update TimeInfo to show media duration
-            updateCurrentTimeInfo(player);
         });
 
 
