@@ -136,7 +136,7 @@
     ***/
     OzPlayer.addListener(function(event)
     {
-        console.warn('addListener(fn)');
+        console.warn('addListener("' + event.type + '")');
         console.dir(event);
     });
 

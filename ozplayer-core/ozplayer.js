@@ -3477,11 +3477,28 @@ var OzPlayer = (function()
                 media   : etc.copy(player.instance)
             };
 
-            //add the media current time rounded to the nearest second
+            //add the media current time and duration rounded to the nearest second
             e.media.currentTime = Math.round(player.media.currentTime);
+            e.media.duration = Math.round(player.media.duration);
+
+            //normalize currentType to duration if its zero on the ended event
+            //nb. this unifies flash with native, where the flash player
+            //automatically resets back to the start when the video ends
+            if(e.type == 'ended' && e.media.currentTime == 0)
+            {
+                e.media.currentTime = e.media.duration;
+            }
+
+            //normalize duration to NaN if it's 0 on the play event
+            //nb. this unifies flash with native, where native has NaN
+            //for duration when first playing the video, while flash has 0
+            if(e.type == 'play' && e.media.duration == 0)
+            {
+                e.media.duration = NaN;
+            }
 
             //call the callback
-            //*** do we need to use call or apply to define "this"?
+            //nb. no defined scope will mean that this == window
             fn(e);
         });
     }
@@ -3542,17 +3559,6 @@ var OzPlayer = (function()
                 player.audio.play();
             }
         }
-
-        //*** DEV EVENTS
-        //*** we won't get this for youtube or vimeo if the initial
-        //*** play command came from its own big play button
-        //*** same thing for normal video on iOS using their native play button
-        //*** we can probably hook into the firstplaying event for that
-        //*** and filter here so that it doesn't fire twice
-        //*** OR maybe use a unique play/playing event for this all the time
-        //*** but make sure we don't get redundant instances from internal
-        //*** cases where play fires without user intervention (if there are any?)
-        doEventCallback(player, 'play');
     }
 
     //pause the video and audio as applicable
@@ -9460,6 +9466,36 @@ var OzPlayer = (function()
             //abort media playback and progress monitoring and show the timeout indicator
             //passing the false flag because we don't need to explicitly pause the media
             abortMedia(player, false);
+        });
+
+
+
+        //~~ callback events ~~//
+
+        //*** DEV EVENTS add registered events to call addListener callbacks
+        //** how come we don't have the play/playing problem in iOS?
+        etc.each(defs.events, function(a)
+        {
+            etc.listen(player.media, a, function(e)
+            {
+                //*** DEV VERY TMP
+                //console.log('type = ' + e.type + '\ncurrentTime = ' + player.media.currentTime
+                //    + '\nduration = ' + player.media.duration
+                //    + '\nmatches = ' + (e.type == 'pause' && Math.round(player.media.currentTime) == Math.round(player.media.duration)));
+
+                //nb. don't call pause if currentTime matches duration
+                //so that we filter out the native html video pause event
+                //which is always fired just before the ended event
+                //however we have to round the numbers to avoid floating point
+                //discrepancies in flash, which does mean that we wouldn't get
+                //a pause event if the user pressed pause within that fraction
+                //of a second from the end, but how likely is that, really?
+                if(!(e.type == 'pause' && Math.round(player.media.currentTime) == Math.round(player.media.duration)))
+                {
+                    doEventCallback(player, e.type);
+                }
+
+            }, false);
         });
 
 
