@@ -3477,9 +3477,10 @@ var OzPlayer = (function()
                 media   : etc.copy(player.instance)
             };
 
-            //add the media current time and duration rounded to the nearest second
-            e.media.currentTime = Math.round(player.media.currentTime);
-            e.media.duration = Math.round(player.media.duration);
+            //add the media current time and duration floored to the nearest second
+            //nb. using floor in case floating point discrepancies are either side of 0.5
+            e.media.currentTime = Math.floor(player.media.currentTime);
+            e.media.duration = Math.floor(player.media.duration);
 
             //normalize currentType to duration if its zero on the ended event
             //nb. this unifies flash with native, where the flash player
@@ -9472,28 +9473,40 @@ var OzPlayer = (function()
 
         //~~ callback events ~~//
 
+        //wtaf ... why is this is necessary again??
+        //but without it we don't get first-play in youtube
+        etc.listen(player.media, 'play', function(){});
+
+        //youtube videos fire a play event after every seek, and the player
+        //doesn't report seek events to filter this with, but we can maintain
+        //this playfilter flag and update it in response to play vs other events
+        //so that we only report play events when the video is not already playing
+        player.playfilter = false;
+
         //*** DEV EVENTS add registered events to call addListener callbacks
         //** how come we don't have the play/playing problem in iOS?
         etc.each(defs.events, function(a)
         {
             etc.listen(player.media, a, function(e)
             {
-                //*** DEV VERY TMP
-                //console.log('type = ' + e.type + '\ncurrentTime = ' + player.media.currentTime
-                //    + '\nduration = ' + player.media.duration
-                //    + '\nmatches = ' + (e.type == 'pause' && Math.round(player.media.currentTime) == Math.round(player.media.duration)));
+                //don't call play callbacks if the video is already playing
+                if(e.type == 'play' && player.playfilter) { return; }
 
-                //nb. don't call pause if currentTime matches duration
-                //so that we filter out the native html video pause event
-                //which is always fired just before the ended event
-                //however we have to round the numbers to avoid floating point
-                //discrepancies in flash, which does mean that we wouldn't get
-                //a pause event if the user pressed pause within that fraction
+                //don't call pause callbacks if currentTime matches duration
+                //because native, flash and vimeo fire a pause event before ended
+                //so this filters them out to avoid redundant pause callbacks
+                //however we have to floor the numbers to avoid floating point
+                //discrepancies in flash and vimeo, which does mean that we wouldn't
+                //get a pause event if the user pressed pause within that fraction
                 //of a second from the end, but how likely is that, really?
-                if(!(e.type == 'pause' && Math.round(player.media.currentTime) == Math.round(player.media.duration)))
-                {
-                    doEventCallback(player, e.type);
-                }
+                //nb. using floor in case the discrepancies are either side of 0.5
+                if(e.type == 'pause' && Math.floor(player.media.currentTime) == Math.floor(player.media.duration)) { return; }
+
+                //[else] fire the event callback(s) for this event
+                doEventCallback(player, e.type);
+
+                //update the playfilter flag
+                player.playfilter = e.type == 'play';
 
             }, false);
         });

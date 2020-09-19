@@ -154,7 +154,7 @@ $variables = array
     'formwidth','controlspace',
     'seekwidth','spacerwidth','volumewidth','volumemax',
 
-    'initwait','dopause'
+    'initwait','dopause','playfilter'
 );
 
 
