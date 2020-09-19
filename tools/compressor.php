@@ -76,6 +76,8 @@ $functions = array
     'cors','xrequest',
     'xphonehome',
     'find',
+    'copy',
+    'doEventCallback',
 
     'applyImageSupport','audioConstruct','haveCSS','applySliderAriaText',
     'addTranscriptExpander','addCrossModalClick',

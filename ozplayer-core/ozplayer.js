@@ -184,6 +184,24 @@ var OzPlayer = (function()
             return m;
         }
 
+        //recursively copy all the properties of an object or array
+        //into a new one, to create a copy of the data rather than a reference
+        //nb. if input is null or not an object we just return it unchanged
+        //behaviour which the inner recursion statement also relies on
+        , copy : function(d)
+        {
+            if(typeof(d) != 'object' || d === null)
+            {
+                return d;
+            }
+            var x = (d instanceof Array) ? [] : {};
+            this.each(d, function(v, k)
+            {
+                x[k] = this.copy(v);
+            });
+            return x;
+        }
+
 
         //get an element or array of elements, optionally
         //within a given context like a subtree or external document,
@@ -1053,7 +1071,12 @@ var OzPlayer = (function()
 
             return u;
 
-        }).apply($this)
+        }).apply($this),
+
+        //*** DEV EVENTS
+        //events supported by the addListener function
+        //see the addListener code for notes about this
+        'events' : ['play', 'pause', 'ended']
 
     },
 
@@ -1561,6 +1584,12 @@ var OzPlayer = (function()
             'batch-bad-id'            : 'Batch initialisation found a p\layer with a duplicate ID.',
             'batch-no-found'          : 'Batch initialisation found no valid p\layers.',
 
+            //*** DEV EVENTS
+            //addListener warnings
+            'event-no-fn'             : 'addListener requires a callback function.',
+            'event-bad-args'          : 'addListener was called with invalid arguments.',
+            'event-bad-type'          : 'addListener does not recognise the \"%type\" event.',
+
             //player option and attribute errors
             'option-bad-callback'     : 'The "%option" callback for #%id must be\ %type.',
             'option-bad-controls'     : 'The "data-controls" attribute for #%id must be "row" or "stack".',
@@ -1602,6 +1631,20 @@ var OzPlayer = (function()
     //players dictionary, which will reference all the player instances,
     //indexed by the <video> ID that's passed to the Video constructor
     players = {},
+
+    //*** DEV EVENTS
+    //events dictionary, indexed by supported event types
+    //see the addListener code for notes about this
+    events = (function()
+    {
+        var e = {};
+        etc.each(defs.events, function(a)
+        {
+            e[a] = [];
+        });
+        return e;
+
+    }).apply($this),
 
     //sliders dictionary, which will reference all the custom sliders,
     //indexed by the ID of its underlying control (which is based on the player ID)
@@ -2144,6 +2187,20 @@ var OzPlayer = (function()
         //the final value if a video element isn't found
         //or if none of the formats or players are supported
         this.mode = 'fallback';
+
+        //*** DEV EVENTS
+        //define the default instance src, which will also be
+        //the final value if we don't find valid media
+        //nb. we need this for addListener callbacks
+        //so they can be used for analytics tracking
+        //but it will also be passed through onsuccess etc.
+        this.src = 'none';
+
+        //*** DEV EVENTS
+        //define the default instance renderer, which will also be
+        //the final value if we don't find valid media
+        //nb. this is just for info in case it's useful
+        this.renderer = 'none';
 
         //default the default video type, which will be
         //the final value if a video element isn't found
@@ -2864,8 +2921,8 @@ var OzPlayer = (function()
                 //console.warn('player.media.rendererName');
                 //console.log(player.media.rendererName);
 
-                //update the instance mode flag with the rendererName
-                //nb. this will be "native" if native video is supported
+                //update the instance mode and renderer flags according to rendererName
+                //nb. mode will be "native" if native video is supported
                 //otherwise it will reflect the active shim, eg. "flash" or "youtube"
                 //nb. if there are no media sources then rendererName will be null
                 //and in that case we want the keep the mode flag at its "fallback" default
@@ -2877,6 +2934,9 @@ var OzPlayer = (function()
                         player.media.rendererName.indexOf('facebook') >= 0 ? 'facebook' :
                         player.media.rendererName.indexOf('vimeo') >= 0 ? 'vimeo' :
                         'native';
+
+                    //*** DEV EVENTS
+                    player.instance.renderer = player.media.rendererName;
                 }
 
                 //then we must copy the instance mode to a player flag, because the
@@ -2910,6 +2970,19 @@ var OzPlayer = (function()
                 if(player.videoType === null)
                 {
                     return abandonMedia(player);
+                }
+
+                //*** DEV EVENTS
+                //[else] update the instance src with the media src
+                //removing the parameters query string if this is vimeo
+                //nb. we can't use media.getSrc() because that will return
+                //blob URL for HLS or DASH, but by this point ME has set an
+                //src on the source video so we can just reference that
+                //*** check that's true for flash
+                player.instance.src = player.video.src;
+                if(player.mode == 'vimeo')
+                {
+                    player.instance.src = player.instance.src.split('?')[0];
                 }
 
 
@@ -3320,6 +3393,100 @@ var OzPlayer = (function()
     };
 
 
+    //*** DEV EVENTS
+    //add global callbacks for playback events, eg. "play", "pause" etc.
+    //nb. callbacks will fire for all player instances and cannot be defined
+    //on a per-instance basis, because we need to be able support this
+    //after OzPlayer.init and there isn't really any point supporting both
+    //but authors can still filter by instance by using event.id in the callback
+    $this.addListener = function(a, b)
+    {
+        //if neither arguments are functions, or the first is a string
+        //but the second isn't a function, show a console warning
+        //with the no-fn error and return false for failure
+        if
+        (
+            (typeof(a) != 'function' && typeof(b) != 'function')
+            ||
+            (typeof(a) == 'string' && typeof(b) != 'function')
+        )
+        {
+            return etc.console(config.lang['event-no-fn'], 'warn');
+        }
+
+        //[else] if the first argument is not a string or function
+        //show a console warning for bad-args and return false for failure
+        if(typeof(a) != 'string' && typeof(a) != 'function')
+        {
+            return etc.console(config.lang['event-bad-args'], 'warn');
+        }
+
+        //[else] if the first argument is a string
+        if(typeof(a) == 'string')
+        {
+            //if it doesn't represent a valid event type, show a
+            //console warning for bad-type and return false for failure
+            if(etc.find(defs.events, a))
+            {
+                return etc.console(etc.sprintf(config.lang['event-bad-type'], { type : a }), 'warn');
+            }
+
+            //[else] add the callback to the dictionary indexed by event type
+            events[a].push(b);
+        }
+
+        //else [if the first argument is a function]
+        else
+        {
+            //add the callback to the dictionary for every event type
+            etc.each(defs.events, function(e)
+            {
+                events[e].push(a);
+            });
+        }
+
+        //*** DEV TMP
+        //console.warn('addListener');
+        //console.dir(events);
+    };
+
+
+
+
+
+
+
+    //-- private => event functions --//
+
+    //compile callback event data and call the specified callbacks(s)
+    //*** DEV EVENTS
+    function doEventCallback(player, type)
+    {
+        //iterate through the callbacks defined for this event
+        etc.each(events[type], function(fn)
+        {
+            //compile the event data with the type, the page reference
+            //and user-agent, and a copy of the instance media data
+            //nb. we need a copy of the instance data not a reference so that
+            //any modifications in the callback don't affect the source data
+            var e =
+            {
+                type    : type,
+                referer : _.location.href,
+                ua      : navigator.userAgent,
+                media   : etc.copy(player.instance)
+            };
+
+            //add the media current time rounded to the nearest second
+            e.media.currentTime = Math.round(player.media.currentTime);
+
+            //call the callback
+            //*** do we need to use call or apply to define "this"?
+            fn(e);
+        });
+    }
+
+
 
 
 
@@ -3375,6 +3542,17 @@ var OzPlayer = (function()
                 player.audio.play();
             }
         }
+
+        //*** DEV EVENTS
+        //*** we won't get this for youtube or vimeo if the initial
+        //*** play command came from its own big play button
+        //*** same thing for normal video on iOS using their native play button
+        //*** we can probably hook into the firstplaying event for that
+        //*** and filter here so that it doesn't fire twice
+        //*** OR maybe use a unique play/playing event for this all the time
+        //*** but make sure we don't get redundant instances from internal
+        //*** cases where play fires without user intervention (if there are any?)
+        doEventCallback(player, 'play');
     }
 
     //pause the video and audio as applicable

@@ -792,8 +792,8 @@
 
 <?php elseif(isset($_GET['video']) && $_GET['video'] == 'ozplayer') : ?>
 
-            <source src="./media/videos/ozplayer.mp4" type="video/mp4" />
             <source src="./media/videos/ozplayer.webm" type="video/webm" />
+            <source src="./media/videos/ozplayer.mp4" type="video/mp4" />
 
             <track src="./media/captions/en/ozplayer.vtt" kind="captions" srclang="en" default="default" />
             <track src="./media/transcripts/en/ozplayer-transcript.vtt" kind="metadata" data-kind="transcript" srclang="en" />
