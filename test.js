@@ -137,6 +137,7 @@
     OzPlayer.addListener(function(event)
     {
         console.warn('addListener("' + event.type + '")');
+        //console.log(event);
         console.table({ type : event.type, referer : event.referer, ua : event.ua });
         console.table(event.media);
     });

@@ -1073,8 +1073,7 @@ var OzPlayer = (function()
 
         }).apply($this),
 
-        //*** DEV EVENTS
-        //events supported by the addListener function
+        //registered events supported by the addListener function
         //see the addListener code for notes about this
         'events' : ['play', 'pause', 'ended']
 
@@ -1584,7 +1583,6 @@ var OzPlayer = (function()
             'batch-bad-id'            : 'Batch initialisation found a p\layer with a duplicate ID.',
             'batch-no-found'          : 'Batch initialisation found no valid p\layers.',
 
-            //*** DEV EVENTS
             //addListener warnings
             'event-no-fn'             : 'addListener requires a callback function.',
             'event-bad-args'          : 'addListener was called with invalid arguments.',
@@ -1632,7 +1630,6 @@ var OzPlayer = (function()
     //indexed by the <video> ID that's passed to the Video constructor
     players = {},
 
-    //*** DEV EVENTS
     //events dictionary, indexed by supported event types
     //see the addListener code for notes about this
     events = (function()
@@ -2188,7 +2185,6 @@ var OzPlayer = (function()
         //or if none of the formats or players are supported
         this.mode = 'fallback';
 
-        //*** DEV EVENTS
         //define the default instance src, which will also be
         //the final value if we don't find valid media
         //nb. we need this for addListener callbacks
@@ -2196,7 +2192,6 @@ var OzPlayer = (function()
         //but it will also be passed through onsuccess etc.
         this.src = 'none';
 
-        //*** DEV EVENTS
         //define the default instance renderer, which will also be
         //the final value if we don't find valid media
         //nb. this is just for info in case it's useful
@@ -2938,7 +2933,6 @@ var OzPlayer = (function()
                         player.media.rendererName.indexOf('vimeo') >= 0 ? 'vimeo' :
                         'native';
 
-                    //*** DEV EVENTS
                     player.instance.renderer = player.media.rendererName;
                 }
 
@@ -2975,13 +2969,11 @@ var OzPlayer = (function()
                     return abandonMedia(player);
                 }
 
-                //*** DEV EVENTS
                 //[else] update the instance src with the media src
                 //removing the parameters query string if this is vimeo
                 //nb. we can't use media.getSrc() because that will return
-                //blob URL for HLS or DASH, but by this point ME has set an
-                //src on the source video so we can just reference that
-                //*** check that's true for flash
+                //a blob URL for HLS or DASH; but by this point ME has set
+                //an src on the source video so we can just reference that
                 player.instance.src = player.video.src;
                 if(player.mode == 'vimeo')
                 {
@@ -3396,12 +3388,11 @@ var OzPlayer = (function()
     };
 
 
-    //*** DEV EVENTS
     //add global callbacks for playback events, eg. "play", "pause" etc.
     //nb. callbacks will fire for all player instances and cannot be defined
     //on a per-instance basis, because we need to be able support this
     //after OzPlayer.init and there isn't really any point supporting both
-    //but authors can still filter by instance by using event.id in the callback
+    //but authors can still filter by instance using event.id in the callback
     $this.addListener = function(a, b)
     {
         //if neither arguments are functions, or the first is a string
@@ -3462,7 +3453,6 @@ var OzPlayer = (function()
     //-- private => event functions --//
 
     //compile callback event data and call the specified callbacks(s)
-    //*** DEV EVENTS
     function doEventCallback(player, type)
     {
         //iterate through the callbacks defined for this event
@@ -3486,7 +3476,7 @@ var OzPlayer = (function()
             e.media.currentTime = Math.floor(player.media.currentTime);
             e.media.duration = Math.floor(player.media.duration);
 
-            //normalize currentType to duration if its zero on the ended event
+            //normalize currentTime to duration if its zero on the ended event
             //nb. this unifies flash with native, where the flash player
             //automatically resets back to the start when the video ends
             if(e.type == 'ended' && e.media.currentTime == 0)
@@ -9487,8 +9477,9 @@ var OzPlayer = (function()
         //so that we only report play events when the video is not already playing
         player.playfilter = false;
 
-        //*** DEV EVENTS add registered events to call addListener callbacks
+        //add registered events to call addListener callbacks
         //** how come we don't have the play/playing problem in iOS?
+        //** could that problem have been related to the wtaf with play events?
         etc.each(defs.events, function(a)
         {
             etc.listen(player.media, a, function(e)
@@ -9503,7 +9494,7 @@ var OzPlayer = (function()
                 //discrepancies in flash and vimeo, which does mean that we wouldn't
                 //get a pause event if the user pressed pause within that fraction
                 //of a second from the end, but how likely is that, really?
-                //nb. using floor in case the discrepancies are either side of 0.5
+                //nnb. using floor in case the discrepancies are either side of 0.5
                 if(e.type == 'pause' && Math.floor(player.media.currentTime) == Math.floor(player.media.duration)) { return; }
 
                 //[else] fire the event callback(s) for this event
