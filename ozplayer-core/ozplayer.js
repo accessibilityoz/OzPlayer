@@ -3420,7 +3420,7 @@ var OzPlayer = (function()
         {
             //if it doesn't represent a valid event type, show a
             //console warning for bad-type and return false for failure
-            if(etc.find(defs.events, a))
+            if(etc.find(defs.events, a) < 0)
             {
                 return etc.console(etc.sprintf(config.lang['event-bad-type'], { type : a }), 'warn');
             }
