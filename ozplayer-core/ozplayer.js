@@ -1610,10 +1610,10 @@ var OzPlayer = (function()
             'option-bad-responsive-mode': 'The "data-responsive-mode" attribute for #%id must have the value "min",\ "max" or "initial".',
 
             //mediaelement path error
-            'path-failure'            : 'Unable to determine path to \/ozplayer-core\/. Ensure that med\iaelement.min.js is loaded via\ <script src>.',
+            'path-failure'            : 'Unable to determine path to \/ozplayer-core\/. Ensure that mediaelement.min.js is loaded via\ <script src>.',
 
             //media wrapper failure warning
-            'wrapper-failure'         : 'Failed to initialize the med\ia.',
+            'wrapper-failure'         : 'Failed to initialize the media.',
 
             //vtt loading and parsing errors
             'vtt-load-failure'        : 'VTT file failed to load\ [%status].\n<%src>',
@@ -2848,13 +2848,16 @@ var OzPlayer = (function()
 
 
         //define a path to the flash shims and renderers relative to this script
-        //nb. get the path relative to mediaelement.js because that's
-        //what ME2 did automatically to get its own path to the original shim
+        //nb. get the path relative to mediaelement.js because that's what
+        //ME2 did automatically to get its own path to the original shim
         //so if it worked (or didn't work lol) for that then this will be the same
         //and also because that script is in the head so we'll find it sooner
-        //nnb. it can only fail if mediaelement isn't loaded by a <script>
+        //nnb. it can only fail if mediaelement isn't loaded by <script src>
         //or if there's another instance or script with the same name that
         //occurs before our instance script and is in a different folder
+        //the chances of the latter are, well, tealeaf and east india company
+        //although the former is more plausible, but that's just how it is
+        //the script has to be loaded via <script src> or we can't get a path
         var pluginPath = null;
         etc.each('script', function(s)
         {
@@ -3465,8 +3468,9 @@ var OzPlayer = (function()
         //iterate through the callbacks defined for this event
         etc.each(events[type], function(fn)
         {
-            //compile the event data with the type, the page reference
-            //and user-agent, and a copy of the instance media data
+            //compile the event data with the event type, the page referer
+            //(remembering to use the forever-necessary spelling error lol)
+            //and the user-agent, along with a copy of the instance media data
             //nb. we need a copy of the instance data not a reference so that
             //any modifications in the callback don't affect the source data
             var e =

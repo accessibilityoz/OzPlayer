@@ -112,8 +112,10 @@ $functions = array
 $variables = array
 (
 
+    //don't define "media"
+
     'player','etc','theslider','config',
-    'controlform','media','key','defs',
+    'controlform','key','defs',
 
     //OLD LOADING//'fakepaused',
 
