@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 4.0 Markup Reference</title>
+    <title>OzPlayer 4.1 Markup Reference</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,10 +19,13 @@
 
 
 
-        <h1>OzPlayer 4.0 Markup Reference</h1>
+        <h1>OzPlayer 4.1 Markup Reference</h1>
 
         <p>
-            This is a detailed reference of every element that OzPlayer uses.
+            This reference describes all the HTML elements that OzPlayer uses,
+            and has details of all the attributes that are supported in each case,
+            along with relevant notes about any special requirements,
+            restrictions, or considerations.
         </p>
 
         <nav>
@@ -254,6 +257,30 @@
                                 defaults to <code>"row"</code>.
                             </p>
 
+                            <figure class="note">
+                                <p>
+                                    <em>
+                                        If <code>"stack"</code> controls are used
+                                        (or in fullscreen mode which always has them)
+                                        the controls will have a "Pin" button that
+                                        allows users to disable auto-hiding.
+                                        This is an accessibility feature for users
+                                        who might have difficulty triggering the
+                                        necessary events that make the controls
+                                        visible again.
+                                    </em>
+                                </p>
+                                <p>
+                                    <em>
+                                        This button is pressed by default, and
+                                        therefore auto-hiding is always disabled
+                                        by default, unless enabled by the user.
+                                        If the user does enable it, then their
+                                        setting will persist.
+                                    </em>
+                                </p>
+                            </figure>
+
                         </div>
                     </details>
                 </li>
@@ -412,6 +439,8 @@
                                             because loading and buffering is
                                             controlled by their
                                             <abbr title="Application Programming Interface">API</abbr>.
+                                            Preload settings also won't have any
+                                            effect for MPEG-DASH videos.
                                         </em>
                                     </p>
                                     <p>
@@ -568,7 +597,7 @@
                                 JavaScript shim. However <strong>this is not
                                 supported for MPEG-DASH in iOS</strong>,
                                 and therefore if you're using that format then
-                                a secondary MP4 would also be required to
+                                a secondary MP4 or HLS would also be required to
                                 support iOS devices, otherwise they'll only see the
                                 <a href="#fallback">fallback content</a>.
                             </em>
@@ -903,7 +932,7 @@
                                                 captions cannot be controlled for
                                                 iOS devices: the Vimeo
                                                 <abbr title="Application Programming Interface">API</abbr>
-                                                ignores the relevant commands,
+                                                does not respond to the relevant commands,
                                                 and always shows captions enabled,
                                                 however the Vimeo player interface
                                                 does provide control during playback.
@@ -949,7 +978,7 @@
                                                 captions cannot be controlled for
                                                 iOS devices: the Vimeo
                                                 <abbr title="Application Programming Interface">API</abbr>
-                                                ignores the relevant commands,
+                                                does not respond to the relevant commands,
                                                 and always shows the default
                                                 language, however the Vimeo player
                                                 interface does provide controls
@@ -1243,6 +1272,31 @@
 
                     </ol>
 
+                    <figure class="note">
+                        <p>
+                            <em>
+                                For YouTube or Vimeo videos on the iPhone,
+                                track captions cannot be shown on the video
+                                (although they are still used to create the transcript).
+                                Therefore it is strongly recommended that you
+                                <strong>also</strong> define embedded captions
+                                in the Creator Studio
+                                (and your VTT file can be uploaded for this).
+                                OzPlayer will automatically hide these embedded
+                                captions for other browsers, to ensure that they
+                                don't show two sets of captions.
+                            </em>
+                        </p>
+                        <p>
+                            <em>
+                                It is not recommended to use embedded captions
+                                exclusively, since they cannot be used to
+                                create the transcript, and they tend to be too
+                                small in most browsers.
+                            </em>
+                        </p>
+                    </figure>
+
                 </section>
 
 
@@ -1462,7 +1516,7 @@
                         <p>
                             <em>
                                 Extended Audio Descriptions are only supported
-                                with standard HTML5 video (MP4 or WebM).
+                                with native HTML5 video (MP4 or WebM).
                             </em>
                         </p>
                     </figure>
