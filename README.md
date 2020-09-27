@@ -11,7 +11,7 @@
 * `changelogs` contains changelogs for every version
 * `dist` contains distributable zip-files for every version
 * `docs` contains help and support documentation for the **latest version**
-* `media` contains media files for demos and testing (video, audio, posters, captions and transcript data)
+* `media` contains media files for demos and testing (video, audio, posters, captions, transcript, and xad data)
 * `ozplayer-core` contains source scripts and core stylesheets for the **latest version**
 * `ozplayer-lang` contains source translation files for the **latest version**
 * `ozplayer-skin` contains source images and skin stylesheets for the **latest version**
