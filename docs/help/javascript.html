@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>OzPlayer 4.1 JavaScript Reference</title>
+
+    <!-- (arbitrary canvas and text styles) -->
+    <link rel="stylesheet" type="text/css" href="help-etc.css" />
+
+    <!-- necessary code example styles -->
+    <link rel="stylesheet" type="text/css" href="help-code.css" />
+
+    <!-- necessary table options styles -->
+    <link rel="stylesheet" type="text/css" href="help-options.css" />
+
+</head>
+<body>
+
+    <div class="container">
+
+
+
+        <h1>OzPlayer 4.1 JavaScript Reference</h1>
+
+        <p>
+            This reference describes all the JavaScript functions that OzPlayer
+            provides, and has details of all the options and data relevant
+            to each function.
+        </p>
+
+        <nav>
+            <ol>
+                <li>
+                    <a href="#define"><code>OzPlayer.define()</code></a>
+                    <ul>
+                        <li><a href="#options">Configuration options</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#addlistener"><code>OzPlayer.addListener()</code></a>
+                    <ul>
+                        <li><a href="#event">Callback event data</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#init"><code>OzPlayer.init()</code></a>
+                </li>
+                <li>
+                    <a href="#video"><code>OzPlayer.Video()</code></a>
+                </li>
+                <li>
+                    <a href="#audio"><code>OzPlayer.Audio()</code></a>
+                </li>
+            </ol>
+        </nav>
+
+
+
+        <section tabindex="-1" id="define">
+
+            <h2><code>OzPlayer.define()</code></h2>
+
+            <p id="code-define-description">
+                The <code>OzPlayer.define()</code> function is an optional
+                static method which can be used to override global configuration
+                options:
+            </p>
+
+<figure class="code" id="code-define">
+    <pre aria-describedby="code-define-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="javascript">OzPlayer.define(<u>"alert-on-error"</u>, <b>true</b>);</code></pre>
+</figure>
+
+            <ol>
+
+                <li>
+                    <details id="define-option">
+                        <summary><code>option</code> <strong>(required <code>string</code>)</strong></summary>
+                        <div>
+
+                            <p>
+                                The name of the configuration option to change.
+                            </p>
+                            <p>
+                                See the <a href="#options-table">table of configuration options</a>
+                                for details of available options.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="define-value">
+                        <summary><code>value</code> <strong>(required <code>mixed</code>)</strong></summary>
+                        <div>
+
+                            <p>
+                                The new value for this configuration option.
+                            </p>
+                            <p>
+                                See the <a href="#options-table">table of configuration options</a>
+                                for details of possible values and data-types for
+                                each option.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+            </ol>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        If this function is used, it must be called
+                        <strong>before</strong> initialising any player instances.
+                    </em>
+                </p>
+            </figure>
+
+            <section tabindex="-1" id="options">
+
+                <h3>Configuration options</h3>
+
+                <p>
+                    None of these options actually need to be set, they all have
+                    functional defaults, but those defaults can be overriden
+                    if you have a particular need to do so:
+                </p>
+
+                <details id="options-table">
+                    <summary>Table of configuration options</summary>
+                    <div>
+                        <table class="options" border="1">
+                            <caption>Configuration options</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Option</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Default</th>
+                                    <th scope="col">Meaning</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>"alert-on-error"</code></td>
+                                    <td>Boolean</td>
+                                    <td><code>false</code></td>
+                                    <td>
+                                        <p>
+                                            Whether to show alerts for setup errors.
+                                        </p>
+                                        <p>
+                                            If this is set to <code>false</code>
+                                            then errors and warnings will be shown
+                                            in the browser console. If it's set to
+                                            <code>true</code> then errors (but not warnings)
+                                            will also produce an alert dialog.
+                                        </p>
+                                        <p>
+                                            This is designed as a development
+                                            setting and should be set to <code>false</code>
+                                            in production.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"captions-nocache"</code></td>
+                                    <td>Boolean</td>
+                                    <td><code>false</code></td>
+                                    <td>
+                                        <p>
+                                            Whether captions and transcript data
+                                            are force-loaded to bypass any
+                                            browser caching.
+                                        </p>
+                                        <p>
+                                            If this is set to <code>false</code>
+                                            then the browser may cache these files
+                                            between page reloads. If it's set to
+                                            <code>true</code> then these files
+                                            are never cached.
+                                        </p>
+                                        <p>
+                                            This is designed as a development
+                                            setting and should be set to <code>false</code>
+                                            in production.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"allow-fullscreen"</code></td>
+                                    <td>Boolean</td>
+                                    <td><code>true</code></td>
+                                    <td>
+                                        <p>
+                                            Whether video fullscreen is allowed.
+                                        </p>
+                                        <p>
+                                            If this is set to <code>false</code>
+                                            then the player will not have a fullscreen
+                                            button.
+                                        </p>
+                                        <p>
+                                            This will not affect iPhone users,
+                                            who will still be able to use their
+                                            native fullscreen player.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"auto-hiding-delay"</code></td>
+                                    <td>Number</td>
+                                    <td><code>4</code></td>
+                                    <td>
+                                        <p>
+                                            The delay time in seconds before
+                                            stacked controls auto-hide.
+                                        </p>
+                                        <p>
+                                            Setting this to <code>0</code> will
+                                            disable auto-hiding.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"default-height"</code></td>
+                                    <td>Number</td>
+                                    <td><code>225</code></td>
+                                    <td>
+                                        <p>
+                                            The default player height if no
+                                            <code>"height"</code> attribute is
+                                            defined on the <code>&lt;video&gt;</code> element.
+                                        </p>
+                                        <p>
+                                            This value cannot override the
+                                            absolute minimum height, a value
+                                            less than <code>169</code> will have
+                                            no effect.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"default-width"</code></td>
+                                    <td>Number</td>
+                                    <td><code>400</code></td>
+                                    <td>
+                                        <p>
+                                            The default player width if no
+                                            <code>"width"</code> attribute is
+                                            defined on the <code>&lt;video&gt;</code> element
+                                            (or no <code>"data-width"</code> on
+                                            the <code>&lt;audio&gt;</code> element
+                                            in the case of an audio-only player).
+                                        </p>
+                                        <p>
+                                            This value cannot override the
+                                            absolute minimum width, a value
+                                            less than <code>300</code> will have
+                                            no effect.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"default-volume"</code></td>
+                                    <td>Number</td>
+                                    <td><code>0.7</code></td>
+                                    <td>
+                                        <p>
+                                            The default media volume, between 0 and 1.
+                                        </p>
+                                        <p>
+                                            If a user has previously interacted
+                                            with the player's volume control,
+                                            then their setting will persist
+                                            and changes to this value will have
+                                            no effect for them.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"seek-duration"</code></td>
+                                    <td>Number</td>
+                                    <td><code>15</code></td>
+                                    <td>
+                                        <p>
+                                            The number of seconds that the media
+                                            seeks forwards or backwards when
+                                            using the seek buttons.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>"tooltip-hide-delay"</code></td>
+                                    <td>Number</td>
+                                    <td><code>2500</code></td>
+                                    <td>
+                                        <p>
+                                            The number of milliseconds for which
+                                            tooltips remain visible.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+
+            </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="addlistener">
+
+            <h2><code>OzPlayer.addListener()</code></h2>
+
+            <p id="code-addlistener-description">
+                The <code>OzPlayer.addListener()</code> function is an optional
+                static method which can be used to define listeners for
+                supported playback events:
+            </p>
+
+<figure class="code" id="code-addlistener">
+    <pre aria-describedby="code-addlistener-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="javascript"><i>//listen for the "play" event</i>
+OzPlayer.addListener(<u>"play"</u>, function(<b>event</b>) { ... });
+
+<i>//listen for all events</i>
+OzPlayer.addListener(function(<b>event</b>) { ... });</code></pre>
+</figure>
+
+            <ol>
+
+                <li>
+                    <details id="addlistener-type">
+                        <summary><code>type</code> <small>(optional <code>string</code>)</small></summary>
+                        <div>
+
+                            <p>
+                                The type of event to listen to, which can be
+                                <code>"play"</code>, <code>"pause"</code> or
+                                <code>"ended"</code>.
+                            </p>
+                            <p>
+                                The <a href="#addlistener-callback">callback function</a>
+                                will be called whenever the specified event occurs.
+                            </p>
+                            <p>
+                                If this argument is omitted, then the callback
+                                will be called for all events, but you can still
+                                differentiate individual events by reference to
+                                the <a href="#event-table"><code>event.type</code></a>
+                                property passed to the callback.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+                <li>
+                    <details id="addlistener-callback">
+                        <summary><code>callback</code> <strong>(required <code>function</code>)</strong></summary>
+                        <div>
+
+                            <p>
+                                The callback function that will be called
+                                whenever the specified event(s) occur.
+                            </p>
+                            <p>
+                                The callback will be passed an
+                                <a href="#event"><code>event</code></a>
+                                object containing data about the event. See the
+                                <a href="#event-table">table of callback event data</a>
+                                for details of what this object contains.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+            </ol>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        This is designed for user analytics. It cannot
+                        interact with or control the player, and modification
+                        of its callback data will not affect the data passed
+                        to subsequent calls.
+                    </em>
+                </p>
+            </figure>
+
+            <section tabindex="-1" id="event">
+
+                <h3>Callback event data</h3>
+
+                <p>
+                    The <code>addListener</code>
+                    <a href="#addlistener-callback">callback function</a> will
+                    be passed an <code>event</code> object containing the following
+                    data about the event:
+                </p>
+
+                <details id="event-table">
+                    <summary>Table of callback event data</summary>
+                    <div>
+                        <table class="options" border="1">
+                            <caption>Callback event data</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Property</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Sample Value</th>
+                                    <th scope="col">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>event.type</code></td>
+                                    <td>String</td>
+                                    <td><code>"play"</code></td>
+                                    <td>
+                                        <p>
+                                            The event type, one of the following values:
+                                        </p>
+                                        <ul>
+                                            <li><code>"play"</code></li>
+                                            <li><code>"pause"</code></li>
+                                            <li><code>"ended"</code></li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.referer</code></td>
+                                    <td>String</td>
+                                    <td><code>"http://www.website.com/"</code></td>
+                                    <td>
+                                        <p>
+                                            The URL of the page that the video is
+                                            being played from.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.ua</code></td>
+                                    <td>String</td>
+                                    <td><code>"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36"</code></td>
+                                    <td>
+                                        <p>
+                                            The browser's user-agent string.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.id</code></td>
+                                    <td>String</td>
+                                    <td><code>"demo"</code></td>
+                                    <td>
+                                        <p>
+                                            The <code>ID</code> of the OzPlayer instance.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.src</code></td>
+                                    <td>String</td>
+                                    <td><code>"http://www.website.com/video.mp4"</code></td>
+                                    <td>
+                                        <p>
+                                            The video or audio-only source URL.
+                                        </p>
+                                        <p>
+                                            If the player includes multiple media sources,
+                                            this will reflect the source that's actually
+                                            being used.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.videoType</code></td>
+                                    <td>String</td>
+                                    <td><code>"video/mp4"</code></td>
+                                    <td>
+                                        <p>
+                                            The mime-type of the video source.
+                                        </p>
+                                        <p>
+                                            For an audio-only player, this will have the
+                                            value <code>"none"</code>.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.audioType</code></td>
+                                    <td>String</td>
+                                    <td><code>"audio/mp3"</code></td>
+                                    <td>
+                                        <p>
+                                            The mime-type of the audio-only or audio
+                                            descriptions source.
+                                        </p>
+                                        <p>
+                                            For a video player with no audio descriptions,
+                                            this will have the value <code>"none"</code>.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.currentTime</code></td>
+                                    <td>Number</td>
+                                    <td><code>0</code></td>
+                                    <td>
+                                        <p>
+                                            The current playback time, rounded down to
+                                            the nearest integer second.
+                                        </p>
+                                        <p>
+                                            For <code>"play"</code> events that occur at
+                                            the very start, this will be <code>0</code>.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.duration</code></td>
+                                    <td>Number</td>
+                                    <td><code>300</code></td>
+                                    <td>
+                                        <p>
+                                            The video or audio-only length, rounded down
+                                            to the nearest integer second.
+                                        </p>
+                                        <p>
+                                            For <code>"ended"</code> events, the
+                                            <code>duration</code> and <code>currentTime</code>
+                                            will have the same value.
+                                        </p>
+                                        <p>
+                                            For the first <code>"play"</code> event
+                                            in a browser session, this may have the value
+                                            <code>NaN</code>, depending on the media
+                                            source, the preload setting, and the
+                                            browser's native caching behaviour.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.mode</code></td>
+                                    <td>String</td>
+                                    <td><code>"native"</code></td>
+                                    <td>
+                                        <p>
+                                            The playback mode, depending on what kind of
+                                            media is being used, one of the following
+                                            values:
+                                        </p>
+                                        <ul>
+                                            <li><code>"native"</code> (HTML video or audio-only)</li>
+                                            <li><code>"flash"</code> (Flash video)</li>
+                                            <li><code>"youtube"</code> (YouTube video)</li>
+                                            <li><code>"vimeo"</code> (Vimeo video)</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>event.media.renderer</code></td>
+                                    <td>String</td>
+                                    <td><code>"html5"</code></td>
+                                    <td>
+                                        <p>
+                                            The playback renderer, depending on what
+                                            kind of media is being used, and the browser's
+                                            native support for that format:
+                                        </p>
+                                        <ul>
+                                            <li><code>"html5"</code> (native MP4, WebM, HLS or DASH video, or native MP3 or OGG audio-only)</li>
+                                            <li><code>"flash_video"</code> (MP4 video via Flash shim)</li>
+                                            <li><code>"native_hls"</code> (HLS video via JavaScript shim)</li>
+                                            <li><code>"flash_hls"</code> (HLS video via Flash shim)</li>
+                                            <li><code>"native_dash"</code> (DASH video via JavaScript shim)</li>
+                                            <li><code>"flash_dash"</code> (DASH video via Flash shim)</li>
+                                            <li><code>"youtube_iframe"</code> (YouTube video via iframe API)</li>
+                                            <li><code>"vimeo_iframe"</code> (Vimeo video via iframe API)</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+
+            </section>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="init">
+
+            <h2><code>OzPlayer.init()</code></h2>
+
+            <p id="code-init-description">
+                The <code>OzPlayer.init()</code> function is a static method
+                which can be used to initialise one or more players on a single page:
+            </p>
+
+<figure class="code" id="code-init">
+    <pre aria-describedby="code-init-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="javascript">OzPlayer.init();</code></pre>
+</figure>
+
+            <p>
+                This method has no arguments.
+            </p>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        This function will initialise all instances of
+                        video and/or audio-only players on a single page.
+                    </em>
+                </p>
+            </figure>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="video">
+
+            <h2><code>OzPlayer.Video()</code></h2>
+
+            <p id="code-video-description">
+                The <code>OzPlayer.Video()</code> function is an object
+                constructor which can be used to initialise a single video
+                player by <code>ID</code>:
+            </p>
+
+<figure class="code" id="code-video">
+    <pre aria-describedby="code-video-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="javascript"><b>new</b> OzPlayer.Video(<u>"demo"</u>)</code></pre>
+</figure>
+
+            <ol>
+
+                <li>
+                    <details id="video-id">
+                        <summary><code>id</code> <strong>(required <code>string</code>)</strong></summary>
+                        <div>
+
+                            <p>
+                                The <code>ID</code> of the OzPlayer instance
+                                to initialise.
+                            </p>
+                            <p>
+                                This is the <code>ID</code>
+                                of the player container (the element with
+                                <code>class="ozplayer"</code>) not the
+                                <code>&lt;video&gt;</code> element itself.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+            </ol>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        Although OzPlayer has a separate
+                        <a href="#audio"><code>OzPlayer.Audio</code></a>
+                        constructor, you can still initialise audio-only
+                        players using the <code>OzPlayer.Video</code>
+                        constructor. The two functions are just aliases
+                        of each other.
+                    </em>
+                </p>
+            </figure>
+
+        </section>
+
+
+
+        <section tabindex="-1" id="audio">
+
+            <h2><code>OzPlayer.Audio()</code></h2>
+
+            <p id="code-audio-description">
+                The <code>OzPlayer.Audio()</code> function is an object
+                constructor which can be used to initialise a single audio-only
+                player by <code>ID</code>:
+            </p>
+
+<figure class="code" id="code-audio">
+    <pre aria-describedby="code-audio-description"><code
+         contentEditable="true" tabindex="0" spellcheck="false"
+         class="javascript"><b>new</b> OzPlayer.Audio(<u>"demo"</u>)</code></pre>
+</figure>
+
+            <ol>
+
+                <li>
+                    <details id="audio-id">
+                        <summary><code>id</code> <strong>(required <code>string</code>)</strong></summary>
+                        <div>
+
+                            <p>
+                                The <code>ID</code> of the OzPlayer instance
+                                to initialise.
+                            </p>
+                            <p>
+                                This is the <code>ID</code>
+                                of the player container (the element with
+                                <code>class="ozplayer"</code>) not the
+                                <code>&lt;audio&gt;</code> element itself.
+                            </p>
+
+                        </div>
+                    </details>
+                </li>
+
+            </ol>
+
+            <figure class="note">
+                <p>
+                    <em>
+                        Although OzPlayer has a separate
+                        <a href="#video"><code>OzPlayer.Video</code></a>
+                        constructor, you can still initialise video
+                        players using the <code>OzPlayer.Audio</code>
+                        constructor. The two functions are just aliases
+                        of each other.
+                    </em>
+                </p>
+            </figure>
+
+        </section>
+
+
+
+        <!-- necessary code example scripting -->
+        <script type="text/javascript" src="help-code.js"></script>
+
+
+
+    </div>
+
+</body>
+</html>

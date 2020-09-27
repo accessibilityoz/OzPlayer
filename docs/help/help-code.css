@@ -176,6 +176,10 @@ figure.code pre i, pre em, pre i *, pre em *, pre i * *, pre em * *
 }
 
 /* ordered details > summary pairs for attribute documentation */
+summary[tabindex]
+{
+    cursor:default;
+}
 figure.code + ol,
 figure.code + ol *
 {
@@ -192,12 +196,6 @@ figure.code + ol
 figure.code + ol > li details > summary
 {
     margin-bottom:0.5em;
-
-    cursor:default;
-}
-figure.code + ol details > summary[tabindex]
-{
-    cursor:pointer;
 }
 figure.code + ol details > summary > span.twisty
 {

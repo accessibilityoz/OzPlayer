@@ -1,7 +1,7 @@
 /*******************************************************************************
  Copyright (c) 2013-20 AccessibilityOz       http://www.accessibilityoz.com.au/
  ------------------------------------------------------------------------------
- OzPlayer [4.0] => player core
+ OzPlayer [4.1] => player core
  ------------------------------------------------------------------------------
 *******************************************************************************/
 var OzPlayer = (function()
@@ -182,6 +182,24 @@ var OzPlayer = (function()
                 return m = false;
             });
             return m;
+        }
+
+        //recursively copy all the properties of an object or array
+        //into a new one, to create a copy of the data rather than a reference
+        //nb. if input is null or not an object we just return it unchanged
+        //behaviour which the inner recursion statement also relies on
+        , copy : function(d)
+        {
+            if(typeof(d) != 'object' || d === null)
+            {
+                return d;
+            }
+            var x = (d instanceof Array) ? [] : {};
+            this.each(d, function(v, k)
+            {
+                x[k] = this.copy(v);
+            });
+            return x;
         }
 
 
@@ -1053,7 +1071,11 @@ var OzPlayer = (function()
 
             return u;
 
-        }).apply($this)
+        }).apply($this),
+
+        //registered events supported by the addListener function
+        //see the addListener code for notes about this
+        'events' : ['play', 'pause', 'ended']
 
     },
 
@@ -1200,12 +1222,6 @@ var OzPlayer = (function()
         //constrains the absolute minimum even if this value is set lower
         'smallscreen-minwidth'    : 300,
 
-
-        //progress timeout for flash video failure (integer seconds)
-        //which is a timer that will begin when flash attempts to load
-        //and if no canplay event has occurred in the meantime
-        //the player will abort playback and show an error overlay
-        'progress-timeout'        : 20,
 
         //maximum seek resolution, ie. the maximum number of steps in the slider
         //nb. I got this figure from observing what BBC iPlayer does, and it
@@ -1561,6 +1577,11 @@ var OzPlayer = (function()
             'batch-bad-id'            : 'Batch initialisation found a p\layer with a duplicate ID.',
             'batch-no-found'          : 'Batch initialisation found no valid p\layers.',
 
+            //addListener warnings
+            'event-no-fn'             : 'addListener requires a callback function.',
+            'event-bad-args'          : 'addListener was called with invalid arguments.',
+            'event-bad-type'          : 'addListener does not recognise the \"%type\" event.',
+
             //player option and attribute errors
             'option-bad-callback'     : 'The "%option" callback for #%id must be\ %type.',
             'option-bad-controls'     : 'The "data-controls" attribute for #%id must be "row" or "stack".',
@@ -1581,10 +1602,10 @@ var OzPlayer = (function()
             'option-bad-responsive-mode': 'The "data-responsive-mode" attribute for #%id must have the value "min",\ "max" or "initial".',
 
             //mediaelement path error
-            'path-failure'            : 'Unable to determine path to \/ozplayer-core\/. Ensure that med\iaelement.min.js is loaded via\ <script src>.',
+            'path-failure'            : 'Unable to determine path to \/ozplayer-core\/. Ensure that mediaelement.min.js is loaded via\ <script src>.',
 
             //media wrapper failure warning
-            'wrapper-failure'         : 'Failed to initialize the med\ia.',
+            'wrapper-failure'         : 'Failed to initialize the media.',
 
             //vtt loading and parsing errors
             'vtt-load-failure'        : 'VTT file failed to load\ [%status].\n<%src>',
@@ -1602,6 +1623,19 @@ var OzPlayer = (function()
     //players dictionary, which will reference all the player instances,
     //indexed by the <video> ID that's passed to the Video constructor
     players = {},
+
+    //events dictionary, indexed by supported event types
+    //see the addListener code for notes about this
+    events = (function()
+    {
+        var e = {};
+        etc.each(defs.events, function(a)
+        {
+            e[a] = [];
+        });
+        return e;
+
+    }).apply($this),
 
     //sliders dictionary, which will reference all the custom sliders,
     //indexed by the ID of its underlying control (which is based on the player ID)
@@ -2144,6 +2178,18 @@ var OzPlayer = (function()
         //the final value if a video element isn't found
         //or if none of the formats or players are supported
         this.mode = 'fallback';
+
+        //define the default instance src, which will also be
+        //the final value if we don't find valid media
+        //nb. we need this for addListener callbacks
+        //so they can be used for analytics tracking
+        //but it will also be passed through onsuccess etc.
+        this.src = 'none';
+
+        //define the default instance renderer, which will also be
+        //the final value if we don't find valid media
+        //nb. this is just for info in case it's useful
+        this.renderer = 'none';
 
         //default the default video type, which will be
         //the final value if a video element isn't found
@@ -2791,13 +2837,16 @@ var OzPlayer = (function()
 
 
         //define a path to the flash shims and renderers relative to this script
-        //nb. get the path relative to mediaelement.js because that's
-        //what ME2 did automatically to get its own path to the original shim
+        //nb. get the path relative to mediaelement.js because that's what
+        //ME2 did automatically to get its own path to the original shim
         //so if it worked (or didn't work lol) for that then this will be the same
         //and also because that script is in the head so we'll find it sooner
-        //nnb. it can only fail if mediaelement isn't loaded by a <script>
+        //nnb. it can only fail if mediaelement isn't loaded by <script src>
         //or if there's another instance or script with the same name that
         //occurs before our instance script and is in a different folder
+        //the chances of the latter are, well, tealeaf and east india company
+        //although the former is more plausible, but that's just how it is
+        //the script has to be loaded via <script src> or we can't get a path
         var pluginPath = null;
         etc.each('script', function(s)
         {
@@ -2864,8 +2913,8 @@ var OzPlayer = (function()
                 //console.warn('player.media.rendererName');
                 //console.log(player.media.rendererName);
 
-                //update the instance mode flag with the rendererName
-                //nb. this will be "native" if native video is supported
+                //update the instance mode and renderer flags according to rendererName
+                //nb. mode will be "native" if native video is supported
                 //otherwise it will reflect the active shim, eg. "flash" or "youtube"
                 //nb. if there are no media sources then rendererName will be null
                 //and in that case we want the keep the mode flag at its "fallback" default
@@ -2877,6 +2926,8 @@ var OzPlayer = (function()
                         player.media.rendererName.indexOf('facebook') >= 0 ? 'facebook' :
                         player.media.rendererName.indexOf('vimeo') >= 0 ? 'vimeo' :
                         'native';
+
+                    player.instance.renderer = player.media.rendererName;
                 }
 
                 //then we must copy the instance mode to a player flag, because the
@@ -2910,6 +2961,17 @@ var OzPlayer = (function()
                 if(player.videoType === null)
                 {
                     return abandonMedia(player);
+                }
+
+                //[else] update the instance src with the media src
+                //removing the parameters query string if this is vimeo
+                //nb. we can't use media.getSrc() because that will return
+                //a blob URL for HLS or DASH; but by this point ME has set
+                //an src on the source video so we can just reference that
+                player.instance.src = player.video.src;
+                if(player.mode == 'vimeo')
+                {
+                    player.instance.src = player.instance.src.split('?')[0];
                 }
 
 
@@ -3318,6 +3380,117 @@ var OzPlayer = (function()
         //then return true for success
         return true;
     };
+
+
+    //add global callbacks for playback events, eg. "play", "pause" etc.
+    //nb. callbacks will fire for all player instances and cannot be defined
+    //on a per-instance basis, because we need to be able support this
+    //after OzPlayer.init and there isn't really any point supporting both
+    //but authors can still filter by instance using event.id in the callback
+    $this.addListener = function(a, b)
+    {
+        //if neither arguments are functions, or the first is a string
+        //but the second isn't a function, show a console warning
+        //with the no-fn error and return false for failure
+        if
+        (
+            (typeof(a) != 'function' && typeof(b) != 'function')
+            ||
+            (typeof(a) == 'string' && typeof(b) != 'function')
+        )
+        {
+            return etc.console(config.lang['event-no-fn'], 'warn');
+        }
+
+        //[else] if the first argument is not a string or function
+        //show a console warning for bad-args and return false for failure
+        if(typeof(a) != 'string' && typeof(a) != 'function')
+        {
+            return etc.console(config.lang['event-bad-args'], 'warn');
+        }
+
+        //[else] if the first argument is a string
+        if(typeof(a) == 'string')
+        {
+            //if it doesn't represent a valid event type, show a
+            //console warning for bad-type and return false for failure
+            if(etc.find(defs.events, a) < 0)
+            {
+                return etc.console(etc.sprintf(config.lang['event-bad-type'], { type : a }), 'warn');
+            }
+
+            //[else] add the callback to the dictionary indexed by event type
+            events[a].push(b);
+        }
+
+        //else [if the first argument is a function]
+        else
+        {
+            //add the callback to the dictionary for every event type
+            etc.each(defs.events, function(e)
+            {
+                events[e].push(a);
+            });
+        }
+
+        //*** DEV TMP
+        //console.warn('addListener');
+        //console.dir(events);
+    };
+
+
+
+
+
+
+
+    //-- private => event functions --//
+
+    //compile callback event data and call the specified callbacks(s)
+    function doEventCallback(player, type)
+    {
+        //iterate through the callbacks defined for this event
+        etc.each(events[type], function(fn)
+        {
+            //compile the event data with the event type, the page referer
+            //(remembering to use the forever-necessary spelling error lol)
+            //and the user-agent, along with a copy of the instance media data
+            //nb. we need a copy of the instance data not a reference so that
+            //any modifications in the callback don't affect the source data
+            var e =
+            {
+                type    : type,
+                referer : _.location.href,
+                ua      : navigator.userAgent,
+                media   : etc.copy(player.instance)
+            };
+
+            //add the media current time and duration floored to the nearest second
+            //nb. using floor in case floating point discrepancies are either side of 0.5
+            e.media.currentTime = Math.floor(player.media.currentTime);
+            e.media.duration = Math.floor(player.media.duration);
+
+            //normalize currentTime to duration if its zero on the ended event
+            //nb. this unifies flash with native, where the flash player
+            //automatically resets back to the start when the video ends
+            if(e.type == 'ended' && e.media.currentTime == 0)
+            {
+                e.media.currentTime = e.media.duration;
+            }
+
+            //normalize duration to NaN if it's 0 on the play event
+            //nb. this unifies flash with native, where native has NaN
+            //for duration when first playing the video, while flash has 0
+            if(e.type == 'play' && e.media.duration == 0)
+            {
+                e.media.duration = NaN;
+            }
+
+            //call the callback
+            //nb. no defined scope will mean that this == window
+            fn(e);
+        });
+    }
 
 
 
@@ -9282,6 +9455,49 @@ var OzPlayer = (function()
             //abort media playback and progress monitoring and show the timeout indicator
             //passing the false flag because we don't need to explicitly pause the media
             abortMedia(player, false);
+        });
+
+
+
+        //~~ callback events ~~//
+
+        //wtaf ... why is this is necessary again??
+        //but without it we don't get first-play in youtube
+        etc.listen(player.media, 'play', function(){});
+
+        //youtube videos fire a play event after every seek, and the player
+        //doesn't report seek events to filter this with, but we can maintain
+        //this playfilter flag and update it in response to play vs other events
+        //so that we only report play events when the video is not already playing
+        player.playfilter = false;
+
+        //add registered events to call addListener callbacks
+        //** how come we don't have the play/playing problem in iOS?
+        //** could that problem have been related to the wtaf with play events?
+        etc.each(defs.events, function(a)
+        {
+            etc.listen(player.media, a, function(e)
+            {
+                //don't call play callbacks if the video is already playing
+                if(e.type == 'play' && player.playfilter) { return; }
+
+                //don't call pause callbacks if currentTime matches duration
+                //because native, flash and vimeo fire a pause event before ended
+                //so this filters them out to avoid redundant pause callbacks
+                //however we have to floor the numbers to avoid floating point
+                //discrepancies in flash and vimeo, which does mean that we wouldn't
+                //get a pause event if the user pressed pause within that fraction
+                //of a second from the end, but how likely is that, really?
+                //nnb. using floor in case the discrepancies are either side of 0.5
+                if(e.type == 'pause' && Math.floor(player.media.currentTime) == Math.floor(player.media.duration)) { return; }
+
+                //[else] fire the event callback(s) for this event
+                doEventCallback(player, e.type);
+
+                //update the playfilter flag
+                player.playfilter = e.type == 'play';
+
+            }, false);
         });
 
 

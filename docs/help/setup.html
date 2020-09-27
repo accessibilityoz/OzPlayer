@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
 
-    <title>OzPlayer 4.0 Setup Guide</title>
+    <title>OzPlayer 4.1 Setup Guide</title>
 
     <!-- (arbitrary canvas and text styles) -->
     <link rel="stylesheet" type="text/css" href="help-etc.css" />
@@ -19,7 +19,7 @@
 
 
 
-        <h1>OzPlayer 4.0 Setup Guide</h1>
+        <h1>OzPlayer 4.1 Setup Guide</h1>
 
         <p>
             OzPlayer uses
@@ -648,6 +648,31 @@
                     </p>
                 </figure>
 
+                <figure class="note">
+                    <p>
+                        <em>
+                            For YouTube or Vimeo videos on the iPhone,
+                            track captions cannot be shown on the video
+                            (although they are still used to create the transcript).
+                            Therefore it is strongly recommended that you
+                            <strong>also</strong> define embedded captions
+                            in the Creator Studio
+                            (and your VTT file can be uploaded for this).
+                            OzPlayer will automatically hide these embedded
+                            captions for other browsers, to ensure that they
+                            don't show two sets of captions.
+                        </em>
+                    </p>
+                    <p>
+                        <em>
+                            It is not recommended to use embedded captions
+                            exclusively, since they cannot be used to
+                            create the transcript, and they tend to be too
+                            small in most browsers.
+                        </em>
+                    </p>
+                </figure>
+
 
 
             </section>
@@ -1232,13 +1257,13 @@
 <figure class="code" id="code-head-core">
     <pre aria-describedby="code-head-core-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/mediaelement.min.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/mediaelement.min.js?v=4.1"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <figure class="note">
                 <p>
                     <em>
-                        Using the <code>?v=4.0</code> query string is recommended,
+                        Using the <code>?v=4.1</code> query string is recommended,
                         to prevent caching issues when updating your version of
                         OzPlayer.
                     </em>
@@ -1254,8 +1279,8 @@
 <figure class="code" id="code-head-renderers">
     <pre aria-describedby="code-head-renderers-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
-<b>&lt;script</b><b> src=<u>"./ozplayer-core/vimeo.min.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.1" type="text/javascript"&gt;&lt;/script&gt;</small>
+<b>&lt;script</b><b> src=<u>"./ozplayer-core/vimeo.min.js?v=4.1"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <p id="code-head-highlights-description">
@@ -1267,10 +1292,10 @@
 <figure class="code" id="code-head-highlights">
     <pre aria-describedby="code-head-highlights-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.1" type="text/javascript"&gt;&lt;/script&gt;</small>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-core/ozplayer.min.css?v=4.0"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-skin/highlights-purple.css?v=4.0"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-core/ozplayer.min.css?v=4.1"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./ozplayer-skin/highlights-purple.css?v=4.1"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
             <p>
@@ -1296,12 +1321,12 @@
 <figure class="code" id="code-head-transcript">
     <pre aria-describedby="code-head-transcript-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
+         class="html"><small>&lt;script src="./ozplayer-core/mediaelement.min.js?v=4.1" type="text/javascript"&gt;&lt;/script&gt;</small>
 
-<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css?v=4.0" media="all" type="text/css" /&gt;</small>
-<small>&lt;link rel="stylesheet" href="./ozplayer-skin/highlights-purple.css?v=4.0" media="all" type="text/css" /&gt;</small>
+<small>&lt;link rel="stylesheet" href="./ozplayer-core/ozplayer.min.css?v=4.1" media="all" type="text/css" /&gt;</small>
+<small>&lt;link rel="stylesheet" href="./ozplayer-skin/highlights-purple.css?v=4.1" media="all" type="text/css" /&gt;</small>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./transcript.css?v=4.0"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"./transcript.css?v=4.1"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
             <p>
@@ -1341,19 +1366,19 @@
 <figure class="code" id="code-head-versions">
     <pre aria-describedby="code-head-versions-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.1/ozplayer-core/mediaelement.min.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.1/ozplayer-core/ozplayer.min.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.1/ozplayer-skin/highlights-purple.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b>
 
-<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.0/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
+<b>&lt;link</b><b> rel=<u>"stylesheet"</u></b><b> href=<u>"//ozplayer.global.ssl.fastly.net/4.1/transcript.css"</u></b><b> media=<u>"all"</u></b><b> type=<u>"text/css"</u></b> <b>/&gt;</b></code></pre>
 </figure>
 
                 <p>
                     If you want to edit the transcript style sheet so that it
                     matches your site design, please download it from
-                    <a href="http://ozplayer.global.ssl.fastly.net/4.0/transcript.css">
-                        http://ozplayer.global.ssl.fastly.net/4.0/transcript.css</a>
+                    <a href="http://ozplayer.global.ssl.fastly.net/4.1/transcript.css">
+                        http://ozplayer.global.ssl.fastly.net/4.1/transcript.css</a>
                     and then include that local copy.
                 </p>
 
@@ -1381,7 +1406,7 @@
 <figure class="code" id="code-body">
     <pre aria-describedby="code-body-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/ozplayer.min.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"./ozplayer-core/ozplayer.min.js?v=4.1"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <p id="code-body-lang-description">
@@ -1392,8 +1417,8 @@
 <figure class="code" id="code-body-lang">
     <pre aria-describedby="code-body-lang-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
-<b>&lt;script</b><b> src=<u>"./ozplayer-lang/en.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js?v=4.1" type="text/javascript"&gt;&lt;/script&gt;</small>
+<b>&lt;script</b><b> src=<u>"./ozplayer-lang/en.js?v=4.1"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <figure class="note">
@@ -1420,10 +1445,10 @@
 <figure class="code" id="code-body-config">
     <pre aria-describedby="code-body-config-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
-<small>&lt;script src="./ozplayer-lang/en.js?v=4.0" type="text/javascript"&gt;&lt;/script&gt;</small>
+         class="html"><small>&lt;script src="./ozplayer-core/ozplayer.min.js?v=4.1" type="text/javascript"&gt;&lt;/script&gt;</small>
+<small>&lt;script src="./ozplayer-lang/en.js?v=4.1" type="text/javascript"&gt;&lt;/script&gt;</small>
 
-<b>&lt;script</b><b> src=<u>"./config.js?v=4.0"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+<b>&lt;script</b><b> src=<u>"./config.js?v=4.1"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
             <p>
@@ -1508,7 +1533,7 @@
 <figure class="code" id="code-body-free">
     <pre aria-describedby="code-body-free-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.1/ozplayer-core/ozplayer.free.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
                 <p id="code-body-subs-description">
@@ -1518,13 +1543,13 @@
 <figure class="code" id="code-body-subs">
     <pre aria-describedby="code-body-subs-description"><code
          contentEditable="true" tabindex="0" spellcheck="false"
-         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.0/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
+         class="html"><b>&lt;script</b><b> src=<u>"//ozplayer.global.ssl.fastly.net/4.1/ozplayer-core/ozplayer.subs.js"</u></b><b> type=<u>"text/javascript"</u></b><b>&gt;</b><b>&lt;/script</b><b>&gt;</b></code></pre>
 </figure>
 
                 <p>
                     If you want to edit the language script, please download it from
-                    <a href="http://ozplayer.global.ssl.fastly.net/4.0/ozplayer-lang/en.js">
-                        http://ozplayer.global.ssl.fastly.net/4.0/ozplayer-lang/en.js</a>
+                    <a href="http://ozplayer.global.ssl.fastly.net/4.1/ozplayer-lang/en.js">
+                        http://ozplayer.global.ssl.fastly.net/4.1/ozplayer-lang/en.js</a>
                     and then include that local copy.
                 </p>
 

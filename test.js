@@ -40,10 +40,11 @@
 
 
     //THIRD => initialise all player instances
-    OzPlayer.init();
-
-
     /***
+    OzPlayer.init();
+    ***/
+
+
     //THIRD => initialise a video player, passing the player ID
     //and optionally also passing an object of player callbacks
     //nb. this function is a constructor and must use the "new" keyboard
@@ -89,7 +90,6 @@
             try { console.error(str); } catch(ex){ alert(str); }
         }
     });
-    ***/
 
 
 
@@ -124,6 +124,23 @@
     //try { console.log(str); } catch(ex){}
 
 
+
+
+    //FOURTH => optionally define event listener(s)
+    /***
+    OzPlayer.addListener("play", function(event)
+    {
+        console.warn('addListener("play", fn)');
+        console.dir(event);
+    });
+    ***/
+    OzPlayer.addListener(function(event)
+    {
+        console.warn('addListener("' + event.type + '")');
+        //console.log(event);
+        console.table({ type : event.type, referer : event.referer, ua : event.ua });
+        console.table(event.media);
+    });
 
 
 

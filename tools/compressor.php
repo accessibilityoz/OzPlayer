@@ -76,6 +76,8 @@ $functions = array
     'cors','xrequest',
     'xphonehome',
     'find',
+    'copy',
+    'doEventCallback',
 
     'applyImageSupport','audioConstruct','haveCSS','applySliderAriaText',
     'addTranscriptExpander','addCrossModalClick',
@@ -110,8 +112,10 @@ $functions = array
 $variables = array
 (
 
+    //don't define "media"
+
     'player','etc','theslider','config',
-    'controlform','media','key','defs',
+    'controlform','key','defs',
 
     //OLD LOADING//'fakepaused',
 
@@ -152,7 +156,7 @@ $variables = array
     'formwidth','controlspace',
     'seekwidth','spacerwidth','volumewidth','volumemax',
 
-    'initwait','dopause'
+    'initwait','dopause','playfilter'
 );
 
 
