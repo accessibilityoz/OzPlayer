@@ -1223,12 +1223,6 @@ var OzPlayer = (function()
         'smallscreen-minwidth'    : 300,
 
 
-        //progress timeout for flash video failure (integer seconds)
-        //which is a timer that will begin when flash attempts to load
-        //and if no canplay event has occurred in the meantime
-        //the player will abort playback and show an error overlay
-        'progress-timeout'        : 20,
-
         //maximum seek resolution, ie. the maximum number of steps in the slider
         //nb. I got this figure from observing what BBC iPlayer does, and it
         //means that the longer the duration is, the higher the step will be
