@@ -9314,7 +9314,7 @@ var OzPlayer = (function()
             //seek-resolution for testing, and that's when it bugged me so I did this
             if(!player.controlform.seek.seeking)
             {
-                dispatchMediaSliderEvent(player.controlform.seek, Math.floor(player.media.currentTime));
+                dispatchMediaSliderEvent(player.controlform.seek, Math.ceil(player.media.currentTime));
             }
         });
 
@@ -9511,7 +9511,7 @@ var OzPlayer = (function()
         etc.listen(player.media, 'timeupdate', function(e)
         {
             //get the media's currentTime quantized to the seek slider's timestep
-            var time = Math.floor(player.media.currentTime / player.controlform.seek.timestep);
+            var time = Math.ceil(player.media.currentTime / player.controlform.seek.timestep);
 
             //*** DEV TMP
             //_.title = '['+player.media.currentTime.toFixed(2)+'] = ' + (time * player.controlform.seek.timestep);
@@ -11823,7 +11823,7 @@ var OzPlayer = (function()
         //the very last index is being selected, and use that to mean
         //"set the time to duration", since we can't set the time
         //beyond the duration, as that doesn't work in the flash player
-        player.controlform.seek.setAttribute('max', ((Math.floor(player.media.duration / step) + 1) * step));
+        player.controlform.seek.setAttribute('max', ((Math.floor(player.media.duration / step) * step)));
 
         //update the slider's "step" attribute and corresponding timestep property
         player.controlform.seek.setAttribute('step', (player.controlform.seek.timestep = step));
