@@ -7528,7 +7528,18 @@ var OzPlayer = (function()
         //so that media objects can't be different from the system volume
         //(in fact its native media players don't even have volume controls)
         //so there's no point adding the controls since they won't do anything
-        if(!defs.agent.ios)
+
+        // TL: 2022-09-01
+        // Test whether volume can be changed rather than relying on the user agent type
+        // This *should* be more intuitive and support iPad, where the user agent does not present as iOS
+        // but still does not allow volume changes independant from the system volume.
+
+        let v = player.media.volume;
+        player.media.volume = 0.5;
+        let hasVolumeControl = Boolean(player.media.volume === 0.5);
+        player.media.volume = v;
+
+        if(hasVolumeControl)
         {
             //create a span-wrapped mute button inside the second fieldset
             //with its state according to the default muting, which will be
