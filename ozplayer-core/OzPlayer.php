@@ -1,10 +1,15 @@
 <?php
-/*******************************************************************************
- Copyright (c) 2013-20 AccessibilityOz       http://www.accessibilityoz.com.au/
- ------------------------------------------------------------------------------
- OzPlayer [4.1] => player core
- ------------------------------------------------------------------------------
-*******************************************************************************/
+/*!
+ * OzPlayer
+ * https://github.com/accessibilityoz/OzPlayer
+ *
+ * Wrapper around MediaElement.js to provide additional accessibility features.
+ *
+ * Copyright 2013-, AccessibilityOz (https://www.accessibilityoz.com/)
+ * License: MIT
+ *
+ */
+
 class OzPlayer
 {
 
