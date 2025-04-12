@@ -1,5 +1,19 @@
 # OzPlayer
 
+## Introduction
+
+This is a very early release. The product had been proprietary for many years,
+but while we're no longer selling it there are some folks still using it who'd
+like to be able to make fixes, so we're releasing under the MIT license.
+
+What this means is that the code hasn't been updated for a few years and is
+in need of clean-up and updates. The build system is ancient, undocumented,
+and written in PHP.
+
+Improvements would be happily accepted, or you're welcome to fork.
+
+Following is the original README.md:
+
 ## Directory Structure
 
 * `build` contains the **latest build versions** of all files used by OzPlayer.
